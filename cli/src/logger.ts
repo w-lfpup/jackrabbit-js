@@ -78,7 +78,7 @@ function logAssertions(
 
 		for (let [index, test] of tests.entries()) {
 			let action = failedTests.get(index);
-			if (action.type !== "end_test") continue;
+			if (!action || action.type !== "end_test") continue;
 
 			console.log(`
   ${test.name}
