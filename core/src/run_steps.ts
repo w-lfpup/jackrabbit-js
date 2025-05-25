@@ -40,7 +40,7 @@ async function execTest(
 	const testFunc = tests[testId];
 	const startTime = performance.now();
 	const assertions = await Promise.race([
-		createTimeout(options.timeoutInterval),
+		createTimeout(options?.timeoutInterval ?? TIMEOUT_INTERVAL),
 		testFunc(),
 	]);
 	const endTime = performance.now();
