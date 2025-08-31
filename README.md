@@ -15,7 +15,7 @@ See [this guide](./test_guide.md) to create jackrabbit tests.
 Install jackrabbit with npm via github.
 
 ```sh
-npm install --save-dev https://github.com/wolfpup-software/jackrabbit-js
+npm install --save-dev https://github.com/w-lfpup/jackrabbit-js
 ```
 
 ### Run Test Collections
