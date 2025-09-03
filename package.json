@@ -2,9 +2,9 @@
 	"name": "jackrabbit",
 	"workspaces": [
 		"core",
+		"tests",
 		"cli",
-		"nodejs_cli",
-		"tests"
+		"nodejs_cli"
 	],
 	"bin": {
 		"jackrabbit": "./nodejs_cli/dist/mod.js"
