@@ -1,6 +1,5 @@
 {
 	"name": "jackrabbit",
-	"type": "module",
 	"workspaces": [
 		"core",
 		"tests",
