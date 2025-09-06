@@ -13,7 +13,7 @@
 		"prepare": "npm run build",
 		"build": "npm run --workspaces build",
 		"format": "npx prettier --write ./",
-		"test": "npx jackrabbit --file ./tests/dist/mod.js"
+		"test": "npx jackrabbit --file ./core/dist/tests/mod.js"
 	},
 	"version": "0.1.0",
 	"devDependencies": {
