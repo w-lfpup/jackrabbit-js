@@ -86,7 +86,10 @@ async function execCollectionOrdered(
 	}
 }
 
-async function startRun(logger: LoggerInterface, testModules: TestModule[]) {
+export async function startRun(
+	logger: LoggerInterface,
+	testModules: TestModule[],
+) {
 	if (logger.cancelled) return;
 	logger.log(testModules, {
 		type: "start_run",
@@ -121,12 +124,10 @@ async function startRun(logger: LoggerInterface, testModules: TestModule[]) {
 	});
 }
 
-function cancelRun(logger: LoggerInterface, testModules: TestModule[]) {
+export function cancelRun(logger: LoggerInterface, testModules: TestModule[]) {
 	if (logger.cancelled) return;
 	logger.log(testModules, {
 		type: "cancel_run",
 		time: performance.now(),
 	});
 }
-
-export { startRun, cancelRun };

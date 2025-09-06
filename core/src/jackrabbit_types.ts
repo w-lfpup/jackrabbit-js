@@ -2,18 +2,19 @@ interface Stringable {
 	toString: Object["toString"];
 }
 
-type Assertions = Stringable | Stringable[] | undefined;
+export type Assertions = Stringable | Stringable[] | undefined;
+
 type SyncTest = () => Assertions;
 type AsyncTest = () => Promise<Assertions>;
-type Test = SyncTest | AsyncTest;
+export type Test = SyncTest | AsyncTest;
 
-interface Options {
+export interface Options {
 	title?: string;
 	runAsynchronously?: boolean;
 	timeoutInterval?: number;
 }
 
-interface TestModule {
+export interface TestModule {
 	tests: Test[];
 	options: Options;
 }
@@ -61,7 +62,7 @@ interface EndTest {
 	assertions: Assertions;
 }
 
-type LoggerAction =
+export type LoggerAction =
 	| StartRun
 	| EndRun
 	| CancelRun
@@ -70,17 +71,8 @@ type LoggerAction =
 	| StartTest
 	| EndTest;
 
-interface LoggerInterface {
+export interface LoggerInterface {
 	readonly failed: boolean;
 	readonly cancelled: boolean;
 	log(testModules: TestModule[], action: LoggerAction): void;
 }
-
-export type {
-	Assertions,
-	LoggerAction,
-	LoggerInterface,
-	Test,
-	Options,
-	TestModule,
-};

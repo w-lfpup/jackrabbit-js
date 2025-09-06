@@ -4,7 +4,7 @@ import type { LoggerInterface } from "../../core/dist/mod.ts";
 import { startRun } from "../../core/dist/mod.js";
 import { Logger } from "./logger.js";
 
-async function run(
+export async function run(
 	config: ConfigInterface,
 	importer: ImporterInterface,
 	logger: LoggerInterface = new Logger(),
@@ -15,5 +15,3 @@ async function run(
 		await startRun(logger, testModules);
 	}
 }
-
-export { run };

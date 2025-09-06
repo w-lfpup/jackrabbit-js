@@ -1,11 +1,9 @@
 import type { TestModule } from "../../core/dist/mod.ts";
 
-interface ConfigInterface {
+export interface ConfigInterface {
 	files: string[];
 }
 
-interface ImporterInterface {
+export interface ImporterInterface {
 	load(url: string): Promise<TestModule[]>;
 }
-
-export type { ConfigInterface, ImporterInterface };
