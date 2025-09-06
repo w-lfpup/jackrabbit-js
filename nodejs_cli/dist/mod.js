@@ -3,18 +3,18 @@ import { Config, Importer, Logger, run } from "../../cli/dist/mod.js";
 const config = new Config(process.argv.slice(2));
 const importer = new Importer(process.cwd());
 const logger = new Logger();
+let errored = false;
 try {
-	await run(config, importer, logger);
-	if (!logger.failed) {
-		process.exit(0);
-	}
-} catch (e) {
-	if (e instanceof Error) {
-		console.log(`
-Error:
+    await run(config, importer, logger);
+}
+catch (e) {
+    errored = true;
+    console.log("Error:");
+    e instanceof Error
+        ? console.log(`
 ${e.name}
 ${e.message}
-${e.stack}`);
-	}
+${e.stack}`)
+        : console.log(e);
 }
-process.exit(1);
+logger.failed || errored ? process.exit(1) : process.exit(0);

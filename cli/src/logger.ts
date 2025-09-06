@@ -11,7 +11,7 @@ interface LoggerData {
 	testTime: number;
 }
 
-class Logger implements LoggerInterface {
+export class Logger implements LoggerInterface {
 	#assertions: Map<number, Map<number, LoggerAction>> = new Map();
 	#data: LoggerData = {
 		cancelled: false,
@@ -131,5 +131,3 @@ function yellow(text: string) {
 function gray(text: string) {
 	return `\x1b[100m\x1b[97m${text}\x1b[0m`;
 }
-
-export { Logger };

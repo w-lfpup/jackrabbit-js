@@ -1,7 +1,7 @@
 import type { TestModule } from "../../core/dist/mod.ts";
 import type { ImporterInterface } from "./cli_types.ts";
 
-class Importer implements ImporterInterface {
+export class Importer implements ImporterInterface {
 	#cwd: string;
 
 	constructor(cwd: string) {
@@ -23,5 +23,3 @@ class Importer implements ImporterInterface {
 		return testModules;
 	}
 }
-
-export { Importer };

@@ -5,7 +5,7 @@ import type {
 } from "../../core/dist/mod.ts";
 
 class TestLogger implements LoggerInterface {
-	cancelled: boolean;
+	cancelled: boolean = false;
 	failed: boolean = false;
 
 	log(_testModule: TestModule[], action: LoggerAction) {

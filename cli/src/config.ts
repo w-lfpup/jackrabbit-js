@@ -27,12 +27,10 @@ function iterateArgs(config: ConfigInterface, args: string[]) {
 	}
 }
 
-class Config implements ConfigInterface {
+export class Config implements ConfigInterface {
 	files: string[] = [];
 
 	constructor(args: string[]) {
 		iterateArgs(this, args);
 	}
 }
-
-export { Config };
