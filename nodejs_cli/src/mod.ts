@@ -13,19 +13,13 @@ try {
 } catch (e: unknown) {
 	errored = true;
 	console.log("Error:");
-	if (e instanceof Error) {
-		console.log(`
+
+	e instanceof Error
+		? console.log(`
 ${e.name}
 ${e.message}
-${e.stack}`);
-	} else {
-		console.log(e);
-	}
+${e.stack}`)
+		: console.log(e);
 }
 
-if (logger.failed || errored) {
-	console.log("mmm bad");
-	process.exit(1);
-}
-
-process.exit(0);
+logger.failed || errored ? process.exit(1) : process.exit(0);
