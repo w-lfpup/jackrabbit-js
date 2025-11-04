@@ -1,10 +1,16 @@
 # Jackrabbit Tests
 
+`Jackrabbit` leverages javascript's module system for a flat, concise testing experience.
+
+No assertion libraries, no wild BDD functions.
+
+Developers with javascript can immediately start testing with basically zero overhead.
+
 ## Tests
 
 Tests are functions that return assertions.
 
-Tests `pass` when they return the `undefined` primitive or an empty array.
+Tests `pass` when they return the `undefined` primitive or an empty array `[]`.
 
 ```TS
 // my_library.tests.ts
@@ -36,7 +42,7 @@ function testMoreStuffAndFail() {
 
 ## Test Modules
 
-Test Modules are javascript `modules`.
+Test Modules are javascript `modules` that contain tests.
 
 ### Export Tests
 
@@ -69,7 +75,7 @@ export const options = {
 
 All properteis are optional.
 
-Tests will run sequentially unless `runAsyncronously` is `true`.
+Tests run sequentially unless the `runAsyncronously` property is set to `true`.
 
 ```TS
 // my_library.tests.ts

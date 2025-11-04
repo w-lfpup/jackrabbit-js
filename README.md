@@ -1,8 +1,6 @@
-# Jackrabbit
+# Jackrabbit-js
 
-Tests without dependencies.
-
-A test runner without dependencies.
+Write tests without dependencies (including jackrabbit itself).
 
 ## Tests
 
