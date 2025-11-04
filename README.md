@@ -1,8 +1,6 @@
-# Jackrabbit
+# Jackrabbit-js
 
-Tests without dependencies.
-
-A test runner without dependencies.
+Write tests without dependencies (including jackrabbit itself).
 
 ## Tests
 
@@ -26,4 +24,4 @@ npx jackrabbit --file ./path/to/test/collection/mod.ts
 
 ## License
 
-BSD 3-Clause License
+`Jackrabbit-js` is released under the BSD 3-Clause License.

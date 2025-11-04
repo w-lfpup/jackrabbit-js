@@ -1,6 +1,11 @@
 node_modules/
 
-*.tsbuildinfo
+cli/dist/
+core/dist/
+tests/dist/
 
-dist/
-!/nodejs_cli/dist/
+# to prevent removal of the file to preserve exec -x
+nodejs_cli/dist/*
+!nodejs_cli/dist/mod.js
+
+*.tsbuildinfo
