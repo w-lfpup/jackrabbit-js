@@ -24,4 +24,4 @@ npx jackrabbit --file ./path/to/test/collection/mod.ts
 
 ## License
 
-BSD 3-Clause License
+`Jackrabbit-js` is released under the BSD 3-Clause License.
