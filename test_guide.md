@@ -89,7 +89,7 @@ interface Options {
 
 ## Test Collections
 
-A `test collection` is a javascript module that exports a list of all relavent test modules called `testModules`.
+A `test collection` is a javascript module that exports a list test modules called `testModules`.
 
 ```TS
 // mod.test.ts
@@ -101,9 +101,11 @@ export const testModules = [
 ];
 ```
 
+This gathers all tests into a single explicit location.
+
 ## Run Test Collections
 
-Jackrabbit logs the results of `test collections`.
+Run the following command and Jackrabbit will log the results of `test collections`.
 
 ```sh
 npx jackrabbit --file ./mod.test.ts
