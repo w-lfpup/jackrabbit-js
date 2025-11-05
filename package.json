@@ -12,6 +12,7 @@
 	"scripts": {
 		"prepare": "npm run build",
 		"build": "npm run --workspaces build",
+		"build:cleanup": "npm run --workspaces build:cleanup",
 		"format": "npx prettier --write ./",
 		"test": "npx jackrabbit --file ./tests/dist/mod.js"
 	},

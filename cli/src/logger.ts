@@ -41,7 +41,10 @@ export class Logger implements LoggerInterface {
 
 		//  add to fails
 		if ("end_test" === action.type && action?.assertions) {
-			if (Array.isArray(action.assertions) && action.assertions.length === 0)
+			if (
+				Array.isArray(action.assertions) &&
+				action.assertions.length === 0
+			)
 				return;
 
 			this.#data.testTime += action.endTime - action.startTime;
