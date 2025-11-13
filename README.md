@@ -10,7 +10,13 @@ See [this guide](./test_guide.md) to create jackrabbit tests.
 
 ### Install
 
-Install jackrabbit with npm via github.
+Install jackrabbit with npm.
+
+```sh
+npm install --save-dev @w-lfpup/jackrabbit-js
+```
+
+Or Install jackrabbit directly from github.
 
 ```sh
 npm install --save-dev https://github.com/w-lfpup/jackrabbit-js
@@ -19,7 +25,7 @@ npm install --save-dev https://github.com/w-lfpup/jackrabbit-js
 ### Run Test Collections
 
 ```sh
-npx jackrabbit --file ./path/to/test/collection/mod.ts
+npx jackrabbit --file ./path/to/test/collection.ts
 ```
 
 ## License

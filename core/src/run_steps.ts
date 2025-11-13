@@ -4,7 +4,7 @@ import type {
 	TestModule,
 } from "./jackrabbit_types.ts";
 
-const TIMEOUT_INTERVAL = 10000;
+const TIMEOUT_INTERVAL_MS = 10000;
 
 function sleep(time: number): Promise<void> {
 	return new Promise((resolve) => {
@@ -14,8 +14,8 @@ function sleep(time: number): Promise<void> {
 	});
 }
 
-async function createTimeout(timeoutInterval?: number): Promise<Assertions> {
-	const interval = timeoutInterval ? timeoutInterval : TIMEOUT_INTERVAL;
+async function createTimeout(timeoutMs?: number): Promise<Assertions> {
+	const interval = timeoutMs ? timeoutMs : TIMEOUT_INTERVAL_MS;
 	await sleep(interval);
 
 	return `timed out at: ${interval}`;
@@ -40,7 +40,7 @@ async function execTest(
 	const testFunc = tests[testId];
 	const startTime = performance.now();
 	const assertions = await Promise.race([
-		createTimeout(options?.timeoutInterval ?? TIMEOUT_INTERVAL),
+		createTimeout(options?.timeoutMs ?? TIMEOUT_INTERVAL_MS),
 		testFunc(),
 	]);
 	const endTime = performance.now();

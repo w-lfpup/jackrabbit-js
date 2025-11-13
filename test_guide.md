@@ -69,7 +69,7 @@ But exporting an `options` pojo with the following properties will affect test b
 export const options = {
 	title: import.meta.url,
 	runAsyncronously: true,
-	timeoutInterval: 3000,
+	timeoutMs: 3000,
 }
 ```
 
@@ -83,7 +83,7 @@ Tests run sequentially unless the `runAsyncronously` property is set to `true`.
 interface Options {
   title?: string;
   runAsynchronously?: boolean;
-  timeoutInterval?: number;
+  timeoutMs?: number;
 }
 ```
 

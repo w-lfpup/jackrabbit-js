@@ -1,5 +1,5 @@
 {
-	"name": "jackrabbit",
+	"name": "@w-lfpup/jackrabbit",
 	"workspaces": [
 		"core",
 		"tests",

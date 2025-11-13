@@ -11,7 +11,7 @@ export type Test = SyncTest | AsyncTest;
 export interface Options {
 	title?: string;
 	runAsynchronously?: boolean;
-	timeoutInterval?: number;
+	timeoutMs?: number;
 }
 
 export interface TestModule {
