@@ -69,22 +69,22 @@ function logAssertions(
 	testModules: TestModule[],
 	fails: Map<number, Map<number, LoggerAction>>,
 ) {
-	for (let [index, module] of testModules.entries()) {
-		let failedTests = fails.get(index);
+	for (let [moduleID, module] of testModules.entries()) {
+		let failedTests = fails.get(moduleID);
 		if (undefined === failedTests) continue;
 
 		const { tests, options } = module;
-		console.log(options?.title ?? `test index: ${index}`);
+		console.log(`module: ${options?.title ?? `module index: ${moduleID}`}`);
 
 		for (let [index, test] of tests.entries()) {
 			let action = failedTests.get(index);
 			if (!action || action.type !== "end_test") continue;
 
-			console.log(`
-  ${test.name}
-    ${action.assertions}`);
+			console.log(`  test: ${test.name}\n    ${action.assertions}`);
 		}
 	}
+
+	console.log("\n");
 
 	// then just print the results
 	for (let [index, module] of testModules.entries()) {

@@ -10,8 +10,8 @@ async function testStuffAndPassAsync(): Promise<undefined> {
 	return;
 }
 
-async function testMoreStuffAndPassAsync(): Promise<[]> {
-	return [];
+async function testMoreStuffAndPassAsync(): Promise<string[]> {
+	return ["yo"];
 }
 
 // export tests
