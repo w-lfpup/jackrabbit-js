@@ -4,7 +4,7 @@ Write tests without dependencies (including jackrabbit itself).
 
 ## Tests
 
-See [this guide](./test_guide.md) to create jackrabbit tests.
+Read [this guide](./test_guide.md) to create jackrabbit tests.
 
 ## Nodejs
 
@@ -13,7 +13,7 @@ See [this guide](./test_guide.md) to create jackrabbit tests.
 Install jackrabbit with npm.
 
 ```sh
-npm install --save-dev @w-lfpup/jackrabbit-js
+npm install --save-dev @w-lfpup/jackrabbit
 ```
 
 Or Install jackrabbit directly from github.

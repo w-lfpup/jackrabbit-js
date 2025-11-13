@@ -1,5 +1,6 @@
 {
 	"name": "@w-lfpup/jackrabbit",
+	"description": "A test runner without dependencies",
 	"workspaces": [
 		"core",
 		"tests",
@@ -16,6 +17,10 @@
 		"test": "npx jackrabbit --file ./tests/dist/mod.js"
 	},
 	"version": "0.1.0",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/w-lfpup/jackarabbit-js.git"
+	},
 	"devDependencies": {
 		"@types/node": "^22.5.5",
 		"prettier": "^3.3.1",
