@@ -7,7 +7,3 @@ function test_will_fail() {
 }
 
 export const tests = [test_will_pass, test_will_fail];
-
-export const options = {
-	title: import.meta.url,
-};

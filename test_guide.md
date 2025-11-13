@@ -1,10 +1,8 @@
 # Jackrabbit Tests
 
-`Jackrabbit` leverages javascript's module system for a flat, concise testing experience.
+For a quick visual reference, please refer to the [examples](./examples/).
 
-No assertion libraries, no wild BDD functions.
-
-Developers with javascript can immediately start testing with basically zero overhead.
+`Jackrabbit` leverages esmodules for a flat, concise testing experience. There are no assertion libraries, there are no wild BDD functions. Developers with javascript experience can immediately start testing with basically zero overhead.
 
 ## Tests
 
@@ -69,7 +67,7 @@ But exporting an `options` pojo with the following properties will affect test b
 export const options = {
 	title: import.meta.url,
 	runAsyncronously: true,
-	timeoutInterval: 3000,
+	timeoutMs: 3000,
 }
 ```
 
@@ -83,7 +81,7 @@ Tests run sequentially unless the `runAsyncronously` property is set to `true`.
 interface Options {
   title?: string;
   runAsynchronously?: boolean;
-  timeoutInterval?: number;
+  timeoutMs?: number;
 }
 ```
 

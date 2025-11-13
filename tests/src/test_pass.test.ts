@@ -10,7 +10,7 @@ async function testStuffAndPassAsync(): Promise<undefined> {
 	return;
 }
 
-async function testMoreStuffAndPassAsync(): Promise<[]> {
+async function testMoreStuffAndPassAsync(): Promise<string[]> {
 	return [];
 }
 

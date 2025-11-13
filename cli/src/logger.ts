@@ -69,35 +69,25 @@ function logAssertions(
 	testModules: TestModule[],
 	fails: Map<number, Map<number, LoggerAction>>,
 ) {
-	for (let [index, module] of testModules.entries()) {
-		let failedTests = fails.get(index);
+	for (let [moduleID, module] of testModules.entries()) {
+		let failedTests = fails.get(moduleID);
 		if (undefined === failedTests) continue;
 
 		const { tests, options } = module;
-		console.log(options?.title ?? `test index: ${index}`);
+
+		console.log(`${options?.title ?? `module index: ${moduleID}`}`);
+
+		let numFailedTests = fails.get(moduleID)?.size ?? 0;
+		console.log(`${numFailedTests}/${tests.length} tests failed`);
 
 		for (let [index, test] of tests.entries()) {
 			let action = failedTests.get(index);
 			if (!action || action.type !== "end_test") continue;
 
-			console.log(`
-  ${test.name}
-    ${action.assertions}`);
+			console.log(`\t${test.name}\n\t\t${action.assertions}`);
 		}
-	}
 
-	// then just print the results
-	for (let [index, module] of testModules.entries()) {
-		let numFailedTests = fails.get(index)?.size ?? 0;
-
-		const { tests, options } = module;
-
-		console.log(`${options?.title ?? `test index: ${index}`}`);
-
-		let numTests = tests.length;
-		let numTestsPassed = numTests - numFailedTests;
-
-		console.log(`  ${numTestsPassed}/${numTests} tests passed`);
+		console.log("\n");
 	}
 }
 
@@ -111,8 +101,7 @@ function logResults(data: LoggerData, time: number) {
 	}
 
 	const overhead = time - data.startTime;
-	console.log(`
-Results:
+	console.log(`Results:
 ${status_with_color}
   duration: ${data.testTime.toFixed(4)} mS
   overhead: ${overhead.toFixed(4)} mS`);
@@ -130,4 +119,8 @@ function yellow(text: string) {
 
 function gray(text: string) {
 	return `\x1b[100m\x1b[97m${text}\x1b[0m`;
+}
+
+function logTestModule(moduleID: number, title?: string) {
+	console.log(`module: ${title ?? `module index: ${moduleID}`}`);
 }

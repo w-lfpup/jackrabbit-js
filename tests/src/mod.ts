@@ -28,7 +28,7 @@ async function testsPass() {
 const tests = [testsFail, testsPass];
 
 const options = {
-	title: import.meta.url,
+	title: "Failures and Successes",
 };
 
 const testModule = {
