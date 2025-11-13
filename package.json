@@ -8,7 +8,7 @@
 		"nodejs_cli"
 	],
 	"bin": {
-		"jackrabbit": "./nodejs_cli/dist/mod.js"
+		"jackrabbit": "nodejs_cli/dist/mod.js"
 	},
 	"scripts": {
 		"prepare": "npm run build",
