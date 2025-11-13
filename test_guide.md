@@ -1,10 +1,8 @@
 # Jackrabbit Tests
 
-`Jackrabbit` leverages javascript's module system for a flat, concise testing experience.
+For a quick visual reference, please refer to the [examples](./examples/).
 
-No assertion libraries, no wild BDD functions.
-
-Developers with javascript can immediately start testing with basically zero overhead.
+`Jackrabbit` leverages esmodules for a flat, concise testing experience. There are no assertion libraries, there are no wild BDD functions. Developers with javascript experience can immediately start testing with basically zero overhead.
 
 ## Tests
 
