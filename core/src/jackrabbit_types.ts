@@ -37,7 +37,6 @@ interface CancelRun {
 interface StartModule {
 	type: "start_module";
 	moduleId: number;
-	time: number;
 }
 
 interface EndModule {
@@ -50,7 +49,6 @@ interface StartTest {
 	type: "start_test";
 	testId: number;
 	moduleId: number;
-	time: number;
 }
 
 interface EndTest {

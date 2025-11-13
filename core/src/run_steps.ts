@@ -14,11 +14,12 @@ function sleep(time: number): Promise<void> {
 	});
 }
 
-async function createTimeout(timeoutMs?: number): Promise<Assertions> {
-	const interval = timeoutMs ? timeoutMs : TIMEOUT_INTERVAL_MS;
-	await sleep(interval);
+async function createTimeout(
+	timeoutMs: number = TIMEOUT_INTERVAL_MS,
+): Promise<Assertions> {
+	await sleep(timeoutMs);
 
-	return `timed out at: ${interval}`;
+	return `timed out at ${performance.now()} after ${timeoutMs} ms.`;
 }
 
 async function execTest(
@@ -28,11 +29,11 @@ async function execTest(
 	testId: number,
 ) {
 	if (logger.cancelled) return;
+
 	logger.log(testModules, {
 		type: "start_test",
-		time: performance.now(),
-		testId,
 		moduleId,
+		testId,
 	});
 
 	const { tests, options } = testModules[moduleId];
@@ -40,19 +41,21 @@ async function execTest(
 	const testFunc = tests[testId];
 	const startTime = performance.now();
 	const assertions = await Promise.race([
-		createTimeout(options?.timeoutMs ?? TIMEOUT_INTERVAL_MS),
+		createTimeout(options.timeoutMs),
 		testFunc(),
 	]);
-	const endTime = performance.now();
 
 	if (logger.cancelled) return;
+
+	const endTime = performance.now();
+
 	logger.log(testModules, {
 		type: "end_test",
-		testId,
-		moduleId,
 		assertions,
 		endTime,
+		moduleId,
 		startTime,
+		testId,
 	});
 }
 
@@ -62,14 +65,16 @@ async function execCollection(
 	moduleId: number,
 ) {
 	if (logger.cancelled) return;
+
 	const { tests } = testModules[moduleId];
 
 	const wrappedTests = [];
-	for (let testId = 0; testId < tests.length; testId++) {
-		wrappedTests.push(execTest(testModules, logger, moduleId, testId));
+	for (let [testID] of tests.entries()) {
+		wrappedTests.push(execTest(testModules, logger, moduleId, testID));
 	}
 
 	if (logger.cancelled) return;
+
 	await Promise.all(wrappedTests);
 }
 
@@ -80,9 +85,10 @@ async function execCollectionOrdered(
 ) {
 	const { tests } = testModules[moduleId];
 
-	for (let index = 0; index < tests.length; index++) {
+	for (let [testID] of tests.entries()) {
 		if (logger.cancelled) return;
-		await execTest(testModules, logger, moduleId, index);
+
+		await execTest(testModules, logger, moduleId, testID);
 	}
 }
 
@@ -90,7 +96,6 @@ export async function startRun(
 	logger: LoggerInterface,
 	testModules: TestModule[],
 ) {
-	if (logger.cancelled) return;
 	logger.log(testModules, {
 		type: "start_run",
 		time: performance.now(),
@@ -98,9 +103,9 @@ export async function startRun(
 
 	for (let [moduleId, testModule] of testModules.entries()) {
 		if (logger.cancelled) return;
+
 		logger.log(testModules, {
 			type: "start_module",
-			time: performance.now(),
 			moduleId,
 		});
 
@@ -110,6 +115,7 @@ export async function startRun(
 			: await execCollectionOrdered(testModules, logger, moduleId);
 
 		if (logger.cancelled) return;
+
 		logger.log(testModules, {
 			type: "end_module",
 			time: performance.now(),
@@ -117,7 +123,6 @@ export async function startRun(
 		});
 	}
 
-	if (logger.cancelled) return;
 	logger.log(testModules, {
 		type: "end_run",
 		time: performance.now(),
@@ -126,6 +131,7 @@ export async function startRun(
 
 export function cancelRun(logger: LoggerInterface, testModules: TestModule[]) {
 	if (logger.cancelled) return;
+
 	logger.log(testModules, {
 		type: "cancel_run",
 		time: performance.now(),
