@@ -11,7 +11,7 @@ async function testStuffAndPassAsync(): Promise<undefined> {
 }
 
 async function testMoreStuffAndPassAsync(): Promise<string[]> {
-	return ["yo"];
+	return [];
 }
 
 // export tests

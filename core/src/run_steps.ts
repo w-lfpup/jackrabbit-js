@@ -118,7 +118,6 @@ export async function startRun(
 
 		logger.log(testModules, {
 			type: "end_module",
-			time: performance.now(),
 			moduleId,
 		});
 	}

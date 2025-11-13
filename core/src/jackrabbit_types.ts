@@ -42,7 +42,6 @@ interface StartModule {
 interface EndModule {
 	type: "end_module";
 	moduleId: number;
-	time: number;
 }
 
 interface StartTest {

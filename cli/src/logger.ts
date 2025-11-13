@@ -76,7 +76,7 @@ function logAssertions(
 		const { tests, options } = module;
 
 		console.log(`${options?.title ?? `module index: ${moduleID}`}`);
-		
+
 		let numFailedTests = fails.get(moduleID)?.size ?? 0;
 		console.log(`${numFailedTests}/${tests.length} tests failed`);
 
