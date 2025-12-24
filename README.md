@@ -27,7 +27,7 @@ npm install --save-dev https://github.com/w-lfpup/jackrabbit-js
 ### Run Test Collections
 
 ```sh
-npx jackrabbit ./test/collection/a.ts ./test/collection/b.ts
+npx jackrabbit ./test/collection.ts
 ```
 
 ## License
