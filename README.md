@@ -2,6 +2,9 @@
 
 Write tests without dependencies (including jackrabbit itself).
 
+[![Tests](https://github.com/w-lfpup/jackrabbit-js/actions/workflows/tests.yml/badge.svg)](https://github.com/w-lfpup/jackrabbit-js/actions/workflows/tests.yml)
+
+
 ## Tests
 
 Read [this guide](./test_guide.md) to create jackrabbit tests.
