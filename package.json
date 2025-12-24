@@ -1,6 +1,8 @@
 {
 	"name": "@w-lfpup/jackrabbit",
 	"description": "A test runner without dependencies",
+	"version": "0.2.0",
+	"license": "BSD-3-Clause",
 	"workspaces": [
 		"core",
 		"tests",
@@ -14,12 +16,11 @@
 		"prepare": "npm run build",
 		"build": "npm run --workspaces build",
 		"format": "npx prettier --write ./",
-		"test": "npx jackrabbit --file ./tests/dist/mod.js"
+		"test": "npx jackrabbit ./tests/dist/mod.js"
 	},
-	"version": "0.1.0",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/w-lfpup/jackarabbit-js.git"
+		"url": "git+https://github.com/w-lfpup/jackrabbit-js.git"
 	},
 	"devDependencies": {
 		"@types/node": "^22.5.5",
