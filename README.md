@@ -22,8 +22,6 @@ npm install --save-dev https://github.com/w-lfpup/jackrabbit-js
 
 For a quick visual reference, please refer to the [examples](./examples/).
 
-`Jackrabbit` leverages the design of esmodules for a flat and concise testing experience. There are no assertion libraries. There are no wild BDD functions.
-
 Developers with javascript experience can immediately start testing with basically zero overhead.
 
 ## Tests
@@ -81,23 +79,23 @@ export const tests = [
 
 ### Export Options
 
-An `options` pojo with the following properties will affect the behavior of the test module:
+Export a parameter object named `options` to affect test behaviors in the current module:
 
 ```TS
 // my.tests.ts
 
 interface Options {
-  title?: string;
   runAsynchronously?: boolean;
   timeoutMs?: number;
+  title?: string;
 }
-```
 
-```TS
+...
+
 export const options = {
-	title: import.meta.url,
 	runAsyncronously: true,
 	timeoutMs: 3000,
+	title: import.meta.url,
 }
 ```
 
@@ -119,11 +117,9 @@ export const testModules = [
 ];
 ```
 
-This gathers all tests into a single explicit location.
-
 ## Run Test Collections
 
-Run the following command and Jackrabbit will log the results of a test collection.
+Run the following command and to log the results of a test collection.
 
 ```sh
 npx jackrabbit ./mod.tests.ts

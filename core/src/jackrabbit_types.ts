@@ -9,9 +9,9 @@ type AsyncTest = () => Promise<Assertions>;
 export type Test = SyncTest | AsyncTest;
 
 export interface Options {
-	title?: string;
 	runAsynchronously?: boolean;
 	timeoutMs?: number;
+	title?: string;
 }
 
 export interface TestModule {
