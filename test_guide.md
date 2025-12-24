@@ -2,11 +2,13 @@
 
 For a quick visual reference, please refer to the [examples](./examples/).
 
-`Jackrabbit` leverages esmodules for a flat, concise testing experience. There are no assertion libraries, there are no wild BDD functions. Developers with javascript experience can immediately start testing with basically zero overhead.
+`Jackrabbit` leverages esmodules for a flat, concise testing experience. There are no assertion libraries, there are no wild BDD functions.
+
+Developers with javascript experience can immediately start testing with basically zero overhead.
 
 ## Tests
 
-Tests are functions that return assertions.
+Tests are functions or promises that return assertions.
 
 Tests `pass` when they return the `undefined` primitive or an empty array `[]`.
 
@@ -17,7 +19,7 @@ function testStuffAndPass() {
 	return;
 }
 
-async function testMoreStuffAndPass() {
+function testMoreStuffAndPass() {
 	return [];
 }
 ```
@@ -40,7 +42,7 @@ function testMoreStuffAndFail() {
 
 ## Test Modules
 
-Test Modules are javascript `modules` that contain tests.
+Test Modules are javascript `modules` that export a value named tests.
 
 ### Export Tests
 
@@ -59,9 +61,17 @@ export const tests = [
 
 ### Export Options
 
-Exporting an `options` pojo is not required.
+But exporting an `options` pojo with the following properties will affect the behavior of the test module:
 
-But exporting an `options` pojo with the following properties will affect test behavior:
+```TS
+// my.tests.ts
+
+interface Options {
+  title?: string;
+  runAsynchronously?: boolean;
+  timeoutMs?: number;
+}
+```
 
 ```TS
 export const options = {
@@ -71,19 +81,9 @@ export const options = {
 }
 ```
 
-All properteis are optional.
+All properteis are optional and exporting an `options` pojo is not required.
 
 Tests run sequentially unless the `runAsyncronously` property is set to `true`.
-
-```TS
-// my_library.tests.ts
-
-interface Options {
-  title?: string;
-  runAsynchronously?: boolean;
-  timeoutMs?: number;
-}
-```
 
 ## Test Collections
 
@@ -92,7 +92,7 @@ A `test collection` is a javascript module that exports a list test modules call
 ```TS
 // mod.test.ts
 
-import * as MyTests from "./my_library.tests.ts";
+import * as MyTests from "./my.tests.ts";
 
 export const testModules = [
 	MyTests
@@ -103,10 +103,16 @@ This gathers all tests into a single explicit location.
 
 ## Run Test Collections
 
-Run the following command and Jackrabbit will log the results of `test collections`.
+Run the following command and Jackrabbit will log the results of a test collection.
 
 ```sh
-npx jackrabbit --file ./mod.test.ts
+npx jackrabbit ./mod.tests.ts
+```
+
+To run multiple test collections, add more filepaths as commandline arguments:
+
+```sh
+npx jackrabbit ./mod.tests.ts ./another_mod.tests.ts
 ```
 
 ## License

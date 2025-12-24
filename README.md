@@ -4,7 +4,6 @@ Write tests without dependencies (including jackrabbit itself).
 
 [![Tests](https://github.com/w-lfpup/jackrabbit-js/actions/workflows/tests.yml/badge.svg)](https://github.com/w-lfpup/jackrabbit-js/actions/workflows/tests.yml)
 
-
 ## Tests
 
 Read [this guide](./test_guide.md) to create jackrabbit tests.
@@ -28,7 +27,7 @@ npm install --save-dev https://github.com/w-lfpup/jackrabbit-js
 ### Run Test Collections
 
 ```sh
-npx jackrabbit --file ./path/to/test/collection.ts
+npx jackrabbit ./test/collection/a.ts ./test/collection/b.ts
 ```
 
 ## License
