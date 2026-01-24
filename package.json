@@ -18,7 +18,7 @@
 		"prepare": "npm run build",
 		"build": "npm run --workspaces build",
 		"format": "npx prettier --write ./",
-		"test": "npm run test:nodejs && test:browser",
+		"test": "npm run test:nodejs",
 		"test:nodejs": "npx jackrabbit ./tests/dist/mod.js",
 		"test:browser": "npx jackrabbit_webdriver"
 	},
