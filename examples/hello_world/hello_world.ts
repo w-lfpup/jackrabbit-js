@@ -2,7 +2,7 @@ function test_will_pass() {
 	return;
 }
 
-function test_will_fail() {
+async function test_will_fail() {
 	return "this test will fail";
 }
 

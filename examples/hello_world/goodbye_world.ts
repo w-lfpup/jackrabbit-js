@@ -2,7 +2,7 @@ async function test_that_passes() {
 	return [];
 }
 
-async function test_that_fails() {
+function test_that_fails() {
 	return ["this test will fail"];
 }
 

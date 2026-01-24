@@ -7,16 +7,20 @@
 		"core",
 		"tests",
 		"cli",
-		"nodejs_cli"
+		"nodejs_cli",
+		"webdriver"
 	],
 	"bin": {
-		"jackrabbit": "nodejs_cli/dist/mod.js"
+		"jackrabbit": "nodejs_cli/dist/mod.js",
+		"jackrabbit_webdriver": "webdriver/dist/mod.js"
 	},
 	"scripts": {
 		"prepare": "npm run build",
 		"build": "npm run --workspaces build",
 		"format": "npx prettier --write ./",
-		"test": "npx jackrabbit ./tests/dist/mod.js"
+		"test": "npm run test:nodejs && test:browser",
+		"test:nodejs": "npx jackrabbit ./tests/dist/mod.js",
+		"test:browser": "npx jackrabbit_webdriver"
 	},
 	"repository": {
 		"type": "git",
