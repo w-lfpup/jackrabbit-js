@@ -1,6 +1,4 @@
-import type { ConfigInterface } from "./cli_types.js";
-
-export class Config implements ConfigInterface {
+export class Config {
 	files: string[] = [];
 
 	constructor(args: string[]) {

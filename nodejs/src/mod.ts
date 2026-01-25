@@ -1,18 +1,16 @@
 #!/usr/bin/env node
 
 import { Config } from "./config.js";
-import { Importer } from "./importer.js";
 import { Logger } from "./logger.js";
 import { run } from "./cli.js";
 
 const config = new Config(process.argv.slice(2));
-const importer = new Importer(process.cwd());
 const logger = new Logger();
 
 let errored = false;
 
 try {
-	await run(config, importer, logger);
+	await run(config, logger);
 } catch (e: unknown) {
 	errored = true;
 	console.log("Error:");
