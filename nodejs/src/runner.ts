@@ -6,12 +6,16 @@ import { Logger } from "./logger.js";
 
 import * as path from "path";
 
-export interface ConfigInterface {
-	files: string[];
+export class Config {
+	files: string[] = [];
+
+	constructor(args: string[]) {
+		this.files = args;
+	}
 }
 
 export async function run(
-	config: ConfigInterface,
+	config: Config,
 	logger: LoggerInterface = new Logger(),
 ) {
 	for (const file of config.files) {
