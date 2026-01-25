@@ -5,8 +5,7 @@ export function testHanger(args) {
 			<head>
 				<script type="importmap">
 					{
-						"jackrabbit": "",
-						"jackrabbit_browser": ""
+						"jackrabbit": "/jackrabbit/"
 					}
 				</script>
 				<script type="jackrabbit">

@@ -1,4 +1,4 @@
-import type { ConfigInterface } from "./cli_types.ts";
+import type { ConfigInterface } from "./cli_types.js";
 
 export class Config implements ConfigInterface {
 	files: string[] = [];

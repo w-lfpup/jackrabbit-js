@@ -1,5 +1,5 @@
-import type { ConfigInterface, ImporterInterface } from "./cli_types.ts";
-import type { LoggerInterface } from "../../core/dist/mod.ts";
+import type { ConfigInterface, ImporterInterface } from "./cli_types.js";
+import type { LoggerInterface } from "../../core/dist/mod.js";
 
 import { startRun } from "../../core/dist/mod.js";
 import { Logger } from "./logger.js";

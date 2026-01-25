@@ -1,7 +1,8 @@
 #!/usr/bin/env node
-import * as path from "path";
-let cwd = path.parse(process.cwd());
-let jrCorePath = path.join(import.meta.url, "../../core/");
-let jrBrowserPath = path.join(import.meta.url, "../../browser/");
-console.log(jrCorePath);
-console.log(jrBrowserPath);
+import { createServer } from "./server.js";
+// for driver in webdrivers (ie safar chromium firefox)
+let server = createServer();
+server.on("close", function () {
+    // exit process when server is closed
+    process.exit(0);
+});

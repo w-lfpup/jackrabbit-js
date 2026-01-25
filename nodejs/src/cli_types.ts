@@ -1,4 +1,4 @@
-import type { TestModule } from "../../core/dist/mod.ts";
+import type { TestModule } from "../../core/dist/mod.js";
 
 export interface ConfigInterface {
 	files: string[];
