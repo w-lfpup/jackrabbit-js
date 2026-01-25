@@ -119,7 +119,9 @@ export const testModules = [
 
 ## Run Test Collections
 
-Run the following command and to log the results of a test collection.
+### NodeJS
+
+Run the following command to log the results of a test collection in nodejs.
 
 ```sh
 npx jackrabbit ./mod.tests.ts
@@ -129,6 +131,20 @@ To run multiple test collections, add more filepaths as commandline arguments:
 
 ```sh
 npx jackrabbit ./mod.tests.ts ./another_mod.tests.ts
+```
+
+### Webdrivers
+
+Run the following command to log the results of a test collection from a browser.
+
+```sh
+npx jackrabbit_browser ./config.json ./mod.tests.ts
+```
+
+To run multiple test collections, add more filepaths as commandline arguments:
+
+```sh
+npx jackrabbit ./config.json ./mod.tests.ts ./another_mod.tests.ts
 ```
 
 ## License

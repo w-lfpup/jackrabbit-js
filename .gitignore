@@ -9,3 +9,5 @@ nodejs_cli/dist/*
 !nodejs_cli/dist/mod.js
 
 *.tsbuildinfo
+
+browser.local.json

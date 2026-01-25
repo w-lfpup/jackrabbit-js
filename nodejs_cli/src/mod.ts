@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { Config, Importer, Logger, run } from "../../cli/dist/mod.js";
+import { Config, Importer, Logger, run } from "";
 
 const config = new Config(process.argv.slice(2));
 const importer = new Importer(process.cwd());

@@ -1,6 +1,6 @@
 import { exec } from "child_process";
 
-export function createWebdriver() {
+export function createWebdriver(webdriver: string, port: number) {
 	const abortController = new AbortController();
 	const { signal } = abortController;
 

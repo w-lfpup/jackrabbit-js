@@ -1,0 +1,8 @@
+{
+	"jackrabbit_host": "localhost:4000",
+	"webdrivers": [
+		["CHROMEWEBDRIVER -p 4001", "localhost:4001"],
+		["EDGEWEBDRIVER -p 4001", "localhost:4001"],
+		["GECKWEBDRIVER -p 4001", "localhost:4001"]
+	]
+}
