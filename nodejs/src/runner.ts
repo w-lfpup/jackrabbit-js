@@ -1,5 +1,3 @@
-import type { LoggerInterface } from "../../core/dist/mod.js";
-
 import { startRun } from "../../core/dist/mod.js";
 
 import { Logger } from "./logger.js";
@@ -14,10 +12,7 @@ export class Config {
 	}
 }
 
-export async function run(
-	config: Config,
-	logger: LoggerInterface = new Logger(),
-) {
+export async function run(config: Config, logger: Logger = new Logger()) {
 	for (const file of config.files) {
 		let filepath = path.join(process.cwd(), file);
 
