@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
-import { createServer } from "./server.js";
-import { createWebdriver } from "./webdriver.js";
+import { createServer } from "./server/server.js";
+import { createWebdriver } from "./server/webdriver.js";
 
 // for driver in webdrivers (ie safar chromium firefox)
 let server = createServer();
