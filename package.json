@@ -11,14 +11,13 @@
 	],
 	"bin": {
 		"jackrabbit": "nodejs/dist/mod.js",
-		"jackrabbit_browser": "webdriver/dist/mod.js"
+		"jackrabbit_webdriver": "browser/dist/mod.js"
 	},
 	"scripts": {
 		"prepare": "npm run build",
 		"build": "npm run --workspaces build",
 		"format": "npx prettier --write ./",
-		"test": "npx jackrabbit ./tests/dist/mod.js",
-		"test:browser": "npx jackrabbit_browser"
+		"test": "npx jackrabbit ./tests/dist/mod.js"
 	},
 	"repository": {
 		"type": "git",

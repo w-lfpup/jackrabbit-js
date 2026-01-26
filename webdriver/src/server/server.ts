@@ -5,9 +5,9 @@ import * as path from "path";
 
 let cwd = path.parse(process.cwd());
 
-let repoPath = path.join(import.meta.url, "../../../");
+let repoParentPath = path.join(import.meta.url, "../../../");
 
-console.log(repoPath);
+console.log(repoParentPath);
 
 export function createServer() {
 	const server = http.createServer(function (req, res) {
