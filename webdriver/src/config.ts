@@ -8,13 +8,19 @@ export interface ConfigJson {
 	webdrivers: [string, URL][];
 }
 
-function fromString(jsonStr: string): ConfigJson | Error {
+class Config {}
+
+export async function createConfig(
+	args: string[],
+): Promise<ConfigJson | Error> {
+	let configFilepath = args[0];
+
 	let json: any;
 	try {
-		json = JSON.parse(jsonStr);
+		let json = await import(configFilepath, { with: { type: "json" } });
 	} catch (e) {
 		if (e instanceof Error) return e;
-		return new Error("failed to parse config from string");
+		return new Error("failed to parse config params from string");
 	}
 
 	let host_and_port: URL | null = URL.parse(json.host_and_port);
