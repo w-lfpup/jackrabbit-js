@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
-import { createServer } from "./server/server.js";
-import { createWebdriver } from "./server/webdriver.js";
+import { createServer } from "./server.js";
+import { createWebdriver } from "./webdriver.js";
 
 import { createConfig } from "./config.js";
 
@@ -13,15 +13,37 @@ if (config instanceof Error) {
 	process.exit(1);
 }
 
-// for driver in webdrivers (ie safar chromium firefox)
+let signal = AbortSignal.timeout(config.timeoutMs);
+
+class Liaison {
+	// has reference to commands and execs
+	// has a bound callback for the server to update and queue next wedriver
+	// has
+}
+
 let server = createServer();
-server.on("close", function () {
-	// exit process when server is closed
+server.on("error", function (e) {
+	console.log(e);
 	process.exit(0);
 });
 
-// server.listen(4000);
+let { host, port } = config.hostAndPort;
+server.listen({
+	host,
+	port,
+	signal,
+});
 
-// let abortController = createWebdriver();
+function sleep(timeMs: number): Promise<void> {
+	return new Promise(function (resolve) {
+		setTimeout(resolve, timeMs);
+	});
+}
 
-export {};
+for (let [command, url] of config.webdrivers) {
+	// start command webdriver
+
+	// get session
+	// go to url
+	await sleep(500);
+}

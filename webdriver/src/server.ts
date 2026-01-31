@@ -40,12 +40,9 @@ export function createServer() {
 			// otherwise send file based on cwd
 		}
 
-		console.log(req.url);
 		res.writeHead(200, { "content-type": "text/html; charset=utf-8" });
 		res.end(req.url);
 	});
 
 	return server;
 }
-
-// server.listen(4000);

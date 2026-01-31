@@ -1,8 +1,6 @@
 node_modules/
 
-cli/dist/
-core/dist/
-tests/dist/
+dist/
 
 # to prevent removal of the file to preserve exec -x
 nodejs_cli/dist/*
