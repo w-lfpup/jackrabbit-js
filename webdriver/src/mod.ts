@@ -35,10 +35,10 @@ let logger = new Logger();
 
 // pass messages from server to webdrivers
 let router = new Router();
-router.addEventListener("log", function (event: Event) {
+router.addEventListener("log", function () {
 	logger.log();
 });
-router.addEventListener("next_webdriver", function () {
+router.addEventListener("complete", function () {
 	webdrivers.next();
 });
 
@@ -46,8 +46,6 @@ server.on("request", router.route);
 server.on("close", function () {
 	logger.cancelled || logger.failed ? process.exit(1) : process.exit(0);
 });
-
-// maybe server on error
 
 // run server
 let { port, hostname } = config.hostAndPort;

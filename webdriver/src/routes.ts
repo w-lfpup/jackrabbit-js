@@ -1,11 +1,14 @@
 import type { IncomingMessage, ServerResponse } from "http";
 import * as path from "path";
+import { Listeners } from "./listeners.js";
 
 let cwd = path.parse(process.cwd());
 
 let repoParentPath = path.join(import.meta.url, "../../../");
 
 export class Router {
+	#listeners = new Listeners();
+
 	route = this.#route.bind(this);
 
 	#route(req: IncomingMessage, res: ServerResponse) {
@@ -29,6 +32,8 @@ export class Router {
 				// abortController.abort();
 				// server.close();
 				// send signal success / fail
+
+				this.#listeners.dispatchEvent(new Event("complete"));
 			}
 
 			if (url === "/") {
@@ -41,42 +46,6 @@ export class Router {
 
 	addEventListener(eventName: string, cb: EventListener) {
 		// only have a callback for "end" or "error"
-	}
-
-	#dispatchEvent(eventName: string) {
-		// iterate through
-	}
-	// begin cycling tests and dependences
-	start() {}
-}
-
-function route(req: Request, res: Response) {
-	// router logic here
-
-	// ROUTES
-	//
-	let { url } = req;
-	if (url) {
-		if (url.startsWith("/jackrabbit/core/")) {
-			// load jackrabbit library
-			// based on repo path
-		}
-
-		if (url.startsWith("/jackrabbit/browser/")) {
-			// load jackrabbit library
-		}
-
-		if (url.startsWith("/log/")) {
-			// if "end_run"
-			// abortController.abort();
-			// server.close();
-			// send signal success / fail
-		}
-
-		if (url === "/") {
-			// send "test" home page
-		}
-
-		// otherwise send file based on cwd
+		this.#listeners.addEventListener(eventName, cb);
 	}
 }

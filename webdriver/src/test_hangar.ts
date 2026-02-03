@@ -12,7 +12,7 @@ export function testHanger(args: string[]) {
 					${args}
 				</script>
 			</head>
-			<body>hello!</body>
+			<body></body>
 		</html>
 	`;
 }

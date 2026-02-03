@@ -1,5 +1,4 @@
 node_modules/
-
 dist/
 
 # to prevent removal of the file to preserve exec -x

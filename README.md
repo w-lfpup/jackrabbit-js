@@ -138,13 +138,13 @@ npx jackrabbit ./mod.tests.ts ./another_mod.tests.ts
 Run the following command to log the results of a test collection from a browser.
 
 ```sh
-npx jackrabbit_browser ./config.json ./mod.tests.ts
+npx jackrabbit_webdriver ./config.json ./mod.tests.ts
 ```
 
 To run multiple test collections, add more filepaths as commandline arguments:
 
 ```sh
-npx jackrabbit ./config.json ./mod.tests.ts ./another_mod.tests.ts
+npx jackrabbit_webdriver ./config.json ./mod.tests.ts ./another_mod.tests.ts
 ```
 
 ## License

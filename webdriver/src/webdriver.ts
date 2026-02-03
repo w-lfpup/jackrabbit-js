@@ -1,5 +1,10 @@
 import type { ConfigInterface } from "./config.js";
 import { ChildProcess, exec } from "child_process";
+import { Listeners } from "./listeners.js";
+
+// Events
+// - complete
+// - error
 
 interface WebDriverSessionParams {
 	host: URL;
@@ -8,9 +13,12 @@ interface WebDriverSessionParams {
 }
 
 export class WebDrivers {
+	#listeners = new Listeners();
 	#config: ConfigInterface;
 	#configIndex: number;
 	#signal: AbortSignal;
+	#processSignal: AbortController | undefined;
+	#process: ChildProcess | undefined;
 
 	constructor(config: ConfigInterface, signal: AbortSignal) {
 		this.#config = config;
@@ -19,6 +27,12 @@ export class WebDrivers {
 	}
 
 	next() {
+		this.#processSignal?.abort();
+
+		if (this.#config.webdrivers.length < this.#configIndex) {
+			return this.#listeners.dispatchEvent(new Event("complete"));
+		}
+
 		let driverCmd = this.#config.webdrivers[this.#configIndex];
 		this.#configIndex += 1;
 		if (driverCmd) {
@@ -27,7 +41,7 @@ export class WebDrivers {
 	}
 
 	addEventListener(eventName: string, cb: EventListener) {
-		// only have a callback for "end" or "error"
+		this.#listeners.addEventListener(eventName, cb);
 	}
 }
 
@@ -61,6 +75,13 @@ class WebdriverSession {
 				}
 			},
 		);
+		this.#process.on("spawn", function () {
+			// fetch get session
+			// fetch go to url
+		});
+
+		// create session
+		// goToUrl
 	}
 
 	downWebdriver() {

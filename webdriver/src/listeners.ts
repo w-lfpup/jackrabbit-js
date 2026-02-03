@@ -1,8 +1,8 @@
-interface ListenerInterface {
+export interface ListenerInterface {
 	addEventListener: EventTarget["addEventListener"];
 }
 
-class Listeners implements ListenerInterface {
+export class Listeners implements ListenerInterface {
 	#eventMap: Map<string, EventListenerOrEventListenerObject[]> = new Map();
 
 	addEventListener(eventName: string, cb: EventListenerOrEventListenerObject) {
@@ -12,5 +12,17 @@ class Listeners implements ListenerInterface {
 			this.#eventMap.set(eventName, eventListeners);
 		}
 		eventListeners.push(cb);
+	}
+
+	dispatchEvent(event: Event) {
+		let eventListeners = this.#eventMap.get(event.type);
+		if (eventListeners)
+			for (const listener of eventListeners) {
+				if (listener instanceof Function) {
+					listener(event);
+				} else {
+					listener.handleEvent(event);
+				}
+			}
 	}
 }

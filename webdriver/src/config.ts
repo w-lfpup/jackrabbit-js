@@ -28,10 +28,10 @@ export async function createConfig(
 	let webdrivers: [string, URL][] = [];
 	if (Array.isArray(json.webdrivers))
 		for (let [command, targetUrl] of json.webdrivers) {
+			let url = URL.parse(targetUrl);
+			if (!url) return new Error(`config: invalid webdriver url json property`);
+
 			if (typeof command === "string") {
-				let url = URL.parse(targetUrl);
-				if (!url)
-					return new Error(`config: invalid webdriver url json property`);
 				webdrivers.push([command, url]);
 			} else {
 				return new Error(`config: invalid webdriver commmand json property`);
