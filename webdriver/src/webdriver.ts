@@ -1,9 +1,34 @@
+import type { ConfigInterface } from "./config.js";
 import { ChildProcess, exec } from "child_process";
 
 interface WebDriverSessionParams {
 	host: URL;
 	command: string;
 	signal: AbortSignal;
+}
+
+export class WebDrivers {
+	#config: ConfigInterface;
+	#configIndex: number;
+	#signal: AbortSignal;
+
+	constructor(config: ConfigInterface, signal: AbortSignal) {
+		this.#config = config;
+		this.#configIndex = 0;
+		this.#signal = signal;
+	}
+
+	next() {
+		let driverCmd = this.#config.webdrivers[this.#configIndex];
+		this.#configIndex += 1;
+		if (driverCmd) {
+			let [command, url] = driverCmd;
+		}
+	}
+
+	addEventListener(eventName: string, cb: EventListener) {
+		// only have a callback for "end" or "error"
+	}
 }
 
 class WebdriverSession {

@@ -1,9 +1,11 @@
 #!/usr/bin/env node
 
-import { createServer } from "./server.js";
-import { createWebdriver } from "./webdriver.js";
-
 import { createConfig } from "./config.js";
+import { Logger } from "./logger.js";
+import { Router } from "./routes.js";
+
+import { WebDrivers } from "./webdriver.js";
+import * as http from "http";
 
 let args = process.argv.slice(2);
 
@@ -13,37 +15,47 @@ if (config instanceof Error) {
 	process.exit(1);
 }
 
+// grand timeout
 let signal = AbortSignal.timeout(config.timeoutMs);
 
-class Liaison {
-	// has reference to commands and execs
-	// has a bound callback for the server to update and queue next wedriver
-	// has
-}
+// server
+let server = http.createServer();
 
-let server = createServer();
-server.on("error", function (e) {
-	console.log(e);
-	process.exit(0);
+// get webdrivers
+let webdrivers = new WebDrivers(config, signal);
+webdrivers.addEventListener("complete", function () {
+	server.closeAllConnections();
+});
+webdrivers.addEventListener("error", function () {
+	// server.closeAllConnections();
 });
 
-let { host, port } = config.hostAndPort;
+// logger
+let logger = new Logger();
+
+// pass messages from server to webdrivers
+let router = new Router();
+router.addEventListener("log", function (event: Event) {
+	logger.log();
+});
+router.addEventListener("next_webdriver", function () {
+	webdrivers.next();
+});
+
+server.on("request", router.route);
+server.on("close", function () {
+	logger.cancelled || logger.failed ? process.exit(1) : process.exit(0);
+});
+
+// maybe server on error
+
+// run server
+let { port, hostname } = config.hostAndPort;
 server.listen({
-	host,
 	port,
+	hostname,
 	signal,
 });
 
-function sleep(timeMs: number): Promise<void> {
-	return new Promise(function (resolve) {
-		setTimeout(resolve, timeMs);
-	});
-}
-
-for (let [command, url] of config.webdrivers) {
-	// start command webdriver
-
-	// get session
-	// go to url
-	await sleep(500);
-}
+// start test run
+webdrivers.next();
