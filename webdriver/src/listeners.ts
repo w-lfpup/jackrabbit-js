@@ -1,5 +1,6 @@
 export interface ListenerInterface {
 	addEventListener: EventTarget["addEventListener"];
+	dispatchEvent: EventTarget["dispatchEvent"];
 }
 
 export class Listeners implements ListenerInterface {
@@ -14,15 +15,15 @@ export class Listeners implements ListenerInterface {
 		eventListeners.push(cb);
 	}
 
-	dispatchEvent(event: Event) {
+	dispatchEvent(event: Event): boolean {
 		let eventListeners = this.#eventMap.get(event.type);
 		if (eventListeners)
 			for (const listener of eventListeners) {
-				if (listener instanceof Function) {
-					listener(event);
-				} else {
-					listener.handleEvent(event);
-				}
+				listener instanceof Function
+					? listener(event)
+					: listener.handleEvent(event);
 			}
+
+		return event.cancelable || event.defaultPrevented;
 	}
 }

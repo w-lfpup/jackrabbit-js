@@ -29,7 +29,7 @@ export class WebDrivers {
 	next() {
 		this.#processSignal?.abort();
 
-		if (this.#config.webdrivers.length < this.#configIndex) {
+		if (this.#config.webdrivers.length <= this.#configIndex) {
 			return this.#listeners.dispatchEvent(new Event("complete"));
 		}
 
