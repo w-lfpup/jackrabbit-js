@@ -4,106 +4,116 @@ import { Listeners } from "./listeners.js";
 
 // Events
 // - complete
+// - output
 // - error
-
-interface WebDriverSessionParams {
-	host: URL;
-	command: string;
-	signal: AbortSignal;
-}
 
 export class WebDrivers {
 	#listeners = new Listeners();
 	#config: ConfigInterface;
 	#configIndex: number;
-	#signal: AbortSignal;
-	#processSignal: AbortController | undefined;
-	#process: ChildProcess | undefined;
+	#session: WebdriverSession | undefined;
 
-	constructor(config: ConfigInterface, signal: AbortSignal) {
+	constructor(config: ConfigInterface) {
 		this.#config = config;
 		this.#configIndex = 0;
-		this.#signal = signal;
-	}
-
-	next() {
-		this.#processSignal?.abort();
-
-		if (this.#config.webdrivers.length <= this.#configIndex) {
-			return this.#listeners.dispatchEvent(new Event("complete"));
-		}
-
-		let driverCmd = this.#config.webdrivers[this.#configIndex];
-		this.#configIndex += 1;
-		if (driverCmd) {
-			let [command, url] = driverCmd;
-		}
 	}
 
 	addEventListener(eventName: string, cb: EventListener) {
 		this.#listeners.addEventListener(eventName, cb);
 	}
+
+	next() {
+		this.#session?.abort();
+
+		let driverCmd = this.#config.webdrivers[this.#configIndex];
+		if (!driverCmd) return this.#listeners.dispatchEvent(new Event("complete"));
+
+		this.#configIndex += 1;
+		let [command, url] = driverCmd;
+		let { timeoutMs, hostAndPort } = this.#config;
+		let signal = AbortSignal.timeout(timeoutMs);
+		this.#session = new WebdriverSession({
+			command,
+			hostAndPort,
+			listeners: this.#listeners,
+			signal,
+			timeoutMs,
+			url,
+		});
+	}
+}
+
+interface WebDriverSessionParams {
+	command: string;
+	hostAndPort: URL;
+	listeners: Listeners;
+	signal: AbortSignal;
+	timeoutMs: number;
+	url: URL;
 }
 
 class WebdriverSession {
 	#params: WebDriverSessionParams;
-	#session: string | undefined;
-	#process: ChildProcess | undefined;
-	#abortController: AbortController | undefined;
+	#abortController: AbortController;
+	#process: ChildProcess;
+	#boundOnOutput = this.#onOutput.bind(this);
+	#boundOnSpawn = this.#onSpawn.bind(this);
 
 	constructor(params: WebDriverSessionParams) {
 		this.#params = params;
-	}
+		let { signal: parentSignal, command, timeoutMs } = this.#params;
 
-	upWebdriver() {
 		this.#abortController = new AbortController();
 		const signal = AbortSignal.any([
-			this.#params.signal,
+			parentSignal,
 			this.#abortController.signal,
+			AbortSignal.timeout(timeoutMs),
 		]);
 
-		this.#process = exec(
-			this.#params.command,
-			{ signal },
-			function (error, stdout, stderr) {
-				if (error) {
-					console.log("WebDriverSession error:\n", error, "\n");
-					console.log(stderr);
-				} else {
-					console.log("Webdriver stdout:\n");
-					console.log(stdout);
-				}
-			},
-		);
-		this.#process.on("spawn", function () {
-			// fetch get session
-			// fetch go to url
-		});
-
-		// create session
-		// goToUrl
+		this.#process = exec(command, { signal }, this.#boundOnOutput);
+		this.#process.on("spawn", this.#boundOnSpawn);
 	}
 
-	downWebdriver() {
-		// delete session
-		// DELETE /session/<session_id>
-		// abort signal
-		// remove abort signal
+	abort() {
+		this.#abortController.abort();
 	}
 
-	createSession() {
-		// POST /session
-		// response {
-		// 	"value": {
-		// 		"sessionId": "1234567890",
-		// 		"capabilities": {...}
-		// 	}
-		// }
+	#onOutput(error: Error | null, stdout: string, stderr: string) {
+		if (error) {
+			console.log("WebDriverSession error:\n", error, "\n");
+			console.log(stderr);
+			this.#params.listeners.dispatchEvent(new Event("error"));
+		} else {
+			console.log("Webdriver stdout:\n");
+			console.log(stdout);
+			this.#params.listeners.dispatchEvent(new Event("output"));
+		}
 	}
 
-	goToUrl(url: string) {
-		// POST /session/<session_id>/url
-		// null response
-		// status code 200
+	async #onSpawn() {
+		console.log("webdriver process has spawned");
+		let { hostAndPort, url } = this.#params;
+
+		try {
+			let res = await fetch(new URL("/session", url), {
+				method: "POST",
+				body: JSON.stringify({ capabilities: {} }),
+			});
+			if (200 !== res.status) throw new Error("/session request failed");
+
+			let json = await res.json();
+			let { sessionId } = json?.value;
+			if (typeof sessionId !== "string")
+				throw new Error("sessionId is not a string");
+
+			let goToUrlRes = await fetch(new URL(`/session/${sessionId}/url`, url), {
+				body: JSON.stringify({ url: hostAndPort }),
+			});
+			if (200 !== goToUrlRes.status)
+				throw new Error("/session/<session_id>/url request failed");
+		} catch (e) {
+			console.log(e);
+			this.#params.listeners.dispatchEvent(new Event("error"));
+		}
 	}
 }

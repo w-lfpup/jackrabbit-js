@@ -15,19 +15,21 @@ if (config instanceof Error) {
 	process.exit(1);
 }
 
+console.log("config:", config);
+
 // grand timeout
-let signal = AbortSignal.timeout(config.timeoutMs);
+let abortController = new AbortController();
 
 // server
 let server = http.createServer();
 
 // get webdrivers
-let webdrivers = new WebDrivers(config, signal);
+let webdrivers = new WebDrivers(config);
 webdrivers.addEventListener("complete", function () {
-	server.closeAllConnections();
+	abortController.abort();
 });
 webdrivers.addEventListener("error", function () {
-	// server.closeAllConnections();
+	webdrivers.next();
 });
 
 // logger
@@ -48,6 +50,7 @@ server.on("close", function () {
 });
 
 // run server
+let { signal } = abortController;
 let { port, hostname } = config.hostAndPort;
 server.listen({
 	port,

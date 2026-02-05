@@ -44,5 +44,3 @@ export async function createConfig(
 		timeoutMs,
 	};
 }
-
-export {};

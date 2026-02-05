@@ -13,6 +13,9 @@ export function testHanger(params: TestHangerParams) {
 				</script>
 				<script type="importmap">
 				</script>
+				<script>
+					// fetch()
+				</script>
 			</head>
 			<body></body>
 		</html>
