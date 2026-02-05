@@ -11,15 +11,11 @@ export async function createConfig(
 ): Promise<ConfigInterface | Error> {
 	let configFilepath = args[0];
 	let relPath = path.join(process.cwd(), configFilepath);
-	console.log(configFilepath, relPath);
 
 	try {
 		let { default: json } = await import(relPath, { with: { type: "json" } });
-		console.log("json:", json);
-		console.log("hostandport:", json.host_and_port);
 
 		let hostAndPort: URL | null = URL.parse(json.host_and_port);
-		console.log("hostandport url", hostAndPort);
 		if (!hostAndPort)
 			throw new Error(`config: invalid host_and_port json property`);
 

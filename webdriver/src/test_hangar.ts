@@ -11,13 +11,15 @@ export function testHanger(params: TestHangerParams) {
 				<script type="jackrabbit">
 					${JSON.stringify(params)}
 				</script>
-				<script type="importmap">
-				</script>
 				<script>
-					// fetch()
+					let jackrabbitConfig = document.querySelector("script[type=jackrabbit]");
+					let json = JSON.parse(jackrabbitConfig.textContent);
+					fetch(new URL("/log/", json.jackrabbit_url));
 				</script>
 			</head>
-			<body></body>
+			<body>
+				<p>hello! welcome to jackrabbit</b>
+			</body>
 		</html>
 	`;
 }

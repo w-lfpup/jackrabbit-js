@@ -39,11 +39,12 @@ webdrivers.addEventListener("error", function () {
 let logger = new Logger();
 
 // pass messages from server to webdrivers
-let router = new Router();
+let router = new Router(config);
 router.addEventListener("log", function () {
 	logger.log();
 });
 router.addEventListener("complete", function () {
+	console.log("webdriver completed it's run!");
 	webdrivers.next();
 });
 
