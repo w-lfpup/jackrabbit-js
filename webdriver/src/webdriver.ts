@@ -56,9 +56,7 @@ interface WebDriverSessionParams {
 class WebdriverSession {
 	#params: WebDriverSessionParams;
 	#process: ChildProcess;
-	// #boundOnOutput = this.#onOutput.bind(this);
 	#sessionId: string | undefined;
-	#boundOnSpawn = this.#onSpawn.bind(this);
 
 	constructor(params: WebDriverSessionParams) {
 		this.#params = params;
@@ -69,29 +67,15 @@ class WebdriverSession {
 			AbortSignal.timeout(timeoutMs),
 		]);
 
-		// this.#process = exec(command, { signal }, this.#boundOnOutput);
 		this.#process = exec(command, { signal });
 		this.#onSpawn();
 	}
 
 	async abort() {
-		// delete session
 		await this.#onDown();
 		this.#process.kill();
 		await sleep(500);
 	}
-
-	// #onOutput(error: Error | null, stdout: string, stderr: string) {
-	// 	if (error) {
-	// 		console.log("WebDriverSession error:\n", error, "\n");
-	// 		console.log(stderr);
-	// 		this.#params.listeners.dispatchEvent(new Event("error"));
-	// 	} else {
-	// 		console.log("Webdriver stdout:\n");
-	// 		console.log(stdout);
-	// 		this.#params.listeners.dispatchEvent(new Event("output"));
-	// 	}
-	// }
 
 	async #onSpawn() {
 		await sleep(500);
@@ -133,10 +117,9 @@ class WebdriverSession {
 	}
 
 	async #onDown() {
-		let { hostAndPort, url } = this.#params;
+		let { url } = this.#params;
 		if (!this.#sessionId) return;
 
-		console.log("trying to down session!");
 		try {
 			let res = await fetch(new URL(`/session/${this.#sessionId}`, url), {
 				method: "DELETE",

@@ -1,5 +1,12 @@
 import * as path from "path";
 
+// use params for each driver
+interface WebdriverParams {
+	command: string;
+	url: URL;
+	timeoutMs: number;
+}
+
 export interface ConfigInterface {
 	hostAndPort: URL;
 	timeoutMs: number;

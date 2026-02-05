@@ -8,7 +8,6 @@ import { Router } from "./routes.js";
 import { WebDrivers } from "./webdriver.js";
 
 let args = process.argv.slice(2);
-console.log(args);
 
 const config = await createConfig(args);
 if (config instanceof Error) {
@@ -16,41 +15,34 @@ if (config instanceof Error) {
 	process.exit(1);
 }
 
-console.log("config:", config);
-
 // grand timeout
 let abortController = new AbortController();
 
-// server
+// generate components
 let server = http.createServer();
-
-// get webdrivers
 let webdrivers = new WebDrivers(config);
+let logger = new Logger();
+let router = new Router(config);
+
+// add webdriver events
 webdrivers.addEventListener("complete", function () {
-	console.log("end of webdrivers!");
 	abortController.abort();
 });
 webdrivers.addEventListener("error", function () {
-	console.log("error, probably timed out");
 	webdrivers.next();
 });
 
-// logger
-let logger = new Logger();
-
-// pass messages from server to webdrivers
-let router = new Router(config);
+// add router events
+// logs are tightly coupled
 router.addEventListener("log", function () {
 	logger.log();
 });
 router.addEventListener("complete", function () {
-	console.log("webdriver completed it's run!");
 	webdrivers.next();
 });
 
 server.on("request", router.route);
 server.on("close", function () {
-	console.log("server close");
 	logger.cancelled || logger.failed ? process.exit(1) : process.exit(0);
 });
 
