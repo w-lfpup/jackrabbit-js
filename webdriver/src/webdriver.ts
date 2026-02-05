@@ -23,8 +23,8 @@ export class WebDrivers {
 		this.#listeners.addEventListener(eventName, cb);
 	}
 
-	next() {
-		this.#session?.abort();
+	async next() {
+		await this.#session?.abort();
 
 		let driverCmd = this.#config.webdrivers[this.#configIndex];
 		if (!driverCmd) return this.#listeners.dispatchEvent(new Event("complete"));
@@ -56,7 +56,7 @@ interface WebDriverSessionParams {
 class WebdriverSession {
 	#params: WebDriverSessionParams;
 	#process: ChildProcess;
-	#boundOnOutput = this.#onOutput.bind(this);
+	// #boundOnOutput = this.#onOutput.bind(this);
 	#sessionId: string | undefined;
 	#boundOnSpawn = this.#onSpawn.bind(this);
 
@@ -69,7 +69,8 @@ class WebdriverSession {
 			AbortSignal.timeout(timeoutMs),
 		]);
 
-		this.#process = exec(command, { signal }, this.#boundOnOutput);
+		// this.#process = exec(command, { signal }, this.#boundOnOutput);
+		this.#process = exec(command, { signal });
 		this.#onSpawn();
 	}
 
@@ -80,17 +81,17 @@ class WebdriverSession {
 		await sleep(500);
 	}
 
-	#onOutput(error: Error | null, stdout: string, stderr: string) {
-		if (error) {
-			console.log("WebDriverSession error:\n", error, "\n");
-			console.log(stderr);
-			this.#params.listeners.dispatchEvent(new Event("error"));
-		} else {
-			console.log("Webdriver stdout:\n");
-			console.log(stdout);
-			this.#params.listeners.dispatchEvent(new Event("output"));
-		}
-	}
+	// #onOutput(error: Error | null, stdout: string, stderr: string) {
+	// 	if (error) {
+	// 		console.log("WebDriverSession error:\n", error, "\n");
+	// 		console.log(stderr);
+	// 		this.#params.listeners.dispatchEvent(new Event("error"));
+	// 	} else {
+	// 		console.log("Webdriver stdout:\n");
+	// 		console.log(stdout);
+	// 		this.#params.listeners.dispatchEvent(new Event("output"));
+	// 	}
+	// }
 
 	async #onSpawn() {
 		await sleep(500);
@@ -133,7 +134,8 @@ class WebdriverSession {
 
 	async #onDown() {
 		let { hostAndPort, url } = this.#params;
-		if (this.#sessionId) return;
+		if (!this.#sessionId) return;
+
 		console.log("trying to down session!");
 		try {
 			let res = await fetch(new URL(`/session/${this.#sessionId}`, url), {

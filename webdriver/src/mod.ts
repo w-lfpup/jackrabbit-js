@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 
+import * as http from "http";
+
 import { createConfig } from "./config.js";
 import { Logger } from "./logger.js";
 import { Router } from "./routes.js";
-
 import { WebDrivers } from "./webdriver.js";
-import * as http from "http";
 
 let args = process.argv.slice(2);
 console.log(args);
