@@ -60,6 +60,7 @@ class WebdriverSession {
 	#boundOnSpawn = this.#onSpawn.bind(this);
 
 	constructor(params: WebDriverSessionParams) {
+		console.log("webdriver params:", params);
 		this.#params = params;
 		let { signal: parentSignal, command, timeoutMs } = this.#params;
 
@@ -95,11 +96,16 @@ class WebdriverSession {
 		let { hostAndPort, url } = this.#params;
 
 		try {
+			let basedUrl = new URL("/session", url);
+			console.log("based_URL:", basedUrl);
 			let res = await fetch(new URL("/session", url), {
 				method: "POST",
 				body: JSON.stringify({ capabilities: {} }),
 			});
-			if (200 !== res.status) throw new Error("/session request failed");
+			console.log("res", res);
+			if (200 !== res.status) {
+				throw new Error("/session request failed");
+			}
 
 			let json = await res.json();
 			let { sessionId } = json?.value;

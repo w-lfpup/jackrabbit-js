@@ -8,6 +8,7 @@ import { WebDrivers } from "./webdriver.js";
 import * as http from "http";
 
 let args = process.argv.slice(2);
+console.log(args);
 
 const config = await createConfig(args);
 if (config instanceof Error) {
@@ -26,9 +27,11 @@ let server = http.createServer();
 // get webdrivers
 let webdrivers = new WebDrivers(config);
 webdrivers.addEventListener("complete", function () {
+	console.log("end of webdrivers!");
 	abortController.abort();
 });
 webdrivers.addEventListener("error", function () {
+	console.log("error, probably timed out");
 	webdrivers.next();
 });
 
@@ -46,6 +49,7 @@ router.addEventListener("complete", function () {
 
 server.on("request", router.route);
 server.on("close", function () {
+	console.log("server close");
 	logger.cancelled || logger.failed ? process.exit(1) : process.exit(0);
 });
 
