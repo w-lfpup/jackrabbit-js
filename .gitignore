@@ -11,5 +11,5 @@ node_modules/
 !webdriver/dist/mod.js
 
 *.tsbuildinfo
-
+.DS_Store
 browser.local.json
