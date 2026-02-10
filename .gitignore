@@ -1,10 +1,13 @@
 node_modules/
-dist/
 
-# to prevent removal of the file to preserve exec -x
-nodejs_cli/dist/*
-!nodejs_cli/dist/mod.js
-webdriver/dist/*
+# odd syntax but important to preserve exec privleges 
+**/dist/*
+
+
+# to prevent removal of the file to preserve exec +x
+!nodejs/dist/mod.js
+
+# webdriver/dist/
 !webdriver/dist/mod.js
 
 *.tsbuildinfo
