@@ -15,14 +15,13 @@ if (config instanceof Error) {
 	process.exit(1);
 }
 
-// grand timeout
-let abortController = new AbortController();
-
 // generate components
 let server = http.createServer();
 let webdrivers = new WebDrivers(config);
-let logger = new Logger();
 let router = new Router(config);
+
+// grand timeout
+let abortController = new AbortController();
 
 // add webdriver events
 webdrivers.addEventListener("complete", function () {
@@ -34,6 +33,7 @@ webdrivers.addEventListener("error", function () {
 
 // add router events
 // logs are tightly coupled
+let logger = new Logger();
 router.addEventListener("log", function () {
 	logger.log();
 });
@@ -41,12 +41,12 @@ router.addEventListener("complete", function () {
 	webdrivers.next();
 });
 
+// run server
 server.on("request", router.route);
 server.on("close", function () {
 	logger.cancelled || logger.failed ? process.exit(1) : process.exit(0);
 });
 
-// run server
 let { signal } = abortController;
 let { port, hostname } = config.hostAndPort;
 server.listen({

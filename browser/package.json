@@ -1,5 +1,5 @@
 {
-	"name": "webdriver",
+	"name": "browser",
 	"type": "module",
 	"main": "dist/mod.js",
 	"scripts": {
