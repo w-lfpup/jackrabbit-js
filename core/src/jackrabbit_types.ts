@@ -15,48 +15,54 @@ export interface Options {
 }
 
 export interface TestModule {
+	options?: Options;
 	tests: Test[];
-	options: Options;
 }
 
 interface StartRun {
-	type: "start_run";
 	time: number;
+	type: "start_run";
 }
 
 interface EndRun {
-	type: "end_run";
 	time: number;
+	type: "end_run";
 }
 
 interface CancelRun {
-	type: "cancel_run";
 	time: number;
+	type: "cancel_run";
 }
 
 interface StartModule {
-	type: "start_module";
 	moduleId: number;
+	moduleName: string;
+	type: "start_module";
 }
 
 interface EndModule {
-	type: "end_module";
 	moduleId: number;
+	moduleName: string;
+	type: "end_module";
 }
 
 interface StartTest {
-	type: "start_test";
-	testId: number;
 	moduleId: number;
+	moduleName: string;
+	testId: number;
+	testName: string;
+	type: "start_test";
 }
 
 interface EndTest {
-	type: "end_test";
-	testId: number;
-	moduleId: number;
-	startTime: number;
-	endTime: number;
 	assertions: Assertions;
+	endTime: number;
+	moduleId: number;
+	moduleName: string;
+	startTime: number;
+	testId: number;
+	testName: string;
+	type: "end_test";
 }
 
 export type LoggerAction =
@@ -71,5 +77,5 @@ export type LoggerAction =
 export interface LoggerInterface {
 	readonly failed: boolean;
 	readonly cancelled: boolean;
-	log(testModules: TestModule[], action: LoggerAction): void;
+	log(action: LoggerAction): void;
 }

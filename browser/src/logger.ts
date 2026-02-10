@@ -28,14 +28,14 @@ export class Logger implements LoggerInterface {
 		return this.#data.cancelled;
 	}
 
-	log(testModules: TestModule[], action: LoggerAction) {
+	log(action: LoggerAction) {
 		if ("start_run" === action.type) {
 			this.#data.startTime = action.time;
 		}
 
 		if ("cancel_run" === action.type) {
 			this.#data.cancelled = true;
-			logAssertions(testModules, this.#assertions);
+			// logAssertions(testModules, this.#assertions);
 			logResults(this.#data, action.time);
 		}
 
@@ -59,7 +59,7 @@ export class Logger implements LoggerInterface {
 		}
 
 		if ("end_run" === action.type) {
-			logAssertions(testModules, this.#assertions);
+			// logAssertions(testModules, this.#assertions);
 			logResults(this.#data, action.time);
 		}
 	}

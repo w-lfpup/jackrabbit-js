@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 import { Logger } from "./logger.js";
 import { run } from "./runner.js";
 
@@ -13,4 +11,4 @@ try {
 	console.log(e);
 }
 
-// logger.log({"action": "end_test_run"})
+// logger.log({"action": "end_"})

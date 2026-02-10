@@ -30,18 +30,23 @@ async function execTest(
 ) {
 	if (logger.cancelled) return;
 
-	logger.log(testModules, {
+	const { tests, options } = testModules[moduleId];
+	const moduleName = options?.title ?? moduleId.toString();
+	const testName =
+		testModules[moduleId]?.tests[testId]?.name ?? testId.toString();
+
+	logger.log({
 		type: "start_test",
 		moduleId,
 		testId,
+		moduleName,
+		testName,
 	});
-
-	const { tests, options } = testModules[moduleId];
 
 	const testFunc = tests[testId];
 	const startTime = performance.now();
 	const assertions = await Promise.race([
-		createTimeout(options.timeoutMs),
+		createTimeout(options?.timeoutMs),
 		testFunc(),
 	]);
 
@@ -49,13 +54,15 @@ async function execTest(
 
 	const endTime = performance.now();
 
-	logger.log(testModules, {
+	logger.log({
 		type: "end_test",
 		assertions,
 		endTime,
 		moduleId,
+		moduleName,
 		startTime,
 		testId,
+		testName,
 	});
 }
 
@@ -96,33 +103,37 @@ export async function startRun(
 	logger: LoggerInterface,
 	testModules: TestModule[],
 ) {
-	logger.log(testModules, {
+	logger.log({
 		type: "start_run",
 		time: performance.now(),
 	});
 
 	for (let [moduleId, testModule] of testModules.entries()) {
 		if (logger.cancelled) return;
+		const { options } = testModule;
 
-		logger.log(testModules, {
+		const moduleName = options?.title ?? moduleId.toString();
+
+		logger.log({
 			type: "start_module",
 			moduleId,
+			moduleName,
 		});
 
-		const { options } = testModule;
 		options?.runAsynchronously
 			? await execCollection(testModules, logger, moduleId)
 			: await execCollectionOrdered(testModules, logger, moduleId);
 
 		if (logger.cancelled) return;
 
-		logger.log(testModules, {
+		logger.log({
 			type: "end_module",
 			moduleId,
+			moduleName,
 		});
 	}
 
-	logger.log(testModules, {
+	logger.log({
 		type: "end_run",
 		time: performance.now(),
 	});
@@ -131,7 +142,7 @@ export async function startRun(
 export function cancelRun(logger: LoggerInterface, testModules: TestModule[]) {
 	if (logger.cancelled) return;
 
-	logger.log(testModules, {
+	logger.log({
 		type: "cancel_run",
 		time: performance.now(),
 	});

@@ -1,14 +1,17 @@
-import { startRun } from "../../core/dist/mod.js";
+import { startRun } from "jackrabbit/core/dist/mod.js";
 
 import { Logger } from "./logger.js";
 
-import * as path from "path";
-
 export async function run(files: string[], logger: Logger = new Logger()) {
-	for (const file of files) {
-		let filepath = path.join(process.cwd(), file);
+	for (const url of files) {
+		let filepath = URL.parse(import.meta.url, url);
 
-		const { testModules } = await import(filepath);
+		if (!filepath) {
+			// log something
+			continue;
+		}
+
+		const { testModules } = await import(filepath.toString());
 
 		await startRun(logger, testModules);
 	}
