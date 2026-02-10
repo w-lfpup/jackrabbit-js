@@ -4,6 +4,8 @@ dist/
 # to prevent removal of the file to preserve exec -x
 nodejs_cli/dist/*
 !nodejs_cli/dist/mod.js
+webdriver/dist/*
+!webdriver/dist/mod.js
 
 *.tsbuildinfo
 
