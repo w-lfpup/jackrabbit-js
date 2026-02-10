@@ -3,6 +3,9 @@
 	"compilerOptions": {
 		"declaration": false,
 		"rootDir": "./src",
-		"outDir": "./dist"
+		"outDir": "./dist",
+		"paths": {
+			"jackrabbit/core/*": ["../core/*"]
+		}
 	}
 }
