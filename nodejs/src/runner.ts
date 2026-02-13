@@ -12,10 +12,6 @@ export async function run(files: string[], logger: Logger = new Logger()) {
 		let filepath = path.join(process.cwd(), file);
 
 		const { testModules } = await import(filepath);
-
 		await startRun(logger, testModules);
-
-		// log results?
-		// new logger each route
 	}
 }

@@ -1,4 +1,4 @@
-import type { IncomingMessage, ServerResponse } from "http";
+import { METHODS, type IncomingMessage, type ServerResponse } from "http";
 import * as path from "path";
 import { Listeners } from "./listeners.js";
 import { testHanger } from "./test_hangar.js";
@@ -23,29 +23,22 @@ export class Router {
 
 		// ROUTES
 		//
-		let { url } = req;
+		let { url, method } = req;
+		// this assumes http 1.1
 		if (url) {
-			if (url.startsWith("/jackrabbit/core/")) {
-				// load jackrabbit library
-				// based on repo path
-			}
-
-			if (url.startsWith("/jackrabbit/browser/")) {
+			if (
+				url.startsWith("/jackrabbit/core/") ||
+				url.startsWith("/jackrabbit/browser/")
+			) {
 				// load jackrabbit library
 			}
 
 			if (url.startsWith("/log/")) {
-				// if "end_run"
-				// abortController.abort();
-				// server.close();
-				// send signal success / fail
-
-				this.#listeners.dispatchEvent(new Event("complete"));
+				// pass to logger
 			}
 
+			// send "test" home page
 			if (url === "/") {
-				console.log("get homepage!!");
-				// send "test" home page
 				let hangar = testHanger({
 					jackrabbit_url: this.#config.hostAndPort,
 					test_collections: [],
@@ -56,7 +49,12 @@ export class Router {
 				res.end(hangar);
 			}
 
-			// otherwise send file based on cwd
+			// stretch goal
+			if (url.startsWith("/webdriver/screenshot")) {
+			}
+			if (url.startsWith("/webdriver/close") && "POST" === method) {
+				this.#listeners.dispatchEvent(new Event("complete"));
+			}
 		}
 	}
 

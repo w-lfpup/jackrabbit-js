@@ -12,12 +12,16 @@ interface LoggerData {
 }
 
 export class Logger implements LoggerInterface {
-	#assertions: Map<number, Map<number, LoggerAction>> = new Map();
 	#data: LoggerData = {
 		cancelled: false,
 		failed: false,
 		startTime: -1,
 		testTime: 0,
+	};
+
+	#moduleReciepts = {
+		numberOfTests: 0,
+		numberOfFails: 0,
 	};
 
 	get failed() {
@@ -31,31 +35,37 @@ export class Logger implements LoggerInterface {
 	log(action: LoggerAction) {
 		if ("start_run" === action.type) {
 			this.#data.startTime = action.time;
+			console.log("start run");
 		}
 
 		if ("cancel_run" === action.type) {
 			this.#data.cancelled = true;
-			// logAssertions(testModules, this.#assertions);
-			logResults(this.#data, action.time);
+			console.log("run cancelled");
 		}
 
 		//  add to fails
 		if ("end_test" === action.type && action?.assertions) {
+			this.#moduleReciepts.numberOfTests += 1;
+
 			if (Array.isArray(action.assertions) && action.assertions.length === 0)
 				return;
 
 			this.#data.testTime += action.endTime - action.startTime;
+			this.#moduleReciepts.numberOfFails += 1;
 			this.#data.failed = true;
 
-			let assertions = this.#assertions.get(action.moduleId);
-			if (assertions) {
-				assertions.set(action.testId, action);
-			} else {
-				this.#assertions.set(
-					action.moduleId,
-					new Map([[action.testId, action]]),
-				);
-			}
+			console.log("test failed:");
+			console.log(action.assertions);
+		}
+
+		if ("start_module" === action.type) {
+			console.log("start module:", action.moduleName);
+		}
+
+		if ("end_module" === action.type) {
+			console.log("module ended");
+			let { numberOfFails, numberOfTests } = this.#moduleReciepts;
+			console.log(`${numberOfFails}/${numberOfTests}`);
 		}
 
 		if ("end_run" === action.type) {

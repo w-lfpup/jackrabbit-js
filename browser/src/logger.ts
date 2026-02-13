@@ -20,6 +20,11 @@ export class Logger implements LoggerInterface {
 		testTime: 0,
 	};
 
+	#moduleReciepts = {
+		numberOfTests: 0,
+		numberOfFails: 0,
+	};
+
 	get failed() {
 		return this.#data.failed;
 	}
@@ -30,37 +35,23 @@ export class Logger implements LoggerInterface {
 
 	log(action: LoggerAction) {
 		if ("start_run" === action.type) {
-			this.#data.startTime = action.time;
+			// send fetch
 		}
 
 		if ("cancel_run" === action.type) {
-			this.#data.cancelled = true;
-			// logAssertions(testModules, this.#assertions);
-			logResults(this.#data, action.time);
 		}
 
 		//  add to fails
 		if ("end_test" === action.type && action?.assertions) {
-			if (Array.isArray(action.assertions) && action.assertions.length === 0)
-				return;
+		}
 
-			this.#data.testTime += action.endTime - action.startTime;
-			this.#data.failed = true;
+		if ("start_module" === action.type) {
+		}
 
-			let assertions = this.#assertions.get(action.moduleId);
-			if (assertions) {
-				assertions.set(action.testId, action);
-			} else {
-				this.#assertions.set(
-					action.moduleId,
-					new Map([[action.testId, action]]),
-				);
-			}
+		if ("end_module" === action.type) {
 		}
 
 		if ("end_run" === action.type) {
-			// logAssertions(testModules, this.#assertions);
-			logResults(this.#data, action.time);
 		}
 	}
 }

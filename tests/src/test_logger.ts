@@ -8,7 +8,7 @@ class TestLogger implements LoggerInterface {
 	cancelled: boolean = false;
 	failed: boolean = false;
 
-	log(_testModule: TestModule[], action: LoggerAction) {
+	log(action: LoggerAction) {
 		if (hasTestFailed(action)) {
 			this.failed = true;
 		}
