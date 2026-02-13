@@ -2,6 +2,7 @@ import type {
 	LoggerAction,
 	LoggerInterface,
 } from "jackrabbit/core/dist/mod.js";
+import { FetchQueue } from "./queue.js";
 
 interface LoggerData {
 	cancelled: boolean;
@@ -11,6 +12,8 @@ interface LoggerData {
 }
 
 export class Logger implements LoggerInterface {
+	#fetchQueue = new FetchQueue();
+
 	#data: LoggerData = {
 		cancelled: false,
 		failed: false,
@@ -28,25 +31,48 @@ export class Logger implements LoggerInterface {
 
 	log(action: LoggerAction) {
 		if ("start_run" === action.type) {
-			// send fetch
-		}
-
-		if ("cancel_run" === action.type) {
-		}
-
-		//  add to fails
-		if ("end_test" === action.type && action?.assertions) {
+			this.#fetchQueue.enqueue(function () {
+				return fetch("/log/start_run", {
+					method: "POST",
+					body: JSON.stringify(action),
+				});
+			});
 		}
 
 		if ("start_module" === action.type) {
+			this.#fetchQueue.enqueue(function () {
+				return fetch("/log/start_module", {
+					method: "POST",
+					body: JSON.stringify(action),
+				});
+			});
+		}
+
+		if ("end_test" === action.type) {
+			this.#fetchQueue.enqueue(function () {
+				return fetch("/log/end_test", {
+					method: "POST",
+					body: JSON.stringify(action),
+				});
+			});
 		}
 
 		if ("end_module" === action.type) {
+			this.#fetchQueue.enqueue(function () {
+				return fetch("/log/end_module", {
+					method: "POST",
+					body: JSON.stringify(action),
+				});
+			});
 		}
 
 		if ("end_run" === action.type) {
-			// send "end_run"
-			// then send "close_webdriver"
+			this.#fetchQueue.enqueue(function () {
+				return fetch("/log/end_run", {
+					method: "POST",
+					body: JSON.stringify(action),
+				});
+			});
 		}
 	}
 }

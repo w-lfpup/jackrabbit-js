@@ -14,7 +14,7 @@ export function testHanger(params: TestHangerParams) {
 				<script>
 					let jackrabbitConfig = document.querySelector("script[type=jackrabbit]");
 					let json = JSON.parse(jackrabbitConfig.textContent);
-					fetch(new URL("/log/", json.jackrabbit_url));
+					fetch(new URL("/log/end_run", json.jackrabbit_url));
 				</script>
 			</head>
 			<body>

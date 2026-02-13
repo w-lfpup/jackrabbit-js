@@ -3,12 +3,12 @@ import { run } from "./runner.js";
 
 const logger = new Logger();
 
-let error;
 try {
-	await run(process.argv.slice(2), logger);
+	let jackrabbitMap = document.querySelector("script[type=jackrabbitmap]");
+	if (null === jackrabbitMap) throw new Error("jackrabbitmap not found");
+	let jackrabbitConfig = JSON.parse(jackrabbitMap.textContent);
+
+	await run(jackrabbitConfig.test_collections, logger);
 } catch (e: unknown) {
-	error = e;
 	console.log(e);
 }
-
-// logger.log({"action": "end_"})

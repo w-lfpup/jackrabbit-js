@@ -3,6 +3,7 @@ import * as path from "path";
 import { Listeners } from "./listeners.js";
 import { testHanger } from "./test_hangar.js";
 import { ConfigInterface } from "./config.js";
+import { log } from "./logger.js";
 
 let cwd = path.parse(process.cwd());
 
@@ -16,49 +17,43 @@ export class Router {
 		this.#config = config;
 	}
 
-	route = this.#route.bind(this);
+	get route() {
+		return this.#boundRoute;
+	}
 
+	#boundRoute = this.#route.bind(this);
 	#route(req: IncomingMessage, res: ServerResponse) {
 		// router logic here
 
 		// ROUTES
 		//
 		let { url, method } = req;
+		if (!url) return;
 		// this assumes http 1.1
-		if (url) {
-			if (
-				url.startsWith("/jackrabbit/core/") ||
-				url.startsWith("/jackrabbit/browser/")
-			) {
-				// load jackrabbit library
-			}
+		if (url.startsWith("/jackrabbit/core/")) {
+			// load jackrabbit library resource
+		}
+		if (url.startsWith("/jackrabbit/browser/")) {
+			// load browser resource
+		}
+		if (url.startsWith("/log/")) {
+			log(req, res, this.#listeners);
+		}
 
-			if (url.startsWith("/log/")) {
-				// send url to "logger actions" with listeners
+		// send "test" home page
+		if (url === "/") {
+			let hangar = testHanger({
+				jackrabbit_url: this.#config.hostAndPort,
+				test_collections: process.argv.slice(3),
+			});
 
-				this.#listeners.dispatchEvent(new Event("complete"));
-			}
-
-			// send "test" home page
-			if (url === "/") {
-				let hangar = testHanger({
-					jackrabbit_url: this.#config.hostAndPort,
-					test_collections: process.argv.slice(3),
-				});
-
-				res.setHeader("Content-Type", "text/html");
-				res.writeHead(200);
-				res.end(hangar);
-			}
-
-			// stretch goal
-			if (url.startsWith("/webdriver/screenshot")) {
-			}
+			res.setHeader("Content-Type", "text/html");
+			res.writeHead(200);
+			res.end(hangar);
 		}
 	}
 
 	addEventListener(eventName: string, cb: EventListener) {
-		// only have a callback for "end" or "error"
 		this.#listeners.addEventListener(eventName, cb);
 	}
 }

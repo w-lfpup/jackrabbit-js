@@ -1,9 +1,33 @@
-class FetchQueue {
-	#incoming: Promise<void>[] = [];
-	#outgoing: Promise<void>[] = [];
-	#current: Promise<void> | undefined;
+interface Queueable {
+	(): Promise<unknown>;
+}
 
-	queue(fetcher: Promise<void>) {
-		this.#incoming.push(fetcher);
+export class FetchQueue {
+	#inbound: Queueable[] = [];
+	#outbound: Queueable[] = [];
+	#inRoute: Queueable | undefined;
+
+	enqueue(queueable: Queueable) {
+		this.#inbound.push(queueable);
+		if (!this.#inRoute) this.#queueAtom();
+	}
+
+	#queueAtom() {
+		if (!this.#outbound.length) {
+			while (this.#inbound.length) {
+				let pip = this.#inbound.pop();
+				if (pip) this.#outbound.push(pip);
+			}
+		}
+
+		this.#inRoute = this.#outbound.pop();
+		this.#execAtom();
+	}
+
+	async #execAtom() {
+		if (this.#inRoute) {
+			await this.#inRoute();
+			this.#queueAtom();
+		}
 	}
 }
