@@ -12,17 +12,11 @@ interface LoggerData {
 }
 
 export class Logger implements LoggerInterface {
-	#assertions: Map<number, Map<number, LoggerAction>> = new Map();
 	#data: LoggerData = {
 		cancelled: false,
 		failed: false,
 		startTime: -1,
 		testTime: 0,
-	};
-
-	#moduleReciepts = {
-		numberOfTests: 0,
-		numberOfFails: 0,
 	};
 
 	get failed() {

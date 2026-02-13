@@ -66,6 +66,10 @@ export class Logger implements LoggerInterface {
 			console.log("module ended");
 			let { numberOfFails, numberOfTests } = this.#moduleReciepts;
 			console.log(`${numberOfFails}/${numberOfTests}`);
+			this.#moduleReciepts = {
+				numberOfTests: 0,
+				numberOfFails: 0,
+			};
 		}
 
 		if ("end_run" === action.type) {
