@@ -1,6 +1,6 @@
 interface TestHangerParams {
 	jackrabbit_url: URL;
-	test_collections: URL[];
+	test_collections: string[];
 }
 
 export function testHanger(params: TestHangerParams) {

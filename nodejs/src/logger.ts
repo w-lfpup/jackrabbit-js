@@ -1,8 +1,4 @@
-import type {
-	LoggerAction,
-	LoggerInterface,
-	TestModule,
-} from "../../core/dist/mod.js";
+import type { LoggerAction, LoggerInterface } from "../../core/dist/mod.js";
 
 interface LoggerData {
 	cancelled: boolean;
@@ -35,7 +31,6 @@ export class Logger implements LoggerInterface {
 	log(action: LoggerAction) {
 		if ("start_run" === action.type) {
 			this.#data.startTime = action.time;
-			console.log("start run");
 		}
 
 		if ("cancel_run" === action.type) {
@@ -44,8 +39,10 @@ export class Logger implements LoggerInterface {
 		}
 
 		//  add to fails
-		if ("end_test" === action.type && action?.assertions) {
+		if ("end_test" === action.type) {
 			this.#moduleReciepts.numberOfTests += 1;
+
+			if (undefined === action.assertions) return;
 
 			if (Array.isArray(action.assertions) && action.assertions.length === 0)
 				return;
@@ -54,18 +51,18 @@ export class Logger implements LoggerInterface {
 			this.#moduleReciepts.numberOfFails += 1;
 			this.#data.failed = true;
 
-			console.log("test failed:");
+			console.log(action.testName);
 			console.log(action.assertions);
 		}
 
 		if ("start_module" === action.type) {
-			console.log("start module:", action.moduleName);
+			console.log(action.moduleName);
 		}
 
 		if ("end_module" === action.type) {
-			console.log("module ended");
 			let { numberOfFails, numberOfTests } = this.#moduleReciepts;
-			console.log(`${numberOfFails}/${numberOfTests}`);
+			let remaining = Math.max(0, numberOfTests - numberOfFails);
+			console.log(`results: ${remaining}/${numberOfTests}\n`);
 			this.#moduleReciepts = {
 				numberOfTests: 0,
 				numberOfFails: 0,
@@ -73,35 +70,8 @@ export class Logger implements LoggerInterface {
 		}
 
 		if ("end_run" === action.type) {
-			// logAssertions(testModules, this.#assertions);
 			logResults(this.#data, action.time);
 		}
-	}
-}
-
-function logAssertions(
-	testModules: TestModule[],
-	fails: Map<number, Map<number, LoggerAction>>,
-) {
-	for (let [moduleID, module] of testModules.entries()) {
-		let failedTests = fails.get(moduleID);
-		if (undefined === failedTests) continue;
-
-		const { tests, options } = module;
-
-		console.log(`${options?.title ?? `module index: ${moduleID}`}`);
-
-		let numFailedTests = fails.get(moduleID)?.size ?? 0;
-		console.log(`${numFailedTests}/${tests.length} tests failed`);
-
-		for (let [index, test] of tests.entries()) {
-			let action = failedTests.get(index);
-			if (!action || action.type !== "end_test") continue;
-
-			console.log(`\t${test.name}\n\t\t${action.assertions}`);
-		}
-
-		console.log("\n");
 	}
 }
 

@@ -65,6 +65,10 @@ interface EndTest {
 	type: "end_test";
 }
 
+interface TestError {
+	type: "error";
+	error: string;
+}
 export type LoggerAction =
 	| StartRun
 	| EndRun
@@ -72,7 +76,8 @@ export type LoggerAction =
 	| StartModule
 	| EndModule
 	| StartTest
-	| EndTest;
+	| EndTest
+	| TestError;
 
 export interface LoggerInterface {
 	readonly failed: boolean;

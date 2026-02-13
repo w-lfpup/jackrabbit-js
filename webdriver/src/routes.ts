@@ -34,14 +34,16 @@ export class Router {
 			}
 
 			if (url.startsWith("/log/")) {
-				// pass to logger
+				// send url to "logger actions" with listeners
+
+				this.#listeners.dispatchEvent(new Event("complete"));
 			}
 
 			// send "test" home page
 			if (url === "/") {
 				let hangar = testHanger({
 					jackrabbit_url: this.#config.hostAndPort,
-					test_collections: [],
+					test_collections: process.argv.slice(3),
 				});
 
 				res.setHeader("Content-Type", "text/html");
@@ -51,9 +53,6 @@ export class Router {
 
 			// stretch goal
 			if (url.startsWith("/webdriver/screenshot")) {
-			}
-			if (url.startsWith("/webdriver/close") && "POST" === method) {
-				this.#listeners.dispatchEvent(new Event("complete"));
 			}
 		}
 	}
