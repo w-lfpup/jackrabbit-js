@@ -2,6 +2,7 @@ import type { LoggerAction, LoggerInterface } from "../../core/dist/mod.js";
 
 interface LoggerData {
 	cancelled: boolean;
+	errored: boolean;
 	failed: boolean;
 	startTime: number;
 	testTime: number;
@@ -11,6 +12,7 @@ export class Logger implements LoggerInterface {
 	#data: LoggerData = {
 		cancelled: false,
 		failed: false,
+		errored: false,
 		startTime: -1,
 		testTime: 0,
 	};
@@ -22,6 +24,10 @@ export class Logger implements LoggerInterface {
 
 	get failed() {
 		return this.#data.failed;
+	}
+
+	get errored() {
+		return this.#data.errored;
 	}
 
 	get cancelled() {
@@ -71,6 +77,11 @@ export class Logger implements LoggerInterface {
 
 		if ("end_run" === action.type) {
 			logResults(this.#data, action.time);
+		}
+
+		if ("error" === action.type) {
+			console.log("error:\n", action.error);
+			this.#data.errored = true;
 		}
 	}
 }

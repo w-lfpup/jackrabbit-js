@@ -5,12 +5,6 @@ import { run } from "./runner.js";
 
 const logger = new Logger();
 
-let error;
-try {
-	await run(process.argv.slice(2), logger);
-} catch (e: unknown) {
-	error = e;
-	console.log(e);
-}
+await run(logger, process.argv.slice(2));
 
-logger.failed || error ? process.exit(1) : process.exit(0);
+logger.failed || logger.errored ? process.exit(1) : process.exit(0);

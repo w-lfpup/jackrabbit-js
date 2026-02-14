@@ -15,4 +15,8 @@ try {
 		type: "error",
 		error: e?.toString() ?? "wild horses error",
 	});
+	logger.log({
+		type: "end_run",
+		time: performance.now(),
+	});
 }
