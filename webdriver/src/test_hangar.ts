@@ -11,6 +11,11 @@ export function testHanger(params: TestHangerParams) {
 				<script type="jackrabbit">
 					${JSON.stringify(params)}
 				</script>
+				<script type="importmap">
+					{
+						
+					}
+				</script>
 				<script>
 					let jackrabbitConfig = document.querySelector("script[type=jackrabbit]");
 					let json = JSON.parse(jackrabbitConfig.textContent);

@@ -4,6 +4,18 @@ import type {
 } from "jackrabbit/core/dist/mod.js";
 import { FetchQueue } from "./queue.js";
 
+const actions = new Set<LoggerAction["type"]>([
+	"start_run",
+	"start_module",
+	"module_error",
+	"end_test",
+	"test_error",
+	"end_module",
+	"end_run",
+	"cancel_run",
+	"run_error",
+]);
+
 export class Logger implements LoggerInterface {
 	#fetchQueue = new FetchQueue();
 	#cancelled = false;
@@ -13,49 +25,14 @@ export class Logger implements LoggerInterface {
 	}
 
 	log(action: LoggerAction) {
-		if ("start_run" === action.type) {
-			this.#fetchQueue.enqueue(function () {
-				return fetch("/log/start_run", getRequestInit(action));
-			});
-		}
-
-		if ("start_module" === action.type) {
-			this.#fetchQueue.enqueue(function () {
-				return fetch("/log/start_module", getRequestInit(action));
-			});
-		}
-
-		if ("end_test" === action.type) {
-			this.#fetchQueue.enqueue(function () {
-				return fetch("/log/end_test", getRequestInit(action));
-			});
-		}
-
-		if ("end_module" === action.type) {
-			this.#fetchQueue.enqueue(function () {
-				return fetch("/log/end_module", getRequestInit(action));
-			});
-		}
-
-		if ("end_run" === action.type) {
-			this.#fetchQueue.enqueue(function () {
-				return fetch("/log/end_run", getRequestInit(action));
-			});
-		}
-
-		if ("cancel_run" === action.type) {
-			this.#cancelled = true;
-			this.#fetchQueue.enqueue(function () {
-				return fetch("/log/cancel_run", getRequestInit(action));
-			});
-		}
-
-		if ("run_error" === action.type) {
-			this.#fetchQueue.enqueue(function () {
-				return fetch("/log/run_error", getRequestInit(action));
-			});
-		}
+		if (actions.has(action.type)) return getFetch(this.#fetchQueue, action);
 	}
+}
+
+function getFetch(fetchQueue: FetchQueue, action: LoggerAction) {
+	fetchQueue.enqueue(function () {
+		return fetch(`/log/${action.type}`, getRequestInit(action));
+	});
 }
 
 function getRequestInit(action: LoggerAction): RequestInit {

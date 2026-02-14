@@ -89,7 +89,7 @@ class WebdriverSession {
 				body: JSON.stringify({ capabilities: {} }),
 			});
 			if (200 !== res.status) {
-				throw new Error("/session request failed");
+				throw new Error("Failed to create a session");
 			}
 
 			let json = await res.json();
@@ -97,7 +97,7 @@ class WebdriverSession {
 			console.log("session id:", sessionId);
 
 			if (typeof sessionId !== "string")
-				throw new Error("sessionId is not a string");
+				throw new Error("SessionId is not a string");
 
 			this.#sessionId = sessionId;
 			let goToUrlRes = await fetch(
@@ -126,7 +126,7 @@ class WebdriverSession {
 				headers: new Headers([["Content-Type", "application/json"]]),
 			});
 			if (200 !== res.status) {
-				throw new Error("/session DELETE request failed");
+				throw new Error("Failed to DELETE session");
 			}
 		} catch (e) {
 			this.#params.listeners.dispatchEvent(new Event("error"));
@@ -135,7 +135,7 @@ class WebdriverSession {
 }
 
 function sleep(timeMs: number): Promise<void> {
-	return new Promise(function (resolve, reject) {
+	return new Promise(function (resolve) {
 		setTimeout(function () {
 			resolve();
 		}, timeMs);

@@ -85,6 +85,7 @@ interface RunError {
 	type: "run_error";
 	error: string;
 }
+
 export type LoggerAction =
 	| StartRun
 	| RunError
