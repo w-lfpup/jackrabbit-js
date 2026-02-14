@@ -25,20 +25,13 @@ export class Logger implements LoggerInterface {
 	}
 
 	log(action: LoggerAction) {
-		if (actions.has(action.type)) return getFetch(this.#fetchQueue, action);
+		if (actions.has(action.type))
+			this.#fetchQueue.enqueue(function () {
+				return fetch(`/log/${action.type}`, {
+					body: JSON.stringify(action),
+					headers: new Headers([["Content-Type", "application/json"]]),
+					method: "POST",
+				});
+			});
 	}
-}
-
-function getFetch(fetchQueue: FetchQueue, action: LoggerAction) {
-	fetchQueue.enqueue(function () {
-		return fetch(`/log/${action.type}`, getRequestInit(action));
-	});
-}
-
-function getRequestInit(action: LoggerAction): RequestInit {
-	return {
-		body: JSON.stringify(action),
-		headers: new Headers([["Content-Type", "application/json"]]),
-		method: "POST",
-	};
 }
