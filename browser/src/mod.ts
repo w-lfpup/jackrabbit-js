@@ -10,5 +10,8 @@ try {
 
 	await run(jackrabbitConfig.test_collections, logger);
 } catch (e: unknown) {
-	console.log(e);
+	logger.log({
+		type: "error",
+		error: e?.toString() ?? "wild horses error",
+	});
 }
