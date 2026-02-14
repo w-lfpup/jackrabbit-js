@@ -79,10 +79,10 @@ export class Logger implements LoggerInterface {
 			logResults(this.#data, action.time);
 		}
 
-		if ("error" === action.type) {
-			console.log("error:\n", action.error);
-			this.#data.errored = true;
-		}
+		// if ("error" === action.type) {
+		// 	console.log("error:\n", action.error);
+		// 	this.#data.errored = true;
+		// }
 	}
 }
 

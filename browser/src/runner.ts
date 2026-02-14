@@ -12,7 +12,7 @@ export async function run(logger: Logger, files: string[]) {
 			await startRun(logger, testModules);
 		} catch (e: unknown) {
 			logger.log({
-				type: "error",
+				type: "run_error",
 				error: e?.toString() ?? "wild horses error",
 			});
 		}

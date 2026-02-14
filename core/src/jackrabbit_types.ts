@@ -46,12 +46,28 @@ interface EndModule {
 	type: "end_module";
 }
 
+interface ModuleError {
+	error: string;
+	moduleId: number;
+	moduleName: string;
+	type: "module_error";
+}
+
 interface StartTest {
 	moduleId: number;
 	moduleName: string;
 	testId: number;
 	testName: string;
 	type: "start_test";
+}
+
+interface TestError {
+	error: string;
+	moduleId: number;
+	moduleName: string;
+	testId: number;
+	testName: string;
+	type: "test_error";
 }
 
 interface EndTest {
@@ -65,15 +81,17 @@ interface EndTest {
 	type: "end_test";
 }
 
-interface TestError {
-	type: "error";
+interface RunError {
+	type: "run_error";
 	error: string;
 }
 export type LoggerAction =
 	| StartRun
+	| RunError
 	| EndRun
 	| CancelRun
 	| StartModule
+	| ModuleError
 	| EndModule
 	| StartTest
 	| EndTest

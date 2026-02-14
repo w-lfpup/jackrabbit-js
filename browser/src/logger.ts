@@ -4,13 +4,6 @@ import type {
 } from "jackrabbit/core/dist/mod.js";
 import { FetchQueue } from "./queue.js";
 
-interface LoggerData {
-	cancelled: boolean;
-	failed: boolean;
-	startTime: number;
-	testTime: number;
-}
-
 export class Logger implements LoggerInterface {
 	#fetchQueue = new FetchQueue();
 	#cancelled = false;
@@ -50,9 +43,16 @@ export class Logger implements LoggerInterface {
 			});
 		}
 
-		if ("error" === action.type) {
+		if ("cancel_run" === action.type) {
+			this.#cancelled = true;
 			this.#fetchQueue.enqueue(function () {
-				return fetch("/log/error", getRequestInit(action));
+				return fetch("/log/cancel_run", getRequestInit(action));
+			});
+		}
+
+		if ("run_error" === action.type) {
+			this.#fetchQueue.enqueue(function () {
+				return fetch("/log/run_error", getRequestInit(action));
 			});
 		}
 	}
