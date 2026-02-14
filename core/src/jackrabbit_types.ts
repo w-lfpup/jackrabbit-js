@@ -80,7 +80,6 @@ export type LoggerAction =
 	| TestError;
 
 export interface LoggerInterface {
-	readonly failed: boolean;
 	readonly cancelled: boolean;
 	log(action: LoggerAction): void;
 }

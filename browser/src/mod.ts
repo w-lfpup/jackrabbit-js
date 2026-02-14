@@ -1,9 +1,18 @@
 import { Logger } from "./logger.js";
 import { run } from "./runner.js";
 
-let jackrabbitMap = document.querySelector("script[type=jackrabbitmap]");
-if (null === jackrabbitMap) throw new Error("jackrabbitmap not found");
-let jackrabbitConfig = JSON.parse(jackrabbitMap.textContent);
-
 let logger = new Logger();
-run(jackrabbitConfig.test_collections, logger);
+
+try {
+	let jackrabbitMap = document.querySelector("script[type=jackrabbitmap]");
+	if (null === jackrabbitMap)
+		throw new Error("Failed to query jackrabbitmap script");
+
+	let jackrabbitConfig = JSON.parse(jackrabbitMap.textContent);
+	run(logger, jackrabbitConfig.test_collections);
+} catch (e: unknown) {
+	logger.log({
+		type: "error",
+		error: e?.toString() ?? "wild horses error",
+	});
+}

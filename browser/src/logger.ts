@@ -13,20 +13,10 @@ interface LoggerData {
 
 export class Logger implements LoggerInterface {
 	#fetchQueue = new FetchQueue();
-
-	#data: LoggerData = {
-		cancelled: false,
-		failed: false,
-		startTime: -1,
-		testTime: 0,
-	};
-
-	get failed() {
-		return this.#data.failed;
-	}
+	#cancelled = false;
 
 	get cancelled() {
-		return this.#data.cancelled;
+		return this.#cancelled;
 	}
 
 	log(action: LoggerAction) {
