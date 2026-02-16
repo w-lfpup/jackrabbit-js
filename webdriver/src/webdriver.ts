@@ -88,15 +88,12 @@ class WebdriverSession {
 				headers: new Headers([["Content-Type", "application/json"]]),
 				body: JSON.stringify({ capabilities: {} }),
 			});
-			console.log("session response ", res);
 			if (200 !== res.status) {
 				throw new Error("Failed to create a session");
 			}
 
 			let json = await res.json();
-			console.log("session json:", json);
 			let { sessionId } = json?.value;
-			console.log("session id:", sessionId);
 
 			if (typeof sessionId !== "string")
 				throw new Error("SessionId is not a string");
@@ -129,7 +126,6 @@ class WebdriverSession {
 				headers: new Headers([["Content-Type", "application/json"]]),
 				body: null,
 			});
-			console.log(res);
 			if (200 !== res.status) {
 				// throw new Error("Failed to DELETE session");
 				this.#params.listeners.dispatchEvent(new Event("error"));

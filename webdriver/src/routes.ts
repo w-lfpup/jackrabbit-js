@@ -11,15 +11,13 @@ import {
 } from "../../core/dist/jackrabbit_types.js";
 
 let cwd = process.cwd();
+
+// better done with URL? feels weird
 let corePath = path.join(import.meta.url.substring(5), "../../../core/dist/");
 let browserPath = path.join(
 	import.meta.url.substring(5),
 	"../../../browser/dist/",
 );
-
-console.log(import.meta.url);
-console.log(corePath);
-console.log(browserPath);
 
 const MIME_TYPES: Record<string, string> = {
 	octet: "application/octet-stream",
@@ -87,7 +85,6 @@ export class Router {
 		// only serve core and browser packages
 		let stream: fs.ReadStream | undefined;
 		if (url.startsWith("/jackrabbit/core/") && "GET" === method) {
-			console.log("get core");
 			stream = await getFile(filePath, corePath);
 		}
 		if (url.startsWith("/jackrabbit/browser/") && "GET" === method) {

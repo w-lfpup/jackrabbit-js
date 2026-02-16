@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-console.log("yoooo");
 import * as http from "http";
 import { createConfig } from "./config.js";
 import { Logger } from "./logger.js";
@@ -11,7 +10,6 @@ if (config instanceof Error) {
     console.log(config);
     process.exit(1);
 }
-console.log(config);
 // generate components
 let logger = new Logger();
 let router = new Router(config, logger);
@@ -21,20 +19,16 @@ let server = http.createServer();
 let abortController = new AbortController();
 // add webdriver events
 webdrivers.addEventListener("complete", function () {
-    console.log("webdriver complete");
     abortController.abort();
 });
 webdrivers.addEventListener("error", function () {
-    console.log("webdriver error");
     webdrivers.next();
 });
 // add router events
 router.addEventListener("complete", function () {
-    console.log("test run complete");
     webdrivers.next();
 });
 router.addEventListener("error", function () {
-    console.log("run error occured");
     webdrivers.next();
 });
 // run server

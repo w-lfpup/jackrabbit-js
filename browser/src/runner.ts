@@ -6,9 +6,6 @@ export async function run(logger: Logger, files: string[], baseUrl: string) {
 	for (const url of files) {
 		try {
 			let filepath = URL.parse(url, baseUrl);
-			console.log("filepaths:\n");
-			console.log(filepath);
-
 			if (null === filepath) throw new Error("Failed to import url: " + url);
 
 			const { testModules } = await import(filepath.toString());

@@ -19,13 +19,11 @@ export async function log(
 		let jsonStr = Buffer.concat(data).toString();
 		let json = JSON.parse(jsonStr);
 
-		console.log("JSON LOG:\n", json);
 		if ("end_run" === json.type) {
 			listeners.dispatchEvent(new Event("complete"));
 		}
 
 		if ("run_error" === json.type) {
-			console.log("run error found");
 			// listeners.dispatchEvent(new Event("error"));
 			listeners.dispatchEvent(new Event("complete"));
 		}
