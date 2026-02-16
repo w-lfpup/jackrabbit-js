@@ -8,19 +8,15 @@ export function testHanger(params: TestHangerParams) {
 		<!DOCTYPE html>
 		<html>
 			<head>
-				<script type="jackrabbit">
+				<script type="jackrabbit_config">
 					${JSON.stringify(params)}
 				</script>
 				<script type="importmap">
 					{
-						
+						"jackrabbit/core/": "/jackrabbit/core/"
 					}
 				</script>
-				<script>
-					let jackrabbitConfig = document.querySelector("script[type=jackrabbit]");
-					let json = JSON.parse(jackrabbitConfig.textContent);
-					fetch(new URL("/log/end_run", json.jackrabbit_url));
-				</script>
+				<script type="module" src="/jackrabbit/browser/dist/mod.js"></script>
 			</head>
 			<body>
 				<p>hello! welcome to jackrabbit</b>

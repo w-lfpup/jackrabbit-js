@@ -45,10 +45,22 @@ async function execTest(
 
 	const testFunc = tests[testId];
 	const startTime = performance.now();
-	const assertions = await Promise.race([
-		createTimeout(options?.timeoutMs),
-		testFunc(),
-	]);
+	let assertions: Assertions;
+	try {
+		assertions = await Promise.race([
+			createTimeout(options?.timeoutMs),
+			testFunc(),
+		]);
+	} catch (e: unknown) {
+		return logger.log({
+			type: "test_error",
+			moduleId,
+			moduleName,
+			testId,
+			testName,
+			error: e?.toString() ?? "wild test error",
+		});
+	}
 
 	if (logger.cancelled) return;
 

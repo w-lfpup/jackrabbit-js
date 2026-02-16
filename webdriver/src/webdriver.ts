@@ -110,7 +110,7 @@ class WebdriverSession {
 			);
 
 			if (200 !== goToUrlRes.status)
-				throw new Error("/session/<session_id>/url request failed");
+				throw new Error("go-to-url request failed");
 		} catch (e) {
 			this.#params.listeners.dispatchEvent(new Event("error"));
 		}

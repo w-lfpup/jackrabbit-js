@@ -4,12 +4,14 @@ import { run } from "./runner.js";
 let logger = new Logger();
 
 try {
-	let jackrabbitMap = document.querySelector("script[type=jackrabbitmap]");
+	let jackrabbitMap = document.querySelector("script[type=jackrabbit_config]");
 	if (null === jackrabbitMap)
-		throw new Error("Failed to query jackrabbitmap script");
-	let jackrabbitConfig = JSON.parse(jackrabbitMap.textContent);
+		throw new Error("Failed to query jackrabbit_config script");
 
-	run(logger, jackrabbitConfig.test_collections);
+	// should be it's own verification and then throw
+	let config = JSON.parse(jackrabbitMap.textContent);
+
+	run(logger, config.test_collections);
 } catch (e: unknown) {
 	logger.log({
 		type: "run_error",
