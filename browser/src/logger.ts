@@ -13,7 +13,6 @@ export class Logger implements LoggerInterface {
 	}
 
 	log(action: LoggerAction) {
-		console.log(action);
 		this.#fetchQueue.enqueue(function () {
 			return fetch(`/log/${action.type}`, {
 				body: JSON.stringify(action),

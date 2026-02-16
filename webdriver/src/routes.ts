@@ -23,6 +23,7 @@ const MIME_TYPES: Record<string, string> = {
 	octet: "application/octet-stream",
 	html: "text/html; charset=UTF-8",
 	js: "text/javascript",
+	json: "application/json",
 	css: "text/css",
 	png: "image/png",
 	jpg: "image/jpeg",
