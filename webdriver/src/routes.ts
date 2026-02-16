@@ -5,11 +5,21 @@ import { Listeners } from "./listeners.js";
 import { testHanger } from "./test_hangar.js";
 import { ConfigInterface } from "./config.js";
 import { log } from "./logger.js";
+import {
+	LoggerAction,
+	LoggerInterface,
+} from "../../core/dist/jackrabbit_types.js";
 
 let cwd = process.cwd();
+let corePath = path.join(import.meta.url.substring(5), "../../../core/dist/");
+let browserPath = path.join(
+	import.meta.url.substring(5),
+	"../../../browser/dist/",
+);
 
-let corePath = path.join(import.meta.url, "../../../core/dist/");
-let browserPath = path.join(import.meta.url, "../../../browser/dist/");
+console.log(import.meta.url);
+console.log(corePath);
+console.log(browserPath);
 
 const MIME_TYPES: Record<string, string> = {
 	octet: "application/octet-stream",
@@ -25,9 +35,11 @@ const MIME_TYPES: Record<string, string> = {
 export class Router {
 	#listeners = new Listeners();
 	#config: ConfigInterface;
+	#logger: LoggerInterface;
 
-	constructor(config: ConfigInterface) {
+	constructor(config: ConfigInterface, logger: LoggerInterface) {
 		this.#config = config;
+		this.#logger = logger;
 	}
 
 	get route() {
@@ -59,22 +71,31 @@ export class Router {
 
 		// log test actions
 		if (url.startsWith("/log/") && "POST" === method) {
-			return log(req, res, this.#listeners);
+			// send listeners, logger
+			//
+			return log(req, res, this.#logger, this.#listeners);
 		}
 
 		let ext = "";
 		if (url.endsWith("/")) ext = "index.html";
-		let filePath = path.join(cwd, url, ext);
+		let urlNoPrefix = url;
+		if (url.startsWith("/jackrabbit")) urlNoPrefix = url.substring(11);
 
+		let filePath = path.join(cwd, urlNoPrefix, ext);
 		// this assumes http 1.1
 		//
 		// only serve core and browser packages
 		let stream: fs.ReadStream | undefined;
-		if (filePath.startsWith("/jackrabbit/core/") && "GET" === method) {
+		if (url.startsWith("/jackrabbit/core/") && "GET" === method) {
+			console.log("get core");
 			stream = await getFile(filePath, corePath);
 		}
-		if (filePath.startsWith("/jackrabbit/browser/") && "GET" === method) {
+		if (url.startsWith("/jackrabbit/browser/") && "GET" === method) {
 			stream = await getFile(filePath, browserPath);
+		}
+
+		if (!url.startsWith("/jackrabbit") && "GET" === method) {
+			stream = await getFile(filePath, cwd);
 		}
 
 		if (stream) {
@@ -100,7 +121,7 @@ async function getFile(
 ): Promise<fs.ReadStream | undefined> {
 	if (!filePath.startsWith(basePath)) return;
 
-	let exists = await fs.promises.access(filePath, fs.constants.R_OK).then(
+	let exists = await fs.promises.access(filePath).then(
 		function () {
 			return true;
 		},

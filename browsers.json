@@ -1,0 +1,5 @@
+{
+	"host_and_port": "http://localhost:4000",
+	"timeout_ms": 10000,
+	"webdrivers": [["safaridriver -p 4001", "http://localhost:4001"]]
+}

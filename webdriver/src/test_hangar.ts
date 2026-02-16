@@ -13,7 +13,9 @@ export function testHanger(params: TestHangerParams) {
 				</script>
 				<script type="importmap">
 					{
-						"jackrabbit/core/": "/jackrabbit/core/"
+						"imports": {
+							"jackrabbit/core/": "/jackrabbit/core/"
+						}
 					}
 				</script>
 				<script type="module" src="/jackrabbit/browser/dist/mod.js"></script>

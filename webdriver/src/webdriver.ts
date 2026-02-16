@@ -73,7 +73,7 @@ class WebdriverSession {
 
 	async abort() {
 		await this.#onDown();
-		this.#process.kill();
+		this.#process.kill;
 		await sleep(500);
 	}
 
@@ -88,11 +88,13 @@ class WebdriverSession {
 				headers: new Headers([["Content-Type", "application/json"]]),
 				body: JSON.stringify({ capabilities: {} }),
 			});
+			console.log("session response ", res);
 			if (200 !== res.status) {
 				throw new Error("Failed to create a session");
 			}
 
 			let json = await res.json();
+			console.log("session json:", json);
 			let { sessionId } = json?.value;
 			console.log("session id:", sessionId);
 
@@ -112,6 +114,7 @@ class WebdriverSession {
 			if (200 !== goToUrlRes.status)
 				throw new Error("go-to-url request failed");
 		} catch (e) {
+			console.log(e);
 			this.#params.listeners.dispatchEvent(new Event("error"));
 		}
 	}
@@ -124,12 +127,16 @@ class WebdriverSession {
 			let res = await fetch(new URL(`/session/${this.#sessionId}`, url), {
 				method: "DELETE",
 				headers: new Headers([["Content-Type", "application/json"]]),
+				body: null,
 			});
+			console.log(res);
 			if (200 !== res.status) {
-				throw new Error("Failed to DELETE session");
+				// throw new Error("Failed to DELETE session");
+				this.#params.listeners.dispatchEvent(new Event("error"));
 			}
 		} catch (e) {
-			this.#params.listeners.dispatchEvent(new Event("error"));
+			console.log(e);
+			// this.#params.listeners.dispatchEvent(new Event("error"));
 		}
 	}
 }

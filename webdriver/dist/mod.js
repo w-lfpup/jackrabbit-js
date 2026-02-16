@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+console.log("yoooo");
 import * as http from "http";
 import { createConfig } from "./config.js";
 import { Logger } from "./logger.js";
@@ -10,31 +11,37 @@ if (config instanceof Error) {
     console.log(config);
     process.exit(1);
 }
+console.log(config);
 // generate components
-let server = http.createServer();
+let logger = new Logger();
+let router = new Router(config, logger);
 let webdrivers = new WebDrivers(config);
-let router = new Router(config);
+let server = http.createServer();
 // grand timeout
 let abortController = new AbortController();
 // add webdriver events
 webdrivers.addEventListener("complete", function () {
+    console.log("webdriver complete");
     abortController.abort();
 });
 webdrivers.addEventListener("error", function () {
+    console.log("webdriver error");
     webdrivers.next();
 });
 // add router events
-// logs are tightly coupled
-let logger = new Logger();
-router.addEventListener("log", function () {
-    logger.log();
-});
 router.addEventListener("complete", function () {
+    console.log("test run complete");
+    webdrivers.next();
+});
+router.addEventListener("error", function () {
+    console.log("run error occured");
     webdrivers.next();
 });
 // run server
 server.on("request", router.route);
 server.on("close", function () {
+    console.log("closing the server");
+    console.log("failed?", logger.failed);
     logger.cancelled || logger.failed ? process.exit(1) : process.exit(0);
 });
 let { signal } = abortController;

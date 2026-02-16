@@ -11,7 +11,7 @@ try {
 	// should be it's own verification and then throw
 	let config = JSON.parse(jackrabbitMap.textContent);
 
-	run(logger, config.test_collections);
+	run(logger, config.test_collections, config.jackrabbit_url);
 } catch (e: unknown) {
 	logger.log({
 		type: "run_error",
