@@ -73,12 +73,12 @@ class WebdriverSession {
 
 	async abort() {
 		await this.#onDown();
-		this.#process.kill;
-		await sleep(500);
+		this.#process.kill();
+		// await sleep(500);
 	}
 
 	async #onSpawn() {
-		await sleep(500);
+		// await sleep(500);
 
 		let { hostAndPort, url } = this.#params;
 
