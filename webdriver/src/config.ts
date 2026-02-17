@@ -4,6 +4,7 @@ import * as path from "path";
 interface WebdriverParams {
 	command: string;
 	url: URL;
+	title: string;
 	timeoutMs: number;
 }
 

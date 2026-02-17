@@ -14,6 +14,7 @@ async function testsFail() {
 	let logger = new TestLogger();
 	await startRun(logger, failTestModules);
 
+	if (logger.errored) throw new Error("an error occured");
 	if (!logger.failed) return "fail tests failed to fail";
 }
 
@@ -22,6 +23,7 @@ async function testsPass() {
 	let logger = new TestLogger();
 	await startRun(logger, passTestModules);
 
+	if (logger.errored) throw new Error("an error occured");
 	if (logger.failed) return "passing tests failed to pass";
 }
 

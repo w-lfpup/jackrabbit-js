@@ -5,6 +5,21 @@ import type {
 import type { IncomingMessage, ServerResponse } from "http";
 import type { Listeners } from "./listeners.js";
 
+interface StartWebdriver {
+	type: "start_env";
+}
+
+interface EndWebdriver {
+	type: "end_env";
+}
+
+interface WebdriverError {
+	type: "env_error";
+}
+type WebdriverActions = StartWebdriver | EndWebdriver | WebdriverError;
+
+type SuperLoggerActions = LoggerAction | WebdriverActions;
+
 export async function log(
 	req: IncomingMessage,
 	res: ServerResponse,
@@ -16,15 +31,17 @@ export async function log(
 		data.push(chunk);
 	});
 	req.on("end", function () {
-		let jsonStr = Buffer.concat(data).toString();
-		let json = JSON.parse(jsonStr);
+		let actionStr = Buffer.concat(data).toString();
+		let action = JSON.parse(actionStr);
 
-		if ("end_run" === json.type) {
+		logger.log(action);
+
+		if ("end_run" === action.type) {
 			listeners.dispatchEvent(new Event("complete"));
 		}
 
-		if ("run_error" === json.type) {
-			// listeners.dispatchEvent(new Event("error"));
+		if ("run_error" === action.type) {
+			listeners.dispatchEvent(new Event("error"));
 			listeners.dispatchEvent(new Event("complete"));
 		}
 
@@ -35,16 +52,45 @@ export async function log(
 
 export class Logger implements LoggerInterface {
 	failed: boolean = false;
+	errored: boolean = false;
 	cancelled: boolean = false;
 
-	log(action: LoggerAction) {
+	log(action: SuperLoggerActions) {
+		console.log("action:\n", action);
+
+		if ("start_env" === action.type) {
+		}
+		if ("end_env" === action.type) {
+		}
+		if ("env_error" === action.type) {
+		}
+
+		if ("start_run" === action.type) {
+		}
+		if ("end_run" === action.type) {
+		}
+		if ("run_error" === action.type) {
+		}
+		if ("start_module" === action.type) {
+		}
+		if ("end_module" === action.type) {
+		}
+		if ("module_error" === action.type) {
+		}
+		if ("start_test" === action.type) {
+		}
+		if ("end_test" === action.type) {
+		}
+		if ("test_error" === action.type) {
+		}
+
 		if ("end_test" === action.type) {
 			let { assertions } = action;
 
 			if (Array.isArray(assertions)) {
 				if (assertions.length) this.failed = true;
 			} else {
-				if (assertions) this.failed = true;
+				if (undefined !== assertions) this.failed = true;
 			}
 		}
 	}
