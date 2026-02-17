@@ -52,8 +52,7 @@ export class Router {
 		if (!url) {
 			res.setHeader("Content-Type", "text/html");
 			res.writeHead(400);
-			res.end();
-			return;
+			return res.end();
 		}
 
 		// "test" home page
@@ -105,6 +104,7 @@ export class Router {
 		} else {
 			res.setHeader("Content-Type", MIME_TYPES["html"]);
 			res.writeHead(404);
+			res.end();
 		}
 	}
 
@@ -119,14 +119,8 @@ async function getFile(
 ): Promise<fs.ReadStream | undefined> {
 	if (!filePath.startsWith(basePath)) return;
 
-	let exists = await fs.promises.access(filePath).then(
-		function () {
-			return true;
-		},
-		function () {
-			return false;
-		},
-	);
-
-	if (exists) return fs.createReadStream(filePath);
+	try {
+		await fs.promises.access(filePath);
+		return fs.createReadStream(filePath);
+	} catch {}
 }

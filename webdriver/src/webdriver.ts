@@ -62,6 +62,7 @@ class WebdriverSession {
 		this.#params = params;
 		let { signal: parentSignal, command, timeoutMs } = this.#params;
 
+		// doubled up, remove
 		const signal = AbortSignal.any([
 			parentSignal,
 			AbortSignal.timeout(timeoutMs),
@@ -78,7 +79,7 @@ class WebdriverSession {
 	}
 
 	async #onSpawn() {
-		// await sleep(500);
+		await sleep(100);
 
 		let { hostAndPort, url } = this.#params;
 
