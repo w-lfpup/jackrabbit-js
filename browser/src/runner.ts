@@ -8,8 +8,9 @@ export async function run(logger: Logger, files: string[], baseUrl: string) {
 			let filepath = URL.parse(url, baseUrl);
 			if (null === filepath) throw new Error("Failed to import url: " + url);
 
+			let filepathStr = filepath.toString();
 			const { testModules } = await import(filepath.toString());
-			await startRun(logger, testModules);
+			await startRun(logger, filepathStr, testModules);
 		} catch (e: unknown) {
 			logger.log({
 				type: "run_error",

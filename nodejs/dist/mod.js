@@ -7,7 +7,7 @@ for (const file of process.argv.slice(2)) {
     let filepath = path.join(process.cwd(), file);
     try {
         const { testModules } = await import(filepath);
-        await startRun(logger, testModules);
+        await startRun(logger, filepath, testModules);
     }
     catch (e) {
         logger.log({

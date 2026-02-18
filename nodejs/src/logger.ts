@@ -37,6 +37,7 @@ export class Logger implements LoggerInterface {
 	log(action: LoggerAction) {
 		if ("start_run" === action.type) {
 			this.#data.startTime = action.time;
+			console.log(action.filepath);
 		}
 
 		if ("cancel_run" === action.type) {
@@ -59,31 +60,30 @@ export class Logger implements LoggerInterface {
 			this.#moduleReciepts.numberOfFails += 1;
 			this.#data.failed = true;
 
-			console.log("  " + action.testName);
+			console.log(`    ${action.testName}`);
 			if (Array.isArray(action.assertions)) {
 				for (const assertion of action.assertions) {
-					console.log("    " + assertion);
+					console.log(`      ${assertion}`);
 				}
 			} else {
-				console.log("    " + action.assertions);
+				console.log(`      ${action.assertions}`);
 			}
 		}
 
 		if ("test_error" === action.type) {
 			this.#data.errored = true;
 			this.#moduleReciepts.numberOfFails += 1;
-			console.log(action.error);
-			console.log("    TEST ERROR:\n    ", action.error, "\n");
+			console.log(`      ${action.error}`);
 		}
 
 		if ("start_module" === action.type) {
-			console.log(action.moduleName);
+			console.log(`  ${action.moduleName}`);
 		}
 
 		if ("end_module" === action.type) {
 			let { numberOfFails, numberOfTests } = this.#moduleReciepts;
 			let remaining = Math.max(0, numberOfTests - numberOfFails);
-			console.log(`  results: ${remaining}/${numberOfTests}\n`);
+			console.log(`    results: ${remaining}/${numberOfTests}\n`);
 			this.#moduleReciepts = {
 				numberOfTests: 0,
 				numberOfFails: 0,
@@ -92,7 +92,7 @@ export class Logger implements LoggerInterface {
 
 		if ("module_error" === action.type) {
 			this.#data.errored = true;
-			console.log("  MODULE ERROR:\n", action.error, "\n\n");
+			console.log(`    ${action.error}\n`);
 		}
 
 		if ("end_run" === action.type) {
@@ -101,7 +101,7 @@ export class Logger implements LoggerInterface {
 
 		if ("run_error" === action.type) {
 			this.#data.errored = true;
-			console.log("RUN ERROR:\n", action.error);
+			console.log(`RUN ERROR:\n${action.error}\n`);
 		}
 	}
 }

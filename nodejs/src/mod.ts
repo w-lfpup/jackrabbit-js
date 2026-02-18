@@ -11,7 +11,7 @@ for (const file of process.argv.slice(2)) {
 
 	try {
 		const { testModules } = await import(filepath);
-		await startRun(logger, testModules);
+		await startRun(logger, filepath, testModules);
 	} catch (e: unknown) {
 		logger.log({
 			type: "run_error",

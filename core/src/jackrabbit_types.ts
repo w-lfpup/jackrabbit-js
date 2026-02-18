@@ -21,6 +21,7 @@ export interface TestModule {
 
 interface StartRun {
 	time: number;
+	filepath: string;
 	type: "start_run";
 }
 
@@ -100,5 +101,8 @@ export type LoggerAction =
 
 export interface LoggerInterface {
 	readonly cancelled: boolean;
+	// readonly passed: boolean;
+	// readonly errored: boolean;
+
 	log(action: LoggerAction): void;
 }

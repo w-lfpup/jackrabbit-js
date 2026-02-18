@@ -1,5 +1,4 @@
 function testStuffAndPass(): undefined {
-	throw Error("yo");
 	return;
 }
 

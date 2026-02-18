@@ -113,10 +113,12 @@ async function execCollectionOrdered(
 
 export async function startRun(
 	logger: LoggerInterface,
+	filepath: string,
 	testModules: TestModule[],
 ) {
 	logger.log({
 		type: "start_run",
+		filepath,
 		time: performance.now(),
 	});
 
