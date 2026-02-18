@@ -1,7 +1,5 @@
-import { lstat } from "fs";
 import * as path from "path";
 
-// use params for each driver
 interface WebdriverParams {
 	command: string;
 	url: URL;
@@ -11,7 +9,6 @@ interface WebdriverParams {
 
 export interface ConfigInterface {
 	hostAndPort: URL;
-	timeoutMs: number;
 	webdrivers: WebdriverParams[];
 }
 
@@ -28,10 +25,6 @@ export async function createConfig(
 		if (!hostAndPort)
 			throw new Error(`config: invalid host_and_port json property`);
 
-		let timeoutMs = json.timeout_ms;
-		if (typeof timeoutMs !== "number")
-			throw new Error("config: invalid timeout_ms json property");
-
 		let webdrivers: WebdriverParams[] = [];
 		if (Array.isArray(json.webdrivers))
 			for (const webdriverParams of json.webdrivers) {
@@ -43,7 +36,6 @@ export async function createConfig(
 		return {
 			hostAndPort,
 			webdrivers,
-			timeoutMs,
 		};
 	} catch (e) {
 		if (e instanceof Error) return e;

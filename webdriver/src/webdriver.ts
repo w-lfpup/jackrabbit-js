@@ -50,9 +50,11 @@ interface WebDriverSessionParams {
 	url: URL;
 }
 
+// async conditions feel off
 class WebdriverSession {
 	#params: WebDriverSessionParams;
 	#process: ChildProcess;
+	#abortController: AbortController;
 	#sessionId: string | undefined;
 
 	constructor(params: WebDriverSessionParams) {
@@ -60,18 +62,25 @@ class WebdriverSession {
 		let { command, timeoutMs } = this.#params;
 
 		// something like this to keep stuff moving
+		this.#abortController = new AbortController();
 		let signal = AbortSignal.timeout(timeoutMs);
 		signal.addEventListener("abort", () => {
 			this.#params.listeners.dispatchEvent(new Event("timeout"));
 		});
 
-		this.#process = exec(command, { signal: AbortSignal.timeout(timeoutMs) });
-		this.#process.addListener("close", function () {});
+		this.#process = exec(command, {
+			signal: AbortSignal.any([
+				AbortSignal.timeout(timeoutMs),
+				this.#abortController.signal,
+			]),
+		});
+		// this.#process.addListener("error", function () {});
 		this.#onSpawn();
 	}
 
 	async abort() {
 		await this.#onDown();
+		this.#abortController.abort();
 		// this.#process.kill();
 	}
 
@@ -90,6 +99,7 @@ class WebdriverSession {
 				method: "POST",
 				headers: new Headers([["Content-Type", "application/json"]]),
 				body: JSON.stringify({ capabilities: {} }),
+				// signal,
 			});
 			if (200 !== res.status) {
 				throw new Error("Failed to create a session");
@@ -108,6 +118,7 @@ class WebdriverSession {
 					method: "POST",
 					headers: new Headers([["Content-Type", "application/json"]]),
 					body: JSON.stringify({ url: hostAndPort }),
+					// signal,Q
 				},
 			);
 
@@ -128,6 +139,7 @@ class WebdriverSession {
 				method: "DELETE",
 				headers: new Headers([["Content-Type", "application/json"]]),
 				body: null,
+				// signal,
 			});
 			if (200 !== res.status) {
 				// throw new Error("Failed to DELETE session");
@@ -148,23 +160,23 @@ function sleep(timeMs: number): Promise<void> {
 	});
 }
 
-async function untilReady(timeoutMs: number, url: string) {
+async function untilReady(url: string, signal: AbortSignal) {
 	let ready: boolean | undefined;
-	while (!ready) {
+	while (!ready && !signal.aborted) {
 		try {
 			let res = await fetch(new URL("/status", url), {
 				method: "GET",
 				headers: new Headers([["Content-Type", "application/json"]]),
 				body: null,
+				signal,
 			});
 			if (200 === res.status) {
 				let json = await res.json();
 				let { ready: jsonReady } = json?.value?.ready;
 				if (typeof jsonReady === "boolean" && jsonReady) return;
 			}
-			await sleep(10);
-		} catch {
-			await sleep(20);
-		}
+		} catch {}
+
+		await sleep(10);
 	}
 }
