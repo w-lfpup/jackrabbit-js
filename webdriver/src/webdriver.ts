@@ -32,12 +32,10 @@ export class WebDrivers {
 		this.#configIndex += 1;
 		let [command, url] = driverCmd;
 		let { timeoutMs, hostAndPort } = this.#config;
-		let signal = AbortSignal.timeout(timeoutMs);
 		this.#session = new WebdriverSession({
 			command,
 			hostAndPort,
 			listeners: this.#listeners,
-			signal,
 			timeoutMs,
 			url,
 		});
@@ -48,7 +46,6 @@ interface WebDriverSessionParams {
 	command: string;
 	hostAndPort: URL;
 	listeners: Listeners;
-	signal: AbortSignal;
 	timeoutMs: number;
 	url: URL;
 }
@@ -60,15 +57,9 @@ class WebdriverSession {
 
 	constructor(params: WebDriverSessionParams) {
 		this.#params = params;
-		let { signal: parentSignal, command, timeoutMs } = this.#params;
+		let { command, timeoutMs } = this.#params;
 
-		// doubled up, remove
-		const signal = AbortSignal.any([
-			parentSignal,
-			AbortSignal.timeout(timeoutMs),
-		]);
-
-		this.#process = exec(command, { signal });
+		this.#process = exec(command, { signal: AbortSignal.timeout(timeoutMs) });
 		this.#onSpawn();
 	}
 
@@ -78,6 +69,7 @@ class WebdriverSession {
 	}
 
 	async #onSpawn() {
+		// could be an abort signal that tries every 50 ms to ping /status
 		await sleep(500);
 
 		let { hostAndPort, url } = this.#params;
