@@ -30,8 +30,8 @@ export class WebDrivers {
 		if (!driverCmd) return this.#listeners.dispatchEvent(new Event("complete"));
 
 		this.#configIndex += 1;
-		let [command, url] = driverCmd;
-		let { timeoutMs, hostAndPort } = this.#config;
+		let { command, url, timeoutMs } = driverCmd;
+		let { hostAndPort } = this.#config;
 		this.#session = new WebdriverSession({
 			command,
 			hostAndPort,
@@ -59,17 +59,28 @@ class WebdriverSession {
 		this.#params = params;
 		let { command, timeoutMs } = this.#params;
 
+		// something like this to keep stuff moving
+		let signal = AbortSignal.timeout(timeoutMs);
+		signal.addEventListener("abort", () => {
+			this.#params.listeners.dispatchEvent(new Event("timeout"));
+		});
+
 		this.#process = exec(command, { signal: AbortSignal.timeout(timeoutMs) });
+		this.#process.addListener("close", function () {});
 		this.#onSpawn();
 	}
 
 	async abort() {
 		await this.#onDown();
-		this.#process.kill();
+		// this.#process.kill();
 	}
 
 	async #onSpawn() {
 		// could be an abort signal that tries every 50 ms to ping /status
+		// let { ready } = json?.value
+		// if (typeof ready !== "bool" && ready)
+		// then continue
+		//
 		await sleep(500);
 
 		let { hostAndPort, url } = this.#params;
@@ -135,4 +146,25 @@ function sleep(timeMs: number): Promise<void> {
 			resolve();
 		}, timeMs);
 	});
+}
+
+async function untilReady(timeoutMs: number, url: string) {
+	let ready: boolean | undefined;
+	while (!ready) {
+		try {
+			let res = await fetch(new URL("/status", url), {
+				method: "GET",
+				headers: new Headers([["Content-Type", "application/json"]]),
+				body: null,
+			});
+			if (200 === res.status) {
+				let json = await res.json();
+				let { ready: jsonReady } = json?.value?.ready;
+				if (typeof jsonReady === "boolean" && jsonReady) return;
+			}
+			await sleep(10);
+		} catch {
+			await sleep(20);
+		}
+	}
 }

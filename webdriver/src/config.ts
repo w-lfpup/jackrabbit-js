@@ -1,3 +1,4 @@
+import { lstat } from "fs";
 import * as path from "path";
 
 // use params for each driver
@@ -11,7 +12,7 @@ interface WebdriverParams {
 export interface ConfigInterface {
 	hostAndPort: URL;
 	timeoutMs: number;
-	webdrivers: [string, URL][];
+	webdrivers: WebdriverParams[];
 }
 
 export async function createConfig(
@@ -31,18 +32,12 @@ export async function createConfig(
 		if (typeof timeoutMs !== "number")
 			throw new Error("config: invalid timeout_ms json property");
 
-		let webdrivers: [string, URL][] = [];
+		let webdrivers: WebdriverParams[] = [];
 		if (Array.isArray(json.webdrivers))
-			for (let [command, targetUrl] of json.webdrivers) {
-				let url = URL.parse(targetUrl);
-				if (!url)
-					throw new Error(`config: invalid webdriver url json property`);
-
-				if (typeof command === "string") {
-					webdrivers.push([command, url]);
-				} else {
-					throw new Error(`config: invalid webdriver commmand json property`);
-				}
+			for (const webdriverParams of json.webdrivers) {
+				let params = createWebdriverParams(webdriverParams);
+				if (params instanceof Error) return params;
+				webdrivers.push(params);
 			}
 
 		return {
@@ -54,4 +49,26 @@ export async function createConfig(
 		if (e instanceof Error) return e;
 		return new Error("failed to parse config params from string");
 	}
+}
+
+export function createWebdriverParams(json: any): WebdriverParams | Error {
+	let { command, url, title, timeout_ms } = json;
+
+	if (typeof command !== "string")
+		return new Error("WebdriverParams.command is not a string");
+
+	let parsedUrl: URL | null = URL.parse(url);
+	if (null === parsedUrl)
+		return new Error("WebdriverParams.url is not a valid URL");
+	if (typeof title !== "string")
+		return new Error("WebdriverParams.title is not a string");
+	if (typeof timeout_ms !== "number")
+		return new Error("WebdriverParams.timeout_ms is not a number");
+
+	return {
+		command,
+		url: parsedUrl,
+		title,
+		timeoutMs: timeout_ms,
+	};
 }

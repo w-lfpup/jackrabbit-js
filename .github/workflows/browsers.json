@@ -1,9 +1,29 @@
 {
-	"host_and_port": "http://localhost:4000",
-	"timeout_ms": 10000,
+	"jackrabbit_url": "http://localhost:4000",
 	"webdrivers": [
-		["CHROMEWEBDRIVER -p 4001", "localhost:4001"],
-		["EDGEWEBDRIVER -p 4001", "localhost:4001"],
-		["GECKWEBDRIVER -p 4001", "localhost:4001"]
+		{
+			"command": "safaridriver -p 4001",
+			"title": "Safari",
+			"timeout_ms": "20000",
+			"url": "http://localhost:4001"
+		},
+		{
+			"command": "CHROMEWEBDRIVER -p 4001",
+			"title": "Chrome",
+			"timeout_ms": "20000",
+			"url": "http://localhost:4001"
+		},
+		{
+			"command": "EDGEWEBDRIVER -p 4001",
+			"title": "Edge",
+			"timeout_ms": "20000",
+			"url": "http://localhost:4001"
+		},
+		{
+			"command": "GECKWEBDRIVER -p 4001",
+			"title": "Firefox",
+			"timeout_ms": "20000",
+			"url": "http://localhost:4001"
+		}
 	]
 }
