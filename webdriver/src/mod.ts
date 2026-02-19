@@ -2,10 +2,11 @@
 
 import * as http from "http";
 
-import { ConfigInterface, createConfig } from "./config.js";
+import { createConfig } from "./config.js";
 import { Logger } from "./logger.js";
 import { Router } from "./routes.js";
 import { WebDrivers } from "./webdriver.js";
+import { EventBus } from "./eventbus.js";
 
 let args = process.argv.slice(2);
 
@@ -15,11 +16,11 @@ if (config instanceof Error) {
 	process.exit(1);
 }
 
-// create webdriver ids [adf, 43f, 5532s]
-let driverIDs = createWebdriverIDs(config);
-console.log(driverIDs);
+let eventbus = new EventBus();
 
 // generate components
+
+// there's no reason for logger to follow the logger interface
 let logger = new Logger();
 let router = new Router(config, logger);
 let webdrivers = new WebDrivers(config);
@@ -27,6 +28,9 @@ let server = http.createServer();
 
 // grand timeout
 let abortController = new AbortController();
+
+// wrap stuff up in a neat little promise?
+// make webdriver session a promise?
 
 // add webdriver events
 webdrivers.addEventListener("complete", function () {
@@ -62,13 +66,3 @@ server.listen({
 
 // start test run
 webdrivers.next();
-
-function createWebdriverIDs(config: ConfigInterface): string[] {
-	let ids: string[] = [];
-	for (const [index] of config.webdrivers.entries()) {
-		let num = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER);
-		// no base 64 so whatever for now
-		ids.push(`${index}:${num.toString(32)}`);
-	}
-	return ids;
-}

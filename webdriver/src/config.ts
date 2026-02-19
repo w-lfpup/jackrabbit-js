@@ -1,10 +1,18 @@
 import * as path from "path";
 
-interface WebdriverParams {
+interface WebdriverConfig {
 	command: string;
 	url: URL;
 	title: string;
 	timeoutMs: number;
+}
+
+export interface WebdriverParams {
+	command: string;
+	url: URL;
+	title: string;
+	timeoutMs: number;
+	jackrabbitSessionID: string;
 }
 
 export interface ConfigInterface {
@@ -27,10 +35,14 @@ export async function createConfig(
 
 		let webdrivers: WebdriverParams[] = [];
 		if (Array.isArray(json.webdrivers))
-			for (const webdriverParams of json.webdrivers) {
+			for (const [index, webdriverParams] of json.webdrivers.entries()) {
 				let params = createWebdriverParams(webdriverParams);
 				if (params instanceof Error) return params;
-				webdrivers.push(params);
+
+				let session = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER);
+				let jackrabbitSessionID = `${index}:${session.toString(32)}`;
+
+				webdrivers.push({ ...params, jackrabbitSessionID });
 			}
 
 		return {
@@ -43,7 +55,7 @@ export async function createConfig(
 	}
 }
 
-export function createWebdriverParams(json: any): WebdriverParams | Error {
+export function createWebdriverParams(json: any): WebdriverConfig | Error {
 	let { command, url, title, timeout_ms } = json;
 
 	if (typeof command !== "string")

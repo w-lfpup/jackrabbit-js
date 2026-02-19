@@ -4,7 +4,7 @@ import * as path from "path";
 import { Listeners } from "./listeners.js";
 import { testHanger } from "./test_hangar.js";
 import { ConfigInterface } from "./config.js";
-import { log } from "./logger.js";
+
 import {
 	LoggerAction,
 	LoggerInterface,
@@ -30,6 +30,14 @@ const MIME_TYPES: Record<string, string> = {
 	ico: "image/x-icon",
 	svg: "image/svg+xml",
 };
+
+export class RouterEvent extends Event {
+	webdriverID: string;
+	constructor(type: string, webdriverID: string, eventInitDict?: EventInit) {
+		super(type, eventInitDict);
+		this.webdriverID = webdriverID;
+	}
+}
 
 export class Router {
 	#listeners = new Listeners();
@@ -71,6 +79,12 @@ export class Router {
 		if (url.startsWith("/log/") && "POST" === method) {
 			// send listeners, logger
 			//
+
+			// get the session cookie
+			// get the json body
+			// confirm the url with action.type
+
+			// log event
 			return log(req, res, this.#logger, this.#listeners);
 		}
 
@@ -123,4 +137,38 @@ async function getFile(
 		await fs.promises.access(filePath);
 		return fs.createReadStream(filePath);
 	} catch {}
+}
+
+// events like "complete" don't make sense in async
+
+async function log(
+	req: IncomingMessage,
+	res: ServerResponse,
+	logger: LoggerInterface,
+	listeners: Listeners,
+) {
+	console.log("cookie?", req.headers.cookie);
+
+	let data: Uint8Array[] = [];
+	req.on("data", function (chunk) {
+		data.push(chunk);
+	});
+	req.on("end", function () {
+		let actionStr = Buffer.concat(data).toString();
+		let action = JSON.parse(actionStr);
+
+		logger.log(action);
+
+		if ("end_run" === action.type) {
+			listeners.dispatchEvent(new Event("complete"));
+		}
+
+		if ("run_error" === action.type) {
+			listeners.dispatchEvent(new Event("error"));
+			listeners.dispatchEvent(new Event("complete"));
+		}
+
+		res.writeHead(200);
+		res.end();
+	});
 }

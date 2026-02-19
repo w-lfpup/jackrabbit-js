@@ -2,8 +2,6 @@ import type {
 	LoggerAction,
 	LoggerInterface,
 } from "../../core/dist/jackrabbit_types.js";
-import type { IncomingMessage, ServerResponse } from "http";
-import type { Listeners } from "./listeners.js";
 
 interface StartWebdriver {
 	type: "start_env";
@@ -20,35 +18,21 @@ type WebdriverActions = StartWebdriver | EndWebdriver | WebdriverError;
 
 type SuperLoggerActions = LoggerAction | WebdriverActions;
 
-export async function log(
-	req: IncomingMessage,
-	res: ServerResponse,
-	logger: LoggerInterface,
-	listeners: Listeners,
-) {
-	let data: Uint8Array[] = [];
-	req.on("data", function (chunk) {
-		data.push(chunk);
-	});
-	req.on("end", function () {
-		let actionStr = Buffer.concat(data).toString();
-		let action = JSON.parse(actionStr);
-
-		logger.log(action);
-
-		if ("end_run" === action.type) {
-			listeners.dispatchEvent(new Event("complete"));
-		}
-
-		if ("run_error" === action.type) {
-			listeners.dispatchEvent(new Event("error"));
-			listeners.dispatchEvent(new Event("complete"));
-		}
-
-		res.writeHead(200);
-		res.end();
-	});
+interface LoggerData {
+	cancelled: boolean;
+	errored: boolean;
+	failed: boolean;
+	startTime: number;
+	testTime: number;
 }
+
+interface ModuleData {
+	numberOfTests: 0;
+	numberOfFails: 0;
+}
+
+// A LOG Event would allow me to send actions
+//
 
 export class Logger implements LoggerInterface {
 	failed: boolean = false;

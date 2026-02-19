@@ -1,4 +1,4 @@
-import type { ConfigInterface } from "./config.js";
+import type { ConfigInterface, WebdriverParams } from "./config.js";
 import { ChildProcess, exec } from "child_process";
 import { Listeners } from "./listeners.js";
 
@@ -9,7 +9,6 @@ import { Listeners } from "./listeners.js";
 
 let headers = new Headers([["Content-Type", "application/json"]]);
 
-// on ABORT needs to have a way of sill downing all the
 export class WebDrivers {
 	#listeners = new Listeners();
 	#config: ConfigInterface;
@@ -25,24 +24,58 @@ export class WebDrivers {
 		this.#listeners.addEventListener(eventName, cb);
 	}
 
-	async next() {
-		await this.#session?.abort();
-
-		let driverCmd = this.#config.webdrivers[this.#configIndex];
-		if (!driverCmd) return this.#listeners.dispatchEvent(new Event("complete"));
-
-		this.#configIndex += 1;
-		let { command, url, timeoutMs } = driverCmd;
-		let { hostAndPort } = this.#config;
-		this.#session = new WebdriverSession({
-			command,
-			hostAndPort,
-			listeners: this.#listeners,
-			timeoutMs,
-			url,
-		});
-	}
+	async start() {}
 }
+
+// on ABORT needs to have a way of sill downing all the
+// export class WebDrivers {
+// 	#listeners = new Listeners();
+// 	#config: ConfigInterface;
+// 	#configIndex: number;
+// 	#session: WebdriverSession | undefined;
+
+// 	constructor(config: ConfigInterface) {
+// 		this.#config = config;
+// 		this.#configIndex = 0;
+// 	}
+
+// 	addEventListener(eventName: string, cb: EventListener) {
+// 		this.#listeners.addEventListener(eventName, cb);
+// 	}
+
+// 	async next() {
+// 		await this.#session?.abort();
+
+// 		let driverCmd = this.#config.webdrivers[this.#configIndex];
+// 		if (!driverCmd) return this.#listeners.dispatchEvent(new Event("complete"));
+
+// 		this.#configIndex += 1;
+// 		let { command, url, timeoutMs } = driverCmd;
+// 		let { hostAndPort } = this.#config;
+// 		this.#session = new WebdriverSession({
+// 			command,
+// 			hostAndPort,
+// 			listeners: this.#listeners,
+// 			timeoutMs,
+// 			url,
+// 		});
+// 	}
+
+// 	// queue
+
+// 	// all
+
+// 	async all() {
+// 		Promise.all([])
+// 	}
+// }
+
+// above class is for order
+
+// below class is for implementation
+// below class needs an "error" or "complete" callback
+
+// this can be used for promises and callbacks
 
 interface WebDriverSessionParams {
 	command: string;
@@ -54,13 +87,13 @@ interface WebDriverSessionParams {
 
 // async conditions feel off
 class WebdriverSession {
-	#params: WebDriverSessionParams;
+	#params: WebdriverParams;
 	#process: ChildProcess;
 	#signal: AbortSignal;
 	#abortController: AbortController;
 	#sessionId: string | undefined;
 
-	constructor(params: WebDriverSessionParams) {
+	constructor(params: WebdriverParams, hostAndPort: URL, listeners: Listeners) {
 		this.#params = params;
 		let { command, timeoutMs } = this.#params;
 
@@ -72,14 +105,11 @@ class WebdriverSession {
 		]);
 
 		this.#process = exec(command, { signal: this.#signal });
-		this.#process.addListener("close", () => {
+		this.#process.addListener("error", () => {
 			this.#abortController.abort();
 		});
 
-		// this.#onSpawn();
-		this.#process.addListener("spawn", () => {
-			this.#onSpawn();
-		});
+		this.#onSpawn();
 	}
 
 	async abort() {
@@ -110,6 +140,7 @@ class WebdriverSession {
 				throw new Error("SessionId is not a string");
 
 			// add cookie with unique id
+			let domain = hostAndPort.host;
 
 			this.#sessionId = sessionId;
 			let goToUrlRes = await fetch(
