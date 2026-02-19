@@ -10,6 +10,9 @@ if (config instanceof Error) {
     console.log(config);
     process.exit(1);
 }
+// create webdriver ids [adf, 43f, 5532s]
+let driverIDs = createWebdriverIDs(config);
+console.log(driverIDs);
 // generate components
 let logger = new Logger();
 let router = new Router(config, logger);
@@ -47,3 +50,12 @@ server.listen({
 });
 // start test run
 webdrivers.next();
+function createWebdriverIDs(config) {
+    let ids = [];
+    for (const [index] of config.webdrivers.entries()) {
+        let num = Math.floor((Math.random() * Number.MAX_SAFE_INTEGER));
+        // no base 64 so whatever for now
+        ids.push(`${index}:${num.toString(32)}`);
+    }
+    return ids;
+}

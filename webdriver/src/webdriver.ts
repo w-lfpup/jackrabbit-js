@@ -72,12 +72,17 @@ class WebdriverSession {
 		]);
 
 		this.#process = exec(command, { signal: this.#signal });
+		this.#process.addListener("close", () => {
+			this.#abortController.abort();
+		});
 
-		this.#onSpawn();
+		// this.#onSpawn();
+		this.#process.addListener("spawn", () => {
+			this.#onSpawn();
+		});
 	}
 
 	async abort() {
-		// something to prevent already aborted stuff
 		await this.#onDown();
 		this.#abortController.abort();
 	}
@@ -86,8 +91,7 @@ class WebdriverSession {
 		let { hostAndPort, url } = this.#params;
 
 		try {
-			// wait until /status returns {"value": {"ready": true} }
-			await untilReady(url, this.#signal);
+			await untilWebdriverReady(url, this.#signal);
 
 			let res = await fetch(new URL("/session", url), {
 				method: "POST",
@@ -104,6 +108,8 @@ class WebdriverSession {
 
 			if (typeof sessionId !== "string")
 				throw new Error("SessionId is not a string");
+
+			// add cookie with unique id
 
 			this.#sessionId = sessionId;
 			let goToUrlRes = await fetch(
@@ -139,15 +145,10 @@ class WebdriverSession {
 	}
 }
 
-function sleep(timeMs: number): Promise<void> {
-	return new Promise(function (resolve) {
-		setTimeout(function () {
-			resolve();
-		}, timeMs);
-	});
-}
-
-async function untilReady(url: URL, signal: AbortSignal): Promise<void> {
+async function untilWebdriverReady(
+	url: URL,
+	signal: AbortSignal,
+): Promise<void> {
 	while (!signal.aborted) {
 		try {
 			let res = await fetch(new URL("/status", url), {
@@ -164,8 +165,16 @@ async function untilReady(url: URL, signal: AbortSignal): Promise<void> {
 			}
 		} catch {}
 
-		await sleep(10);
+		await sleep(30);
 	}
 
 	throw new Error("Webdriver was never ready.");
+}
+
+function sleep(timeMs: number): Promise<void> {
+	return new Promise(function (resolve) {
+		setTimeout(function () {
+			resolve();
+		}, timeMs);
+	});
 }
