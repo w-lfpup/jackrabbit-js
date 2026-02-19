@@ -20,9 +20,7 @@ export function testHanger(params: TestHangerParams) {
 				</script>
 				<script type="module" src="/jackrabbit/browser/dist/mod.js"></script>
 			</head>
-			<body>
-				<p>hello! welcome to jackrabbit</b>
-			</body>
+			<body></body>
 		</html>
 	`;
 }

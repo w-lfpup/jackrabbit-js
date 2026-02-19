@@ -153,7 +153,7 @@ export async function startRun(
 	});
 }
 
-export function cancelRun(logger: LoggerInterface, testModules: TestModule[]) {
+export function cancelRun(logger: LoggerInterface) {
 	if (logger.cancelled) return;
 
 	logger.log({

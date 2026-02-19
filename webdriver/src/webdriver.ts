@@ -63,43 +63,35 @@ class WebdriverSession {
 
 		// something like this to keep stuff moving
 		this.#abortController = new AbortController();
-		let signal = AbortSignal.timeout(timeoutMs);
-		signal.addEventListener("abort", () => {
-			this.#params.listeners.dispatchEvent(new Event("timeout"));
-		});
+		let signal = AbortSignal.any([
+			this.#abortController.signal,
+			AbortSignal.timeout(timeoutMs),
+		]);
+		console.log("COMMAND:", command);
 
-		this.#process = exec(command, {
-			signal: AbortSignal.any([
-				AbortSignal.timeout(timeoutMs),
-				this.#abortController.signal,
-			]),
-		});
-		// this.#process.addListener("error", function () {});
-		this.#onSpawn();
+		this.#process = exec(command, { signal });
+
+		this.#onSpawn(signal);
 	}
 
 	async abort() {
+		// something to prevent already aborted stuff
 		await this.#onDown();
 		this.#abortController.abort();
-		// this.#process.kill();
 	}
 
-	async #onSpawn() {
-		// could be an abort signal that tries every 50 ms to ping /status
-		// let { ready } = json?.value
-		// if (typeof ready !== "bool" && ready)
-		// then continue
-		//
-		await sleep(500);
-
+	async #onSpawn(signal: AbortSignal) {
 		let { hostAndPort, url } = this.#params;
 
 		try {
+			// wait until /status returns {"value": {"ready": true} }
+			await untilReady(url, signal);
+
 			let res = await fetch(new URL("/session", url), {
 				method: "POST",
 				headers: new Headers([["Content-Type", "application/json"]]),
 				body: JSON.stringify({ capabilities: {} }),
-				// signal,
+				signal,
 			});
 			if (200 !== res.status) {
 				throw new Error("Failed to create a session");
@@ -118,7 +110,7 @@ class WebdriverSession {
 					method: "POST",
 					headers: new Headers([["Content-Type", "application/json"]]),
 					body: JSON.stringify({ url: hostAndPort }),
-					// signal,Q
+					signal,
 				},
 			);
 
@@ -160,9 +152,8 @@ function sleep(timeMs: number): Promise<void> {
 	});
 }
 
-async function untilReady(url: string, signal: AbortSignal) {
-	let ready: boolean | undefined;
-	while (!ready && !signal.aborted) {
+async function untilReady(url: URL, signal: AbortSignal): Promise<void> {
+	while (!signal.aborted) {
 		try {
 			let res = await fetch(new URL("/status", url), {
 				method: "GET",
@@ -170,13 +161,16 @@ async function untilReady(url: string, signal: AbortSignal) {
 				body: null,
 				signal,
 			});
+
 			if (200 === res.status) {
 				let json = await res.json();
-				let { ready: jsonReady } = json?.value?.ready;
-				if (typeof jsonReady === "boolean" && jsonReady) return;
+				let { ready } = json?.value;
+				if (typeof ready === "boolean" && ready) return;
 			}
 		} catch {}
 
 		await sleep(10);
 	}
+
+	throw new Error("Webdriver was never ready.");
 }
