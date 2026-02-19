@@ -8,7 +8,6 @@ interface WebdriverSessionAction {
 
 interface WebdriverSessionStartAction extends WebdriverSessionAction {
 	type: "session_start";
-	error: Error;
 }
 
 interface WebdriverSessionErrorAction extends WebdriverSessionAction {
@@ -18,7 +17,6 @@ interface WebdriverSessionErrorAction extends WebdriverSessionAction {
 
 interface WebdriverSessionCompleteAction extends WebdriverSessionAction {
 	type: "session_complete";
-	loggerAction: LoggerAction;
 }
 
 interface WebdriverLogAction extends WebdriverSessionAction {

@@ -21,8 +21,9 @@ let eventbus = new EventBus();
 // generate components
 
 // there's no reason for logger to follow the logger interface
-let logger = new Logger();
-let router = new Router(config, logger);
+let logger = new Logger(eventbus);
+
+let router = new Router(config, eventbus);
 let webdrivers = new WebDrivers(config);
 let server = http.createServer();
 

@@ -2,7 +2,10 @@ import type {
 	LoggerAction,
 	LoggerInterface,
 } from "jackrabbit/core/dist/mod.js";
-import { FetchQueue } from "./queue.js";
+
+interface Queueable {
+	(): Promise<unknown>;
+}
 
 export class Logger implements LoggerInterface {
 	#fetchQueue = new FetchQueue();
@@ -20,5 +23,35 @@ export class Logger implements LoggerInterface {
 				method: "POST",
 			});
 		});
+	}
+}
+
+class FetchQueue {
+	#inbound: Queueable[] = [];
+	#outbound: Queueable[] = [];
+	#inRoute: Queueable | undefined;
+
+	enqueue(queueable: Queueable) {
+		this.#inbound.push(queueable);
+		if (!this.#inRoute) this.#queueAtom();
+	}
+
+	#queueAtom() {
+		if (!this.#outbound.length) {
+			while (this.#inbound.length) {
+				let pip = this.#inbound.pop();
+				if (pip) this.#outbound.push(pip);
+			}
+		}
+
+		this.#inRoute = this.#outbound.pop();
+		this.#execAtom();
+	}
+
+	async #execAtom() {
+		if (this.#inRoute) {
+			await this.#inRoute();
+			this.#queueAtom();
+		}
 	}
 }

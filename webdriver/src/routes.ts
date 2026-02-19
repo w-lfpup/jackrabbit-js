@@ -40,7 +40,7 @@ export class RouterEvent extends Event {
 }
 
 export class Router {
-	#listeners = new Listeners();
+	// #listeners = new Listeners();
 	#config: ConfigInterface;
 	#logger: LoggerInterface;
 
@@ -122,9 +122,9 @@ export class Router {
 		}
 	}
 
-	addEventListener(eventName: string, cb: EventListener) {
-		this.#listeners.addEventListener(eventName, cb);
-	}
+	// addEventListener(eventName: string, cb: EventListener) {
+	// 	this.#listeners.addEventListener(eventName, cb);
+	// }
 }
 
 async function getFile(
@@ -171,4 +171,5 @@ async function log(
 		res.writeHead(200);
 		res.end();
 	});
+	// req.on("error", function(){})
 }

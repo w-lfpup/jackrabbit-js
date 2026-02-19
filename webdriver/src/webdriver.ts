@@ -1,6 +1,5 @@
 import type { ConfigInterface, WebdriverParams } from "./config.js";
 import { ChildProcess, exec } from "child_process";
-import { Listeners } from "./listeners.js";
 
 // Events
 // - complete
@@ -9,19 +8,16 @@ import { Listeners } from "./listeners.js";
 
 let headers = new Headers([["Content-Type", "application/json"]]);
 
+// create prmises for every session
+// start end rejection
 export class WebDrivers {
-	#listeners = new Listeners();
 	#config: ConfigInterface;
-	#configIndex: number;
 	#session: WebdriverSession | undefined;
+
+	// create promises with listeners and abort singals
 
 	constructor(config: ConfigInterface) {
 		this.#config = config;
-		this.#configIndex = 0;
-	}
-
-	addEventListener(eventName: string, cb: EventListener) {
-		this.#listeners.addEventListener(eventName, cb);
 	}
 
 	async start() {}
@@ -80,7 +76,6 @@ export class WebDrivers {
 interface WebDriverSessionParams {
 	command: string;
 	hostAndPort: URL;
-	listeners: Listeners;
 	timeoutMs: number;
 	url: URL;
 }
@@ -93,7 +88,7 @@ class WebdriverSession {
 	#abortController: AbortController;
 	#sessionId: string | undefined;
 
-	constructor(params: WebdriverParams, hostAndPort: URL, listeners: Listeners) {
+	constructor(params: WebdriverParams, hostAndPort: URL) {
 		this.#params = params;
 		let { command, timeoutMs } = this.#params;
 

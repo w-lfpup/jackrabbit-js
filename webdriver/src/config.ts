@@ -44,7 +44,6 @@ export async function createConfig(
 
 				webdrivers.push({ ...params, jackrabbitSessionID });
 			}
-
 		return {
 			hostAndPort,
 			webdrivers,
