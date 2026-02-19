@@ -7,6 +7,8 @@ import { Listeners } from "./listeners.js";
 // - output
 // - error
 
+let headers = new Headers([["Content-Type", "application/json"]]);
+
 // on ABORT needs to have a way of sill downing all the
 export class WebDrivers {
 	#listeners = new Listeners();
@@ -54,6 +56,7 @@ interface WebDriverSessionParams {
 class WebdriverSession {
 	#params: WebDriverSessionParams;
 	#process: ChildProcess;
+	#signal: AbortSignal;
 	#abortController: AbortController;
 	#sessionId: string | undefined;
 
@@ -63,15 +66,14 @@ class WebdriverSession {
 
 		// something like this to keep stuff moving
 		this.#abortController = new AbortController();
-		let signal = AbortSignal.any([
+		this.#signal = AbortSignal.any([
 			this.#abortController.signal,
 			AbortSignal.timeout(timeoutMs),
 		]);
-		console.log("COMMAND:", command);
 
-		this.#process = exec(command, { signal });
+		this.#process = exec(command, { signal: this.#signal });
 
-		this.#onSpawn(signal);
+		this.#onSpawn();
 	}
 
 	async abort() {
@@ -80,18 +82,18 @@ class WebdriverSession {
 		this.#abortController.abort();
 	}
 
-	async #onSpawn(signal: AbortSignal) {
+	async #onSpawn() {
 		let { hostAndPort, url } = this.#params;
 
 		try {
 			// wait until /status returns {"value": {"ready": true} }
-			await untilReady(url, signal);
+			await untilReady(url, this.#signal);
 
 			let res = await fetch(new URL("/session", url), {
 				method: "POST",
-				headers: new Headers([["Content-Type", "application/json"]]),
+				headers,
 				body: JSON.stringify({ capabilities: {} }),
-				signal,
+				signal: this.#signal,
 			});
 			if (200 !== res.status) {
 				throw new Error("Failed to create a session");
@@ -108,9 +110,9 @@ class WebdriverSession {
 				new URL(`/session/${this.#sessionId}/url`, url),
 				{
 					method: "POST",
-					headers: new Headers([["Content-Type", "application/json"]]),
+					headers,
 					body: JSON.stringify({ url: hostAndPort }),
-					signal,
+					signal: this.#signal,
 				},
 			);
 
@@ -127,20 +129,13 @@ class WebdriverSession {
 		if (!this.#sessionId) return;
 
 		try {
-			let res = await fetch(new URL(`/session/${this.#sessionId}`, url), {
+			await fetch(new URL(`/session/${this.#sessionId}`, url), {
 				method: "DELETE",
-				headers: new Headers([["Content-Type", "application/json"]]),
+				headers,
 				body: null,
-				// signal,
+				signal: this.#signal,
 			});
-			if (200 !== res.status) {
-				// throw new Error("Failed to DELETE session");
-				this.#params.listeners.dispatchEvent(new Event("error"));
-			}
-		} catch (e) {
-			console.log(e);
-			// this.#params.listeners.dispatchEvent(new Event("error"));
-		}
+		} catch {}
 	}
 }
 
@@ -157,7 +152,7 @@ async function untilReady(url: URL, signal: AbortSignal): Promise<void> {
 		try {
 			let res = await fetch(new URL("/status", url), {
 				method: "GET",
-				headers: new Headers([["Content-Type", "application/json"]]),
+				headers,
 				body: null,
 				signal,
 			});
