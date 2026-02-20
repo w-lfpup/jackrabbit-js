@@ -22,29 +22,30 @@ export interface TestModule {
 interface StartRun {
 	time: number;
 	expected_collection_count: number;
-	type: "run_start";
+	type: "start_run";
 }
 
 interface EndRun {
 	time: number;
-	type: "run_end";
+	type: "end_run";
 }
 
 interface StartTestCollection {
 	collection_id: number;
 	collection_url: string;
 	expected_module_count: number;
-	type: "collection_start";
+	type: "start_collection";
 }
 
 interface EndTestCollection {
 	collection_id: number;
-	type: "collection_end";
+	type: "end_collection";
 }
 
 interface TestCollectionError {
 	collection_id: number;
 	time: number;
+	error: string;
 	type: "collection_error";
 }
 
@@ -53,13 +54,13 @@ interface StartModule {
 	module_name: string;
 	collection_id: number;
 	expected_test_count: number;
-	type: "module_start";
+	type: "start_module";
 }
 
 interface EndModule {
 	module_id: number;
 	collection_id: number;
-	type: "module_end";
+	type: "end_module";
 }
 
 interface ModuleError {
@@ -74,7 +75,7 @@ interface StartTest {
 	collection_id: number;
 	test_id: number;
 	test_name: string;
-	type: "test_start";
+	type: "start_test";
 }
 
 interface TestError {

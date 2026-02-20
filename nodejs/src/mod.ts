@@ -6,8 +6,16 @@ import { runCollection } from "../../core/dist/mod.js";
 
 const logger = new Logger();
 
+let filepaths = process.argv.slice(2);
+
 // start run
-for (const file of process.argv.slice(2)) {
+logger.log({
+	type: "start_run",
+	time: performance.now(),
+	expected_collection_count: filepaths.length,
+});
+
+for (const [index, file] of filepaths.entries()) {
 	let filepath = path.join(process.cwd(), file);
 
 	try {
@@ -15,7 +23,9 @@ for (const file of process.argv.slice(2)) {
 		await runCollection(logger, filepath, testModules);
 	} catch (e: unknown) {
 		logger.log({
-			type: "run_error",
+			type: "collection_error",
+			collection_id: index,
+			url: filepath,
 			error: e?.toString() ?? "wild horses error",
 		});
 	}

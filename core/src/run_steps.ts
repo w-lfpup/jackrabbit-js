@@ -25,23 +25,22 @@ async function createTimeout(
 async function execTest(
 	testModules: TestModule[],
 	logger: LoggerInterface,
-	moduleId: number,
-	testId: number,
+	module_id: number,
+	test_id: number,
 ) {
-	const { tests, options } = testModules[moduleId];
-	const moduleName = options?.title ?? moduleId.toString();
-	const testName =
-		testModules[moduleId]?.tests[testId]?.name ?? testId.toString();
+	const { tests, options } = testModules[module_id];
+	const module_name = options?.title ?? module_id.toString();
+	const test_Name =
+		testModules[module_id]?.tests[test_id]?.name ?? test_id.toString();
 
 	logger.log({
 		type: "start_test",
-		moduleId,
-		testId,
-		moduleName,
-		testName,
+		module_id,
+		test_id,
+		test_name,
 	});
 
-	const testFunc = tests[testId];
+	const testFunc = tests[test_id];
 	const startTime = performance.now();
 	let assertions: Assertions;
 	try {
@@ -52,38 +51,38 @@ async function execTest(
 	} catch (e: unknown) {
 		return logger.log({
 			type: "test_error",
-			moduleId,
-			moduleName,
-			testId,
-			testName,
+			module_id,
+			module_name,
+			test_id,
+			test_name,
 			error: e?.toString() ?? "wild test error",
 		});
 	}
 
-	const endTime = performance.now();
+	const end_time = performance.now();
 
 	logger.log({
 		type: "end_test",
 		assertions,
-		endTime,
-		moduleId,
-		moduleName,
+		end_time,
+		module_id,
+		module_name,
 		startTime,
-		testId,
-		testName,
+		test_id,
+		test_name,
 	});
 }
 
 async function execCollection(
 	testModules: TestModule[],
 	logger: LoggerInterface,
-	moduleId: number,
+	module_id: number,
 ) {
-	const { tests } = testModules[moduleId];
+	const { tests } = testModules[module_id];
 
 	const wrappedTests = [];
-	for (let [testID] of tests.entries()) {
-		wrappedTests.push(execTest(testModules, logger, moduleId, testID));
+	for (let [test_id] of tests.entries()) {
+		wrappedTests.push(execTest(testModules, logger, module_id, test_id));
 	}
 
 	await Promise.all(wrappedTests);
@@ -92,50 +91,54 @@ async function execCollection(
 async function execCollectionOrdered(
 	testModules: TestModule[],
 	logger: LoggerInterface,
-	moduleId: number,
+	module_id: number,
 ) {
-	const { tests } = testModules[moduleId];
+	const { tests } = testModules[module_id];
 
-	for (let [testID] of tests.entries()) {
-		await execTest(testModules, logger, moduleId, testID);
+	for (let [test_id] of tests.entries()) {
+		await execTest(testModules, logger, module_id, test_id);
 	}
 }
 
 export async function runCollection(
 	logger: LoggerInterface,
-	url: string,
+	collection_id: number,
+	collection_url: string,
 	testModules: TestModule[],
 ) {
 	logger.log({
-		type: "start_run",
-		url,
-		time: performance.now(),
+		collection_id,
+		collection_url,
+		expected_module_count: testModules.length,
+		type: "start_collection",
 	});
 
-	for (let [moduleId, testModule] of testModules.entries()) {
+	for (let [module_id, testModule] of testModules.entries()) {
 		const { options } = testModule;
 
-		const moduleName = options?.title ?? moduleId.toString();
+		const module_name = options?.title ?? module_id.toString();
 
 		logger.log({
 			type: "start_module",
-			moduleId,
-			moduleName,
+			module_id,
+			module_name,
+			collection_id,
+			expected_test_count: testModule.tests.length,
 		});
 
 		options?.runAsynchronously
-			? await execCollection(testModules, logger, moduleId)
-			: await execCollectionOrdered(testModules, logger, moduleId);
+			? await execCollection(testModules, logger, module_id)
+			: await execCollectionOrdered(testModules, logger, module_id);
 
 		logger.log({
+			collection_id,
+			module_id,
 			type: "end_module",
-			moduleId,
-			moduleName,
 		});
 	}
 
 	logger.log({
-		type: "end_run",
-		time: performance.now(),
+		type: "end_collection",
+		collection_id,
 	});
 }
