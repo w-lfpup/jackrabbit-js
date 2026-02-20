@@ -25,14 +25,20 @@ interface WebdriverRunCompleteAction extends WebdriverSessionAction {
 
 interface WebdriverLogAction extends WebdriverSessionAction {
 	type: "log";
+	url: string | undefined;
 	loggerAction: LoggerAction;
 }
 
-type WebdriverActions =
+interface WebdriverEndAction extends WebdriverSessionAction {
+	type: "end";
+}
+
+export type WebdriverActions =
 	| WebdriverSessionStartAction
 	| WebdriverSessionClosedAction
 	| WebdriverSessionErrorAction
 	| WebdriverRunCompleteAction
+	| WebdriverEndAction
 	| WebdriverLogAction;
 
 interface EventBusListener {

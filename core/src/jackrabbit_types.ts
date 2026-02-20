@@ -30,15 +30,26 @@ interface EndRun {
 	type: "end_run";
 }
 
-interface CancelRun {
-	time: number;
-	type: "cancel_run";
-}
-
 interface StartModule {
 	moduleId: number;
 	moduleName: string;
 	type: "start_module";
+}
+
+interface StartTestCollection {
+	time: number;
+	filepath: string;
+	type: "start_test_collection";
+}
+
+interface EndTestCollection {
+	time: number;
+	type: "end_test_collection";
+}
+
+interface TestCollectionError {
+	time: number;
+	type: "test_collection_error";
 }
 
 interface EndModule {
@@ -91,7 +102,6 @@ export type LoggerAction =
 	| StartRun
 	| RunError
 	| EndRun
-	| CancelRun
 	| StartModule
 	| ModuleError
 	| EndModule

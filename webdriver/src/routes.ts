@@ -9,6 +9,7 @@ import {
 	LoggerInterface,
 } from "../../core/dist/jackrabbit_types.js";
 import type { EventBus } from "./eventbus.js";
+import { Logger } from "./logger.js";
 
 let cwd = process.cwd();
 
@@ -40,13 +41,12 @@ export class RouterEvent extends Event {
 }
 
 export class Router {
-	// #listeners = new Listeners();
 	#config: ConfigInterface;
-	#logger: LoggerInterface;
+	#eventbus: EventBus;
 
 	constructor(config: ConfigInterface, eventbus: EventBus) {
 		this.#config = config;
-		this.#logger = logger;
+		this.#eventbus = eventbus;
 	}
 
 	get route() {
@@ -77,15 +77,17 @@ export class Router {
 
 		// log test actions
 		if (url.startsWith("/log/") && "POST" === method) {
-			// send listeners, logger
-			//
+			console.log("log has a cookie?", req.headers.cookie);
+			let loggerAction = await getLoggerActionFromRequestBody(req);
+			this.#eventbus.dispatchAction({
+				type: "log",
+				url: req.url,
+				loggerAction,
+				id: "",
+			});
 
-			// get the session cookie
-			// get the json body
-			// confirm the url with action.type
-
-			// log event
-			return log(req, res, this.#logger, this.#listeners);
+			res.writeHead(200);
+			return res.end();
 		}
 
 		let ext = "";
@@ -99,17 +101,18 @@ export class Router {
 		// only serve core and browser packages
 		let stream: fs.ReadStream | undefined;
 		if (url.startsWith("/jackrabbit/core/") && "GET" === method) {
-			stream = await getFile(filePath, corePath);
+			stream = await getDirectoryScopedFile(filePath, corePath);
 		}
 		if (url.startsWith("/jackrabbit/browser/") && "GET" === method) {
-			stream = await getFile(filePath, browserPath);
+			stream = await getDirectoryScopedFile(filePath, browserPath);
 		}
 
 		if (!url.startsWith("/jackrabbit") && "GET" === method) {
-			stream = await getFile(filePath, cwd);
+			stream = await getDirectoryScopedFile(filePath, cwd);
 		}
 
 		if (stream) {
+			// throwing errors and stuff
 			const ext = path.extname(filePath).substring(1).toLowerCase();
 			let mimeType = MIME_TYPES[ext] ?? MIME_TYPES["octet"];
 			res.setHeader("Content-Type", mimeType);
@@ -123,7 +126,27 @@ export class Router {
 	}
 }
 
-async function getFile(
+function getLoggerActionFromRequestBody(
+	req: IncomingMessage,
+): Promise<LoggerAction> {
+	return new Promise(function (resolve, reject) {
+		let data: Uint8Array[] = [];
+		req.addListener("data", function (chunk) {
+			data.push(chunk);
+		});
+		req.addListener("end", function () {
+			let actionStr = Buffer.concat(data).toString();
+			let action = JSON.parse(actionStr) as LoggerAction;
+
+			resolve(action);
+		});
+		req.addListener("error", function (err: Error) {
+			reject(err);
+		});
+	});
+}
+
+async function getDirectoryScopedFile(
 	filePath: string,
 	basePath: string,
 ): Promise<fs.ReadStream | undefined> {
@@ -133,39 +156,4 @@ async function getFile(
 		await fs.promises.access(filePath);
 		return fs.createReadStream(filePath);
 	} catch {}
-}
-
-// events like "complete" don't make sense in async
-
-async function log(
-	req: IncomingMessage,
-	res: ServerResponse,
-	logger: LoggerInterface,
-	listeners: Listeners,
-) {
-	console.log("cookie?", req.headers.cookie);
-
-	let data: Uint8Array[] = [];
-	req.on("data", function (chunk) {
-		data.push(chunk);
-	});
-	req.on("end", function () {
-		let actionStr = Buffer.concat(data).toString();
-		let action = JSON.parse(actionStr);
-
-		logger.log(action);
-
-		if ("end_run" === action.type) {
-			listeners.dispatchEvent(new Event("complete"));
-		}
-
-		if ("run_error" === action.type) {
-			listeners.dispatchEvent(new Event("error"));
-			listeners.dispatchEvent(new Event("complete"));
-		}
-
-		res.writeHead(200);
-		res.end();
-	});
-	// req.on("error", function(){})
 }

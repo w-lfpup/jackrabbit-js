@@ -13,12 +13,13 @@ let headers = new Headers([["Content-Type", "application/json"]]);
 // start end rejection
 export class WebDrivers {
 	#config: ConfigInterface;
-	#session: WebdriverSession | undefined;
+	#eventbus: EventBus;
 
 	// create promises with listeners and abort singals
 
-	constructor(config: ConfigInterface) {
+	constructor(config: ConfigInterface, eventbus: EventBus) {
 		this.#config = config;
+		this.#eventbus = eventbus;
 	}
 
 	async start() {}

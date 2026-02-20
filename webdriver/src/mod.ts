@@ -17,39 +17,12 @@ if (config instanceof Error) {
 }
 
 let eventbus = new EventBus();
-
-// generate components
-
-// there's no reason for logger to follow the logger interface
 let logger = new Logger(eventbus);
-
 let router = new Router(config, eventbus);
-let webdrivers = new WebDrivers(config);
-let server = http.createServer();
-
-// grand timeout
-let abortController = new AbortController();
-
-// wrap stuff up in a neat little promise?
-// make webdriver session a promise?
-
-// add webdriver events
-webdrivers.addEventListener("complete", function () {
-	abortController.abort();
-});
-webdrivers.addEventListener("error", function () {
-	webdrivers.next();
-});
-
-// add router events
-router.addEventListener("complete", function () {
-	webdrivers.next();
-});
-router.addEventListener("error", function () {
-	webdrivers.next();
-});
+let webdrivers = new WebDrivers(config, eventbus);
 
 // run server
+let server = http.createServer();
 server.on("request", router.route);
 server.on("close", function () {
 	console.log("closing the server");
@@ -57,6 +30,7 @@ server.on("close", function () {
 	logger.cancelled || logger.failed ? process.exit(1) : process.exit(0);
 });
 
+let abortController = new AbortController();
 let { signal } = abortController;
 let { port, hostname } = config.hostAndPort;
 server.listen({
@@ -66,4 +40,4 @@ server.listen({
 });
 
 // start test run
-webdrivers.next();
+webdrivers.start();

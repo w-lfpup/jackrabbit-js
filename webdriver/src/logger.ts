@@ -2,12 +2,19 @@ import type {
 	LoggerAction,
 	LoggerInterface,
 } from "../../core/dist/jackrabbit_types.js";
-import type { EventBus } from "./eventbus.js";
+import type { EventBus, WebdriverActions } from "./eventbus.js";
 
 // A LOG Event would allow me to send actions
 //
 
-export class Logger implements LoggerInterface {
+// log sync -> print out results as they happen
+// log async -> save results print when all done
+
+// need config for webdriver names and stuff
+
+// need to track each web driver
+
+export class Logger {
 	failed: boolean = false;
 	errored: boolean = false;
 	cancelled: boolean = false;
@@ -18,37 +25,42 @@ export class Logger implements LoggerInterface {
 		eventbus.addListener("log", this.#boundLog);
 	}
 
-	#log(action: SuperLoggerActions) {
+	#log(action: WebdriverActions) {
+		if ("log" !== action.type) return;
 		console.log("action:\n", action);
 
-		if ("start_env" === action.type) {
+		let { loggerAction, id } = action;
+
+		console.log("loggerAction:\n", loggerAction);
+
+		if ("start_env" === loggerAction.type) {
 		}
-		if ("end_env" === action.type) {
+		if ("end_env" === loggerAction.type) {
 		}
-		if ("env_error" === action.type) {
+		if ("env_error" === loggerAction.type) {
 		}
 
-		if ("start_run" === action.type) {
+		if ("start_run" === loggerAction.type) {
 		}
-		if ("end_run" === action.type) {
+		if ("end_run" === loggerAction.type) {
 		}
-		if ("run_error" === action.type) {
+		if ("run_error" === loggerAction.type) {
 		}
-		if ("start_module" === action.type) {
+		if ("start_module" === loggerAction.type) {
 		}
-		if ("end_module" === action.type) {
+		if ("end_module" === loggerAction.type) {
 		}
-		if ("module_error" === action.type) {
+		if ("module_error" === loggerAction.type) {
 		}
-		if ("start_test" === action.type) {
+		if ("start_test" === loggerAction.type) {
 		}
-		if ("end_test" === action.type) {
+		if ("end_test" === loggerAction.type) {
 		}
-		if ("test_error" === action.type) {
+		if ("test_error" === loggerAction.type) {
 		}
 
-		if ("end_test" === action.type) {
-			let { assertions } = action;
+		if ("end_test" === loggerAction.type) {
+			let { assertions } = loggerAction;
 
 			if (Array.isArray(assertions)) {
 				if (assertions.length) this.failed = true;
