@@ -20,13 +20,13 @@ export interface TestModule {
 }
 
 interface StartRun {
-	time: number;
 	expected_collection_count: number;
 	type: "start_run";
 }
 
 interface EndRun {
-	time: number;
+	start_time: number;
+	end_time: number;
 	type: "end_run";
 }
 
@@ -93,10 +93,10 @@ interface TestError {
 interface EndTest {
 	assertions: Assertions;
 	collection_id: number;
-	end_time: number;
 	module_id: number;
-	start_time: number;
 	test_id: number;
+	start_time: number;
+	end_time: number;
 	type: "end_test";
 }
 

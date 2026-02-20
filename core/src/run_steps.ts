@@ -2,7 +2,18 @@ import type {
 	Assertions,
 	LoggerInterface,
 	TestModule,
+	Test,
+	TestOptions,
 } from "./jackrabbit_types.ts";
+
+interface ExecTestParams {
+	logger: LoggerInterface;
+	options: TestOptions | undefined;
+	jrTest: Test;
+	collection_id: number;
+	module_id: number;
+	test_id: number;
+}
 
 const TIMEOUT_INTERVAL_MS = 10000;
 
@@ -22,72 +33,70 @@ async function createTimeout(
 	return `timed out at ${performance.now()} after ${timeoutMs} ms.`;
 }
 
-async function prepareTest(
-	testModules: TestModule[],
-	logger: LoggerInterface,
-	collection_id: number,
-	module_id: number,
-	test_id: number,
-) {
-	const { tests, options } = testModules[module_id];
-	const test_name =
-		testModules[module_id]?.tests[test_id]?.name ?? test_id.toString();
+async function execTest(params: ExecTestParams) {
+	const { logger, options, jrTest, test_id, collection_id, module_id } = params;
 
-	// should be a promise
-	return async function () {
-		logger.log({
+	const test_name = jrTest.name ?? test_id.toString();
+
+	logger.log({
+		collection_id,
+		module_id,
+		test_id,
+		test_name,
+		type: "start_test",
+	});
+
+	let start_time = performance.now();
+
+	let assertions: Assertions;
+	try {
+		assertions = await Promise.race([
+			createTimeout(options?.timeoutMs),
+			jrTest(),
+		]);
+	} catch (e: unknown) {
+		return logger.log({
 			collection_id,
+			error: e?.toString() ?? "wild test error",
 			module_id,
 			test_id,
-			test_name,
-			type: "start_test",
+			type: "test_error",
 		});
+	}
 
-		const testFunc = tests[test_id];
-		const start_time = performance.now();
-		let assertions: Assertions;
-		try {
-			assertions = await Promise.race([
-				createTimeout(options?.timeoutMs),
-				testFunc(),
-			]);
-		} catch (e: unknown) {
-			return logger.log({
-				collection_id,
-				error: e?.toString() ?? "wild test error",
-				module_id,
-				test_id,
-				type: "test_error",
-			});
-		}
+	let end_time = performance.now();
 
-		const end_time = performance.now();
-
-		logger.log({
-			assertions,
-			collection_id,
-			end_time,
-			module_id,
-			start_time,
-			test_id,
-			type: "end_test",
-		});
-	};
+	logger.log({
+		assertions,
+		collection_id,
+		start_time,
+		end_time,
+		module_id,
+		test_id,
+		type: "end_test",
+	});
 }
 
 async function execCollection(
 	logger: LoggerInterface,
-	testModules: TestModule[],
+	testModule: TestModule,
 	collection_id: number,
 	module_id: number,
 ) {
-	const { tests } = testModules[module_id];
+	const { tests, options } = testModule;
 
 	const wrappedTests = [];
-	for (let [test_id] of tests.entries()) {
-		wrappedTests.push(
-			prepareTest(testModules, logger, collection_id, module_id, test_id),
-		);
+	for (let [test_id, jrTest] of tests.entries()) {
+		wrappedTests.push(async function () {
+			await execTest({
+				logger,
+				options,
+				jrTest,
+				collection_id,
+				module_id,
+				test_id,
+			});
+		});
 	}
 
 	await Promise.all(wrappedTests);
@@ -95,14 +104,21 @@ async function execCollection(
 
 async function execCollectionOrdered(
 	logger: LoggerInterface,
-	testModules: TestModule[],
+	testModule: TestModule,
 	collection_id: number,
 	module_id: number,
 ) {
-	const { tests } = testModules[module_id];
+	const { tests, options } = testModule;
 
-	for (let [test_id] of tests.entries()) {
-		await prepareTest(testModules, logger, collection_id, module_id, test_id);
+	for (let [test_id, jrTest] of tests.entries()) {
+		await execTest({
+			logger,
+			options,
+			jrTest,
+			collection_id,
+			module_id,
+			test_id,
+		});
 	}
 }
 
@@ -133,10 +149,10 @@ export async function runCollection(
 		});
 
 		options?.runAsynchronously
-			? await execCollection(logger, testModules, collection_id, module_id)
+			? await execCollection(logger, testModule, collection_id, module_id)
 			: await execCollectionOrdered(
 					logger,
-					testModules,
+					testModule,
 					collection_id,
 					module_id,
 				);
