@@ -24,7 +24,6 @@ export class WebDrivers {
 	async start() {}
 }
 
-// async conditions feel off
 class WebdriverSession {
 	#params: WebdriverParams;
 	#hostAndPort: URL;
