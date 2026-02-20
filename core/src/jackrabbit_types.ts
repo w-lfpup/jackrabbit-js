@@ -49,7 +49,6 @@ interface EndTestCollection {
 
 interface TestCollectionError {
 	collection_id: number;
-	time: number;
 	error: string;
 	type: "collection_error";
 }

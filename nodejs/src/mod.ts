@@ -4,11 +4,10 @@ import { Logger } from "./logger.js";
 import * as path from "path";
 import { runCollection } from "../../core/dist/mod.js";
 
-const logger = new Logger();
-
 let filepaths = process.argv.slice(2);
 
-// start run
+const logger = new Logger();
+
 logger.log({
 	type: "start_run",
 	time: performance.now(),
@@ -24,8 +23,7 @@ for (const [collection_id, file] of filepaths.entries()) {
 	} catch (e: unknown) {
 		logger.log({
 			type: "collection_error",
-			collection_id: index,
-			url: filepath,
+			collection_id,
 			error: e?.toString() ?? "wild horses error",
 		});
 	}
@@ -35,8 +33,5 @@ logger.log({
 	type: "end_run",
 	time: performance.now(),
 });
-
-// end run
-// log results
 
 logger.failed || logger.errored ? process.exit(1) : process.exit(0);

@@ -19,8 +19,7 @@ for (const [collection_id, file] of filepaths.entries()) {
     catch (e) {
         logger.log({
             type: "collection_error",
-            collection_id: index,
-            url: filepath,
+            collection_id,
             error: e?.toString() ?? "wild horses error",
         });
     }
