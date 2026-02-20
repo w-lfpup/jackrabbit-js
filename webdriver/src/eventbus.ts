@@ -15,8 +15,12 @@ interface WebdriverSessionErrorAction extends WebdriverSessionAction {
 	error: Error;
 }
 
-interface WebdriverSessionCompleteAction extends WebdriverSessionAction {
-	type: "session_complete";
+interface WebdriverSessionClosedAction extends WebdriverSessionAction {
+	type: "session_closed";
+}
+
+interface WebdriverRunCompleteAction extends WebdriverSessionAction {
+	type: "run_complete";
 }
 
 interface WebdriverLogAction extends WebdriverSessionAction {
@@ -26,23 +30,24 @@ interface WebdriverLogAction extends WebdriverSessionAction {
 
 type WebdriverActions =
 	| WebdriverSessionStartAction
-	| WebdriverSessionCompleteAction
+	| WebdriverSessionClosedAction
 	| WebdriverSessionErrorAction
+	| WebdriverRunCompleteAction
 	| WebdriverLogAction;
 
-interface EventbusListener {
+interface EventBusListener {
 	(action: WebdriverActions): void;
 }
 
 export interface EventBusInterface {
-	addListener(type: string, listener: EventbusListener): void;
+	addListener(type: string, listener: EventBusListener): void;
 	dispatchAction(action: WebdriverActions): void;
 }
 
 export class EventBus implements EventBusInterface {
-	#eventMap: Map<string, EventbusListener[]> = new Map();
+	#eventMap: Map<string, EventBusListener[]> = new Map();
 
-	addListener(type: string, cb: EventbusListener) {
+	addListener(type: string, cb: EventBusListener) {
 		let listeners = this.#eventMap.get(type);
 		if (!listeners) {
 			listeners = [];

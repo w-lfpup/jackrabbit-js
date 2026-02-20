@@ -1,7 +1,6 @@
 import { METHODS, type IncomingMessage, type ServerResponse } from "http";
 import * as fs from "fs";
 import * as path from "path";
-import { Listeners } from "./listeners.js";
 import { testHanger } from "./test_hangar.js";
 import { ConfigInterface } from "./config.js";
 
@@ -9,6 +8,7 @@ import {
 	LoggerAction,
 	LoggerInterface,
 } from "../../core/dist/jackrabbit_types.js";
+import type { EventBus } from "./eventbus.js";
 
 let cwd = process.cwd();
 
@@ -44,7 +44,7 @@ export class Router {
 	#config: ConfigInterface;
 	#logger: LoggerInterface;
 
-	constructor(config: ConfigInterface, logger: LoggerInterface) {
+	constructor(config: ConfigInterface, eventbus: EventBus) {
 		this.#config = config;
 		this.#logger = logger;
 	}
@@ -121,10 +121,6 @@ export class Router {
 			res.end();
 		}
 	}
-
-	// addEventListener(eventName: string, cb: EventListener) {
-	// 	this.#listeners.addEventListener(eventName, cb);
-	// }
 }
 
 async function getFile(

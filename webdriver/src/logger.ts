@@ -2,34 +2,7 @@ import type {
 	LoggerAction,
 	LoggerInterface,
 } from "../../core/dist/jackrabbit_types.js";
-
-interface StartWebdriver {
-	type: "start_env";
-}
-
-interface EndWebdriver {
-	type: "end_env";
-}
-
-interface WebdriverError {
-	type: "env_error";
-}
-type WebdriverActions = StartWebdriver | EndWebdriver | WebdriverError;
-
-type SuperLoggerActions = LoggerAction | WebdriverActions;
-
-interface LoggerData {
-	cancelled: boolean;
-	errored: boolean;
-	failed: boolean;
-	startTime: number;
-	testTime: number;
-}
-
-interface ModuleData {
-	numberOfTests: 0;
-	numberOfFails: 0;
-}
+import type { EventBus } from "./eventbus.js";
 
 // A LOG Event would allow me to send actions
 //
@@ -39,7 +12,13 @@ export class Logger implements LoggerInterface {
 	errored: boolean = false;
 	cancelled: boolean = false;
 
-	log(action: SuperLoggerActions) {
+	#boundLog = this.#log.bind(this);
+
+	constructor(eventbus: EventBus) {
+		eventbus.addListener("log", this.#boundLog);
+	}
+
+	#log(action: SuperLoggerActions) {
 		console.log("action:\n", action);
 
 		if ("start_env" === action.type) {

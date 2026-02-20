@@ -12,7 +12,7 @@ export interface WebdriverParams {
 	url: URL;
 	title: string;
 	timeoutMs: number;
-	jackrabbitSessionID: string;
+	sessionID: string;
 }
 
 export interface ConfigInterface {
@@ -40,9 +40,9 @@ export async function createConfig(
 				if (params instanceof Error) return params;
 
 				let session = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER);
-				let jackrabbitSessionID = `${index}:${session.toString(32)}`;
+				let sessionID = `${index}:${session.toString(32)}`;
 
-				webdrivers.push({ ...params, jackrabbitSessionID });
+				webdrivers.push({ ...params, sessionID });
 			}
 		return {
 			hostAndPort,

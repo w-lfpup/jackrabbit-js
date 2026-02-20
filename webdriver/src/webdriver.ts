@@ -1,5 +1,6 @@
 import type { ConfigInterface, WebdriverParams } from "./config.js";
 import { ChildProcess, exec } from "child_process";
+import type { EventBus } from "./eventbus.js";
 
 // Events
 // - complete
@@ -23,97 +24,55 @@ export class WebDrivers {
 	async start() {}
 }
 
-// on ABORT needs to have a way of sill downing all the
-// export class WebDrivers {
-// 	#listeners = new Listeners();
-// 	#config: ConfigInterface;
-// 	#configIndex: number;
-// 	#session: WebdriverSession | undefined;
-
-// 	constructor(config: ConfigInterface) {
-// 		this.#config = config;
-// 		this.#configIndex = 0;
-// 	}
-
-// 	addEventListener(eventName: string, cb: EventListener) {
-// 		this.#listeners.addEventListener(eventName, cb);
-// 	}
-
-// 	async next() {
-// 		await this.#session?.abort();
-
-// 		let driverCmd = this.#config.webdrivers[this.#configIndex];
-// 		if (!driverCmd) return this.#listeners.dispatchEvent(new Event("complete"));
-
-// 		this.#configIndex += 1;
-// 		let { command, url, timeoutMs } = driverCmd;
-// 		let { hostAndPort } = this.#config;
-// 		this.#session = new WebdriverSession({
-// 			command,
-// 			hostAndPort,
-// 			listeners: this.#listeners,
-// 			timeoutMs,
-// 			url,
-// 		});
-// 	}
-
-// 	// queue
-
-// 	// all
-
-// 	async all() {
-// 		Promise.all([])
-// 	}
-// }
-
-// above class is for order
-
-// below class is for implementation
-// below class needs an "error" or "complete" callback
-
-// this can be used for promises and callbacks
-
-interface WebDriverSessionParams {
-	command: string;
-	hostAndPort: URL;
-	timeoutMs: number;
-	url: URL;
-}
-
 // async conditions feel off
 class WebdriverSession {
 	#params: WebdriverParams;
-	#process: ChildProcess;
-	#signal: AbortSignal;
+	#hostAndPort: URL;
+	#eventbus: EventBus;
+	#signal: AbortSignal | undefined;
 	#abortController: AbortController;
-	#sessionId: string | undefined;
+	#session: string | undefined;
 
-	constructor(params: WebdriverParams, hostAndPort: URL) {
+	constructor(params: WebdriverParams, hostAndPort: URL, eventbus: EventBus) {
 		this.#params = params;
-		let { command, timeoutMs } = this.#params;
-
-		// something like this to keep stuff moving
+		this.#hostAndPort = hostAndPort;
+		this.#eventbus = eventbus;
 		this.#abortController = new AbortController();
+
+		this.#eventbus.addListener("run_complete", (action) => {
+			if (action.id === this.#params.sessionID) this.#down();
+		});
+	}
+
+	async run() {
+		let { command, url, sessionID, timeoutMs } = this.#params;
+
+		this.#eventbus.dispatchAction({
+			id: this.#params.sessionID,
+			type: "session_start",
+		});
+
 		this.#signal = AbortSignal.any([
 			this.#abortController.signal,
 			AbortSignal.timeout(timeoutMs),
 		]);
 
-		this.#process = exec(command, { signal: this.#signal });
-		this.#process.addListener("error", () => {
-			this.#abortController.abort();
+		this.#signal.addEventListener("abort", () => {
+			this.#eventbus.dispatchAction({
+				type: "session_closed",
+				id: this.#params.sessionID,
+			});
 		});
 
-		this.#onSpawn();
-	}
-
-	async abort() {
-		await this.#onDown();
-		this.#abortController.abort();
-	}
-
-	async #onSpawn() {
-		let { hostAndPort, url } = this.#params;
+		exec(command, { signal: this.#signal }, (error) => {
+			if (error)
+				this.#eventbus.dispatchAction({
+					id: this.#params.sessionID,
+					type: "session_error",
+					error,
+				});
+			this.#abortController.abort();
+		});
 
 		try {
 			await untilWebdriverReady(url, this.#signal);
@@ -129,21 +88,37 @@ class WebdriverSession {
 			}
 
 			let json = await res.json();
-			let { sessionId } = json?.value;
+			let { session } = json?.value;
+			if (typeof session !== "string")
+				throw new Error("session is not a string");
+			this.#session = session;
 
-			if (typeof sessionId !== "string")
-				throw new Error("SessionId is not a string");
-
-			// add cookie with unique id
-			let domain = hostAndPort.host;
-
-			this.#sessionId = sessionId;
-			let goToUrlRes = await fetch(
-				new URL(`/session/${this.#sessionId}/url`, url),
+			let cookieReq = await fetch(
+				new URL(`/session/${this.#session}/cookie`, url),
 				{
 					method: "POST",
 					headers,
-					body: JSON.stringify({ url: hostAndPort }),
+					body: JSON.stringify({
+						cookie: {
+							name: "jackrabbit",
+							value: sessionID,
+							path: "/",
+							domain: this.#hostAndPort.host,
+						},
+					}),
+					signal: this.#signal,
+				},
+			);
+
+			if (200 !== cookieReq.status)
+				throw new Error("set-cookie request failed");
+
+			let goToUrlRes = await fetch(
+				new URL(`/session/${this.#session}/url`, url),
+				{
+					method: "POST",
+					headers,
+					body: JSON.stringify({ url: this.#hostAndPort }),
 					signal: this.#signal,
 				},
 			);
@@ -151,30 +126,39 @@ class WebdriverSession {
 			if (200 !== goToUrlRes.status)
 				throw new Error("go-to-url request failed");
 		} catch (e) {
-			console.log(e);
-			this.#params.listeners.dispatchEvent(new Event("error"));
+			let error = e instanceof Error ? e : new Error("unknown session error");
+			this.#eventbus.dispatchAction({
+				type: "session_error",
+				id: this.#params.sessionID,
+				error,
+			});
+			this.#abortController.abort();
 		}
 	}
 
-	async #onDown() {
-		let { url } = this.#params;
-		if (!this.#sessionId) return;
+	async #down() {
+		if (this.#session) {
+			let { url } = this.#params;
+			try {
+				await fetch(new URL(`/session/${this.#session}`, url), {
+					method: "DELETE",
+					headers,
+					body: null,
+					signal: this.#signal,
+				});
+			} catch {}
+		}
 
-		try {
-			await fetch(new URL(`/session/${this.#sessionId}`, url), {
-				method: "DELETE",
-				headers,
-				body: null,
-				signal: this.#signal,
-			});
-		} catch {}
+		this.#abortController.abort();
 	}
 }
 
 async function untilWebdriverReady(
 	url: URL,
-	signal: AbortSignal,
+	signal: AbortSignal | undefined,
 ): Promise<void> {
+	if (!signal) return;
+
 	while (!signal.aborted) {
 		try {
 			let res = await fetch(new URL("/status", url), {
