@@ -25,9 +25,7 @@ export function sleep(time: number): Promise<void> {
 	});
 }
 
-async function createTimeout(
-	timeoutMs: number = TIMEOUT_INTERVAL_MS,
-): Promise<Assertions> {
+async function failAfterTimeout(timeoutMs: number): Promise<Assertions> {
 	await sleep(timeoutMs);
 
 	return `timed out at ${performance.now()} after ${timeoutMs} ms.`;
@@ -51,7 +49,7 @@ async function execTest(params: ExecTestParams) {
 	let assertions: Assertions;
 	try {
 		assertions = await Promise.race([
-			createTimeout(options?.timeoutMs),
+			failAfterTimeout(options?.timeoutMs ?? TIMEOUT_INTERVAL_MS),
 			jrTest(),
 		]);
 	} catch (e: unknown) {
