@@ -33,6 +33,8 @@ async function execTest(
 	const test_Name =
 		testModules[module_id]?.tests[test_id]?.name ?? test_id.toString();
 
+	// should be a promise
+
 	logger.log({
 		type: "start_test",
 		module_id,
@@ -102,9 +104,9 @@ async function execCollectionOrdered(
 
 export async function runCollection(
 	logger: LoggerInterface,
+	testModules: TestModule[],
 	collection_id: number,
 	collection_url: string,
-	testModules: TestModule[],
 ) {
 	logger.log({
 		collection_id,

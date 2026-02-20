@@ -30,6 +30,11 @@ interface EndRun {
 	type: "end_run";
 }
 
+interface RunError {
+	error: string;
+	type: "run_error";
+}
+
 interface StartTestCollection {
 	collection_id: number;
 	collection_url: string;
@@ -50,48 +55,48 @@ interface TestCollectionError {
 }
 
 interface StartModule {
-	module_id: number;
-	module_name: string;
 	collection_id: number;
 	expected_test_count: number;
+	module_id: number;
+	module_name: string;
 	type: "start_module";
 }
 
 interface EndModule {
-	module_id: number;
 	collection_id: number;
+	module_id: number;
 	type: "end_module";
 }
 
 interface ModuleError {
+	collection_id: number;
 	error: string;
 	module_id: number;
-	collection_id: number;
 	type: "module_error";
 }
 
 interface StartTest {
-	module_id: number;
 	collection_id: number;
+	module_id: number;
 	test_id: number;
 	test_name: string;
 	type: "start_test";
 }
 
 interface TestError {
+	collection_id: number;
 	error: string;
 	module_id: number;
-	collection_id: number;
 	test_id: number;
 	type: "test_error";
 }
 
 interface EndTest {
 	assertions: Assertions;
+	collection_id: number;
 	end_time: number;
 	module_id: number;
 	start_time: number;
-	collection_id: number;
 	test_id: number;
 	type: "end_test";
 }
@@ -99,6 +104,7 @@ interface EndTest {
 export type LoggerAction =
 	| StartRun
 	| EndRun
+	| RunError
 	| StartTestCollection
 	| EndTestCollection
 	| TestCollectionError

@@ -1,5 +1,5 @@
 import { Logger } from "./logger.js";
-import { runCollection } from "./runner.js";
+import { run } from "./runner.js";
 
 let logger = new Logger();
 
@@ -11,10 +11,21 @@ try {
 	// should be it's own verification and then throw
 	let config = JSON.parse(jackrabbitMap.textContent);
 
-	runCollection(logger, config.test_collections, config.jackrabbit_url);
+	logger.log({
+		type: "start_run",
+		time: performance.now(),
+		expected_collection_count: config?.test_collections?.length ?? 0,
+	});
+
+	run(logger, config.test_collections, config.jackrabbit_url);
 } catch (e: unknown) {
 	logger.log({
-		type: "test_collection_error",
+		type: "run_error",
 		error: e?.toString() ?? "wild horses error",
 	});
 }
+
+logger.log({
+	type: "end_run",
+	time: performance.now(),
+});

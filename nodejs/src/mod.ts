@@ -15,12 +15,12 @@ logger.log({
 	expected_collection_count: filepaths.length,
 });
 
-for (const [index, file] of filepaths.entries()) {
+for (const [collection_id, file] of filepaths.entries()) {
 	let filepath = path.join(process.cwd(), file);
 
 	try {
 		const { testModules } = await import(filepath);
-		await runCollection(logger, filepath, testModules);
+		await runCollection(logger, testModules, collection_id, filepath);
 	} catch (e: unknown) {
 		logger.log({
 			type: "collection_error",
@@ -30,6 +30,11 @@ for (const [index, file] of filepaths.entries()) {
 		});
 	}
 }
+
+logger.log({
+	type: "end_run",
+	time: performance.now(),
+});
 
 // end run
 // log results

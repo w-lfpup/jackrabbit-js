@@ -1,16 +1,16 @@
 import type { Logger } from "./logger.js";
 
-import { startRun } from "jackrabbit/core/dist/mod.js";
+import { runCollection } from "jackrabbit/core/dist/mod.js";
 
 export async function run(logger: Logger, files: string[], baseUrl: string) {
-	for (const url of files) {
+	for (const [collection_id, url] of files.entries()) {
 		try {
 			let filepath = URL.parse(url, baseUrl);
 			if (null === filepath) throw new Error("Failed to import url: " + url);
 
 			let filepathStr = filepath.toString();
 			const { testModules } = await import(filepath.toString());
-			await startRun(logger, filepathStr, testModules);
+			await runCollection(logger, testModules, collection_id, filepathStr);
 		} catch (e: unknown) {
 			logger.log({
 				type: "run_error",
