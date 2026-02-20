@@ -31,7 +31,7 @@ export class Logger implements LoggerInterface {
 	log(action: LoggerAction) {
 		if ("start_run" === action.type) {
 			this.#data.startTime = action.time;
-			console.log(action.filepath);
+			console.log(action.url);
 		}
 
 		if ("start_test" === action.type) {
@@ -88,10 +88,10 @@ export class Logger implements LoggerInterface {
 			logResults(this.#data, action.time);
 		}
 
-		if ("run_error" === action.type) {
-			this.#data.errored = true;
-			console.log(`RUN ERROR:\n${action.error}\n`);
-		}
+		// if ("test_collection_error" === action.type) {
+		// 	this.#data.errored = true;
+		// 	console.log(`RUN ERROR:\n${action.error}\n`);
+		// }
 	}
 }
 

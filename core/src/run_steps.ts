@@ -6,7 +6,7 @@ import type {
 
 const TIMEOUT_INTERVAL_MS = 10000;
 
-function sleep(time: number): Promise<void> {
+export function sleep(time: number): Promise<void> {
 	return new Promise((resolve) => {
 		setTimeout(() => {
 			resolve();
@@ -101,14 +101,14 @@ async function execCollectionOrdered(
 	}
 }
 
-export async function startRun(
+export async function runCollection(
 	logger: LoggerInterface,
-	filepath: string,
+	url: string,
 	testModules: TestModule[],
 ) {
 	logger.log({
 		type: "start_run",
-		filepath,
+		url,
 		time: performance.now(),
 	});
 
