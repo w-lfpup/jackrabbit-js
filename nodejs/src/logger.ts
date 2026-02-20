@@ -1,7 +1,6 @@
 import type { LoggerAction, LoggerInterface } from "../../core/dist/mod.js";
 
 interface LoggerData {
-	cancelled: boolean;
 	errored: boolean;
 	failed: boolean;
 	startTime: number;
@@ -10,7 +9,6 @@ interface LoggerData {
 
 export class Logger implements LoggerInterface {
 	#data: LoggerData = {
-		cancelled: false,
 		failed: false,
 		errored: false,
 		startTime: 0,
@@ -30,19 +28,10 @@ export class Logger implements LoggerInterface {
 		return this.#data.errored;
 	}
 
-	get cancelled() {
-		return this.#data.cancelled;
-	}
-
 	log(action: LoggerAction) {
 		if ("start_run" === action.type) {
 			this.#data.startTime = action.time;
 			console.log(action.filepath);
-		}
-
-		if ("cancel_run" === action.type) {
-			this.#data.cancelled = true;
-			console.log("RUN CANCELLED\n");
 		}
 
 		if ("start_test" === action.type) {
@@ -110,10 +99,6 @@ function logResults(data: LoggerData, time: number) {
 	let status_with_color = data.failed
 		? yellow("\u{2717} failed")
 		: blue("\u{2714} passed");
-
-	if (data.cancelled) {
-		status_with_color = gray("\u{2717} cancelled");
-	}
 
 	if (data.errored) {
 		status_with_color = gray("\u{2717} errored");

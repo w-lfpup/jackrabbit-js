@@ -30,12 +30,6 @@ interface EndRun {
 	type: "end_run";
 }
 
-interface StartModule {
-	moduleId: number;
-	moduleName: string;
-	type: "start_module";
-}
-
 interface StartTestCollection {
 	time: number;
 	filepath: string;
@@ -50,6 +44,12 @@ interface EndTestCollection {
 interface TestCollectionError {
 	time: number;
 	type: "test_collection_error";
+}
+
+interface StartModule {
+	moduleId: number;
+	moduleName: string;
+	type: "start_module";
 }
 
 interface EndModule {
@@ -110,9 +110,5 @@ export type LoggerAction =
 	| TestError;
 
 export interface LoggerInterface {
-	readonly cancelled: boolean;
-	// readonly passed: boolean;
-	// readonly errored: boolean;
-
 	log(action: LoggerAction): void;
 }

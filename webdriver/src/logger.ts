@@ -33,12 +33,12 @@ export class Logger {
 
 		console.log("loggerAction:\n", loggerAction);
 
-		if ("start_env" === loggerAction.type) {
-		}
-		if ("end_env" === loggerAction.type) {
-		}
-		if ("env_error" === loggerAction.type) {
-		}
+		// if ("start_env" === loggerAction.type) {
+		// }
+		// if ("end_env" === loggerAction.type) {
+		// }
+		// if ("env_error" === loggerAction.type) {
+		// }
 
 		if ("start_run" === loggerAction.type) {
 		}
