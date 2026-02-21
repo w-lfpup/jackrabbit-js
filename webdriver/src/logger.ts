@@ -27,7 +27,6 @@ export class Logger {
 
 	#log(action: WebdriverActions) {
 		if ("log" !== action.type) return;
-		console.log("action:\n", action);
 
 		let { loggerAction, id, urlStr } = action;
 

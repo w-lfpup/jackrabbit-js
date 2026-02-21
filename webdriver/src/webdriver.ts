@@ -159,24 +159,27 @@ class WebdriverSession {
 			}
 
 			let json = await res.json();
-			let { session } = json?.value;
-			if (typeof session !== "string")
+			let { sessionId } = json?.value;
+			if (typeof sessionId !== "string")
 				throw new Error("session is not a string");
-			this.#session = session;
+			this.#session = sessionId;
 
+			let cookie = {
+				name: "jackrabbit",
+				value: sessionID,
+				path: "/",
+				domain: this.#hostAndPort.hostname,
+				httpOnly: true,
+			};
+
+			console.log("set cookie", cookie);
 			let cookieReq = await fetch(
 				new URL(`/session/${this.#session}/cookie`, url),
 				{
 					method: "POST",
 					headers,
 					body: JSON.stringify({
-						cookie: {
-							name: "jackrabbit",
-							value: sessionID,
-							path: "/",
-							domain: this.#hostAndPort.host,
-							httpOnly: true,
-						},
+						cookie,
 					}),
 					signal: this.#signal,
 				},
