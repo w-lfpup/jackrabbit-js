@@ -1,13 +1,12 @@
 node_modules/
+core/dist/
+browser/dist/
+nodejs/dist/
+tests/dist/
+webdriver/dist/
 
-# odd syntax but important to preserve exec privleges 
-**/dist/*
-
-
-# to prevent removal of the file to preserve exec +x
+# odd but important to preserve exec privleges 
 !nodejs/dist/mod.js
-
-# webdriver/dist/
 !webdriver/dist/mod.js
 
 *.tsbuildinfo
