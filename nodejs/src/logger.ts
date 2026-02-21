@@ -1,10 +1,30 @@
 import type { LoggerAction, LoggerInterface } from "../../core/dist/mod.js";
 
+/**
+ * TODO(taylorvann):
+ *
+ * Logging tests in order is not a priority.
+ * I will come back to it when I feel like it.
+ */
+
 interface LoggerData {
 	errored: boolean;
 	failed: boolean;
 	startTime: number;
 	testTime: number;
+}
+
+interface ModuleReceipt {
+	title: string;
+	assertions: LoggerAction[];
+}
+
+interface CollectionReceipt {
+	title: string;
+	numberOfTest: number;
+	numberOfFails: number;
+	numberOfErrors: number;
+	moduleReceipts: ModuleReceipt[];
 }
 
 export class Logger implements LoggerInterface {
@@ -15,10 +35,7 @@ export class Logger implements LoggerInterface {
 		testTime: 0,
 	};
 
-	#moduleReciepts = {
-		numberOfTests: 0,
-		numberOfFails: 0,
-	};
+	#collectionReceipts: (CollectionReceipt | undefined)[] = [];
 
 	get failed() {
 		return this.#data.failed;
@@ -29,69 +46,50 @@ export class Logger implements LoggerInterface {
 	}
 
 	log(action: LoggerAction) {
+		// if ("start_run" === action.type) {
+		// 	this.#data.startTime = action.time;
+		// }
+
 		if ("start_run" === action.type) {
+			// verify two properties are correct type first
+			this.#collectionReceipts = new Array(action.expected_collection_count);
 			this.#data.startTime = action.time;
-			console.log(action.url);
 		}
 
-		if ("start_test" === action.type) {
-			this.#moduleReciepts.numberOfTests += 1;
-		}
-
-		//  add to fails
-		if ("end_test" === action.type) {
-			this.#data.testTime += action.endTime - action.startTime;
-
-			if (undefined === action.assertions) return;
-			if (Array.isArray(action.assertions) && action.assertions.length === 0)
-				return;
-
-			this.#moduleReciepts.numberOfFails += 1;
-			this.#data.failed = true;
-
-			console.log(`    ${action.testName}`);
-			if (Array.isArray(action.assertions)) {
-				for (const assertion of action.assertions) {
-					console.log(`      ${assertion}`);
-				}
-			} else {
-				console.log(`      ${action.assertions}`);
-			}
-		}
-
-		if ("test_error" === action.type) {
-			this.#data.errored = true;
-			this.#moduleReciepts.numberOfFails += 1;
-			console.log(`      ${action.error}`);
-		}
-
-		if ("start_module" === action.type) {
-			console.log(`  ${action.moduleName}`);
-		}
-
-		if ("end_module" === action.type) {
-			let { numberOfFails, numberOfTests } = this.#moduleReciepts;
-			let remaining = Math.max(0, numberOfTests - numberOfFails);
-			console.log(`    results: ${remaining}/${numberOfTests}\n`);
-			this.#moduleReciepts = {
-				numberOfTests: 0,
+		if ("start_collection" === action.type) {
+			// create collection receipts
+			this.#collectionReceipts[action.collection_id] = {
+				title: action.collection_url,
+				numberOfTest: 0,
 				numberOfFails: 0,
+				numberOfErrors: 0,
+				moduleReceipts: new Array(action.expected_module_count),
 			};
 		}
 
+		if ("start_module" === action.type) {
+			// create test receipts
+			let moduleReceipts =
+				this.#collectionReceipts[action.collection_id]?.moduleReceipts;
+			if (moduleReceipts) {
+				moduleReceipts[action.module_id] = {
+					title: action.module_name,
+					assertions: [],
+				};
+			}
+		}
+
 		if ("module_error" === action.type) {
-			this.#data.errored = true;
-			console.log(`    ${action.error}\n`);
+		}
+
+		if ("end_test" === action.type) {
+		}
+
+		if ("test_error" === action.type) {
 		}
 
 		if ("end_run" === action.type) {
-			logResults(this.#data, action.time);
 		}
-
-		// if ("test_collection_error" === action.type) {
-		// 	this.#data.errored = true;
-		// 	console.log(`RUN ERROR:\n${action.error}\n`);
-		// }
 	}
 }
 

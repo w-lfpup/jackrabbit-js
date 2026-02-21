@@ -52,6 +52,18 @@ async function execTest(params: ExecTestParams) {
 			failAfterTimeout(options?.timeoutMs ?? TIMEOUT_INTERVAL_MS),
 			jrTest(),
 		]);
+
+		let end_time = performance.now();
+
+		logger.log({
+			assertions,
+			collection_id,
+			start_time,
+			end_time,
+			module_id,
+			test_id,
+			type: "end_test",
+		});
 	} catch (e: unknown) {
 		return logger.log({
 			collection_id,
@@ -61,18 +73,6 @@ async function execTest(params: ExecTestParams) {
 			type: "test_error",
 		});
 	}
-
-	let end_time = performance.now();
-
-	logger.log({
-		assertions,
-		collection_id,
-		start_time,
-		end_time,
-		module_id,
-		test_id,
-		type: "end_test",
-	});
 }
 
 async function execCollection(
@@ -85,8 +85,8 @@ async function execCollection(
 
 	const wrappedTests = [];
 	for (let [test_id, jrTest] of tests.entries()) {
-		wrappedTests.push(async function () {
-			await execTest({
+		wrappedTests.push(function () {
+			return execTest({
 				logger,
 				options,
 				jrTest,
@@ -156,9 +156,9 @@ export async function runCollection(
 				);
 
 		logger.log({
+			type: "end_module",
 			collection_id,
 			module_id,
-			type: "end_module",
 		});
 	}
 

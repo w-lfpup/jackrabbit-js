@@ -1,6 +1,6 @@
 import type { ConfigInterface, WebdriverParams } from "./config.js";
 import { ChildProcess, exec } from "child_process";
-import type { EventBus } from "./eventbus.js";
+import type { EventBus, WebdriverActions } from "./eventbus.js";
 
 // Events
 // - complete
@@ -14,17 +14,82 @@ let headers = new Headers([["Content-Type", "application/json"]]);
 export class WebDrivers {
 	#config: ConfigInterface;
 	#eventbus: EventBus;
-
-	// create promises with listeners and abort singals
+	#webdrivers: WebdriverSession[] = [];
+	#currentIndex = 0;
 
 	constructor(config: ConfigInterface, eventbus: EventBus) {
-		this.#config = config;
 		this.#eventbus = eventbus;
+		this.#config = config;
+
+		for (const params of config.webdrivers) {
+			this.#webdrivers.push(
+				new WebdriverSession(params, config.hostAndPort, eventbus),
+			);
+		}
 	}
 
-	async start() {}
+	run() {
+		this.#eventbus.addListener("session_closed", (action) => {
+			let webdriver = this.#webdrivers[this.#currentIndex];
+			this.#currentIndex += 1;
+
+			if (webdriver) {
+				webdriver.run();
+			} else {
+				this.#eventbus.dispatchAction({
+					type: "end",
+				});
+			}
+		});
+
+		let webdriver = this.#webdrivers[this.#currentIndex];
+		this.#currentIndex += 1;
+		if (webdriver) {
+			webdriver.run();
+		} else {
+			this.#eventbus.dispatchAction({
+				type: "end",
+			});
+		}
+	}
+
+	runAll() {
+		this.#eventbus.addListener("session_closed", (action) => {
+			if ("session_closed" === action.type) {
+				let { id } = action;
+				let [indexStr] = id.split(":");
+				let index = parseInt(indexStr);
+				let webdriverTarget = this.#webdrivers[index];
+				if (webdriverTarget) {
+					if (id === this.#config.webdrivers[index]?.sessionID)
+						this.#currentIndex += 1;
+				}
+
+				if (this.#currentIndex === this.#webdrivers.length) {
+					this.#eventbus.dispatchAction({
+						type: "end",
+					});
+				}
+			}
+		});
+
+		for (let webdriver of this.#webdrivers) {
+			webdriver.run();
+		}
+	}
 }
 
+// in sync world this does not matter
+//
+// let { id } = action;
+// let [indexStr, hash] = id.split(":");
+// let index = parseInt(indexStr);
+// let webdriverTarget = this.#webdrivers[index];
+// if (webdriverTarget) {
+// 	if (id === this.#config.webdrivers[index]?.sessionID){
+// 		resolve()
+// 	}
+// }
 class WebdriverSession {
 	#params: WebdriverParams;
 	#hostAndPort: URL;
@@ -40,11 +105,17 @@ class WebdriverSession {
 		this.#abortController = new AbortController();
 
 		this.#eventbus.addListener("run_complete", (action) => {
-			if (action.id === this.#params.sessionID) this.#down();
+			if (
+				"run_complete" === action.type &&
+				action.id === this.#params.sessionID
+			)
+				this.#down();
 		});
 	}
 
 	async run() {
+		// check if already running
+
 		let { command, url, sessionID, timeoutMs } = this.#params;
 
 		this.#eventbus.dispatchAction({
@@ -64,13 +135,13 @@ class WebdriverSession {
 			});
 		});
 
-		exec(command, { signal: this.#signal }, (error) => {
-			if (error)
-				this.#eventbus.dispatchAction({
-					id: this.#params.sessionID,
-					type: "session_error",
-					error,
-				});
+		let process = exec(command, { signal: this.#signal });
+		process.addListener("error", (error) => {
+			this.#eventbus.dispatchAction({
+				id: this.#params.sessionID,
+				type: "session_error",
+				error,
+			});
 			this.#abortController.abort();
 		});
 
@@ -104,6 +175,7 @@ class WebdriverSession {
 							value: sessionID,
 							path: "/",
 							domain: this.#hostAndPort.host,
+							httpOnly: true,
 						},
 					}),
 					signal: this.#signal,
@@ -146,7 +218,16 @@ class WebdriverSession {
 					body: null,
 					signal: this.#signal,
 				});
-			} catch {}
+			} catch (e) {
+				this.#eventbus.dispatchAction({
+					type: "session_error",
+					id: this.#params.sessionID,
+					error:
+						e instanceof Error
+							? e
+							: new Error("failed to delete session unknown error"),
+				});
+			}
 		}
 
 		this.#abortController.abort();

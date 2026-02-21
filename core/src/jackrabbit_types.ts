@@ -21,12 +21,12 @@ export interface TestModule {
 
 interface StartRun {
 	expected_collection_count: number;
+	time: number;
 	type: "start_run";
 }
 
 interface EndRun {
-	start_time: number;
-	end_time: number;
+	time: number;
 	type: "end_run";
 }
 
@@ -82,14 +82,6 @@ interface StartTest {
 	type: "start_test";
 }
 
-interface TestError {
-	collection_id: number;
-	error: string;
-	module_id: number;
-	test_id: number;
-	type: "test_error";
-}
-
 interface EndTest {
 	assertions: Assertions;
 	collection_id: number;
@@ -98,6 +90,14 @@ interface EndTest {
 	start_time: number;
 	end_time: number;
 	type: "end_test";
+}
+
+interface TestError {
+	collection_id: number;
+	error: string;
+	module_id: number;
+	test_id: number;
+	type: "test_error";
 }
 
 export type LoggerAction =

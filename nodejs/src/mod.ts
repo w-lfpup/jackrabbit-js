@@ -15,9 +15,8 @@ logger.log({
 });
 
 for (const [collection_id, file] of filepaths.entries()) {
-	let filepath = path.join(process.cwd(), file);
-
 	try {
+		let filepath = path.join(process.cwd(), file);
 		const { testModules } = await import(filepath);
 		await runCollection(logger, testModules, collection_id, filepath);
 	} catch (e: unknown) {

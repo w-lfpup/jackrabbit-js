@@ -24,6 +24,9 @@ server.on("close", function () {
     logger.cancelled || logger.failed ? process.exit(1) : process.exit(0);
 });
 let abortController = new AbortController();
+eventbus.addListener("end", function () {
+    abortController.abort();
+});
 let { signal } = abortController;
 let { port, hostname } = config.hostAndPort;
 server.listen({
@@ -32,4 +35,4 @@ server.listen({
     signal,
 });
 // start test run
-webdrivers.start();
+webdrivers.run();

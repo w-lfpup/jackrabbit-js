@@ -29,7 +29,7 @@ export class Logger {
 		if ("log" !== action.type) return;
 		console.log("action:\n", action);
 
-		let { loggerAction, id } = action;
+		let { loggerAction, id, urlStr } = action;
 
 		console.log("loggerAction:\n", loggerAction);
 

@@ -1,5 +1,3 @@
-// All webdriver events have a webdriver ID
-
 import { LoggerAction } from "../../core/dist/jackrabbit_types.js";
 
 interface WebdriverSessionAction {
@@ -25,11 +23,11 @@ interface WebdriverRunCompleteAction extends WebdriverSessionAction {
 
 interface WebdriverLogAction extends WebdriverSessionAction {
 	type: "log";
-	url: string | undefined;
+	urlStr: string | undefined;
 	loggerAction: LoggerAction;
 }
 
-interface WebdriverEndAction extends WebdriverSessionAction {
+interface WebdriverEndAction {
 	type: "end";
 }
 
@@ -63,6 +61,7 @@ export class EventBus implements EventBusInterface {
 	}
 
 	dispatchAction(action: WebdriverActions) {
+		console.log(action);
 		let listeners = this.#eventMap.get(action.type);
 		if (listeners)
 			for (const listener of listeners) {

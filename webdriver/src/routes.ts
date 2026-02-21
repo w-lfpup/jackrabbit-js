@@ -1,15 +1,11 @@
-import { METHODS, type IncomingMessage, type ServerResponse } from "http";
+import type { IncomingMessage, ServerResponse } from "http";
 import * as fs from "fs";
 import * as path from "path";
 import { testHanger } from "./test_hangar.js";
 import { ConfigInterface } from "./config.js";
 
-import {
-	LoggerAction,
-	LoggerInterface,
-} from "../../core/dist/jackrabbit_types.js";
+import { LoggerAction } from "../../core/dist/jackrabbit_types.js";
 import type { EventBus } from "./eventbus.js";
-import { Logger } from "./logger.js";
 
 let cwd = process.cwd();
 
@@ -31,14 +27,6 @@ const MIME_TYPES: Record<string, string> = {
 	ico: "image/x-icon",
 	svg: "image/svg+xml",
 };
-
-export class RouterEvent extends Event {
-	webdriverID: string;
-	constructor(type: string, webdriverID: string, eventInitDict?: EventInit) {
-		super(type, eventInitDict);
-		this.webdriverID = webdriverID;
-	}
-}
 
 export class Router {
 	#config: ConfigInterface;
@@ -81,7 +69,7 @@ export class Router {
 			let loggerAction = await getLoggerActionFromRequestBody(req);
 			this.#eventbus.dispatchAction({
 				type: "log",
-				url: req.url,
+				urlStr: req.url,
 				loggerAction,
 				id: "",
 			});

@@ -13,7 +13,8 @@ export async function run(logger: Logger, files: string[], baseUrl: string) {
 			await runCollection(logger, testModules, collection_id, filepathStr);
 		} catch (e: unknown) {
 			logger.log({
-				type: "run_error",
+				type: "collection_error",
+				collection_id,
 				error: e?.toString() ?? "wild horses error",
 			});
 		}
