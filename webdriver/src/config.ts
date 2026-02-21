@@ -40,7 +40,7 @@ export async function createConfig(
 				if (params instanceof Error) return params;
 
 				let session = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER);
-				let jrId = `${index}:${session.toString(32)}`;
+				let jrId = `${index}_${session.toString(32)}`;
 
 				webdrivers.push({ ...params, jrId });
 			}

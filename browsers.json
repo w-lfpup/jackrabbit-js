@@ -6,6 +6,12 @@
 			"title": "Safari",
 			"timeout_ms": 20000,
 			"url": "http://localhost:4001"
+		},
+		{
+			"command": "geckodriver -p 4001 ",
+			"title": "Firefox",
+			"timeout_ms": 20000,
+			"url": "http://localhost:4001"
 		}
 	]
 }

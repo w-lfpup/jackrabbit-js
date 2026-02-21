@@ -63,6 +63,12 @@ export class Router {
 			return res.end(hangar);
 		}
 
+		if (url === "/cookie" && "GET" === method) {
+			res.setHeader("Content-Type", "text/html");
+			res.writeHead(200);
+			return res.end("The cookie train has arrived!");
+		}
+
 		// log test actions
 		if (url.startsWith("/log/") && "POST" === method) {
 			console.log("log has a cookie?", req.headers.cookie);
@@ -72,7 +78,7 @@ export class Router {
 			for (const cookieLine of cookies) {
 				console.log(cookieLine);
 				if (cookieLine.startsWith("jackrabbit=")) {
-					let [name, value] = cookieLine.split("=");
+					let [_name, value] = cookieLine.split("=");
 					id = value;
 				}
 			}
