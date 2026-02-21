@@ -20,9 +20,11 @@ export class Logger {
 	cancelled: boolean = false;
 
 	#boundLog = this.#log.bind(this);
+	#eventbus: EventBus;
 
 	constructor(eventbus: EventBus) {
-		eventbus.addListener("log", this.#boundLog);
+		this.#eventbus = eventbus;
+		this.#eventbus.addListener("log", this.#boundLog);
 	}
 
 	#log(action: WebdriverActions) {
@@ -42,6 +44,10 @@ export class Logger {
 		if ("start_run" === loggerAction.type) {
 		}
 		if ("end_run" === loggerAction.type) {
+			this.#eventbus.dispatchAction({
+				type: "run_complete",
+				id,
+			});
 		}
 		if ("run_error" === loggerAction.type) {
 		}

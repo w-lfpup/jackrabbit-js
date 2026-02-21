@@ -17,15 +17,14 @@ try {
 		expected_collection_count: config?.test_collections?.length ?? 0,
 	});
 
-	run(logger, config.test_collections, config.jackrabbit_url);
+	await run(logger, config.test_collections, config.jackrabbit_url);
+	logger.log({
+		type: "end_run",
+		time: performance.now(),
+	});
 } catch (e: unknown) {
 	logger.log({
 		type: "run_error",
 		error: e?.toString() ?? "wild horses error",
 	});
 }
-
-logger.log({
-	type: "end_run",
-	time: performance.now(),
-});

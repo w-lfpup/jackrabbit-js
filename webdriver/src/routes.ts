@@ -66,15 +66,30 @@ export class Router {
 		// log test actions
 		if (url.startsWith("/log/") && "POST" === method) {
 			console.log("log has a cookie?", req.headers.cookie);
-			let loggerAction = await getLoggerActionFromRequestBody(req);
-			this.#eventbus.dispatchAction({
-				type: "log",
-				urlStr: req.url,
-				loggerAction,
-				id: "",
-			});
 
-			res.writeHead(200);
+			let id: string | undefined;
+			let cookies = req.headers.cookie?.split(";") ?? [];
+			for (const cookieLine of cookies) {
+				console.log(cookieLine);
+				if (cookieLine.startsWith("jackrabbit=")) {
+					let [name, value] = cookieLine.split("=");
+					id = value;
+				}
+			}
+
+			if (id) {
+				let loggerAction = await getLoggerActionFromRequestBody(req);
+				this.#eventbus.dispatchAction({
+					type: "log",
+					urlStr: req.url,
+					loggerAction,
+					id,
+				});
+				res.writeHead(200);
+			} else {
+				res.writeHead(403);
+			}
+
 			return res.end();
 		}
 

@@ -61,7 +61,7 @@ export class WebDrivers {
 				let index = parseInt(indexStr);
 				let webdriverTarget = this.#webdrivers[index];
 				if (webdriverTarget) {
-					if (id === this.#config.webdrivers[index]?.sessionID)
+					if (id === this.#config.webdrivers[index]?.jrId)
 						this.#currentIndex += 1;
 				}
 
@@ -96,7 +96,7 @@ class WebdriverSession {
 	#eventbus: EventBus;
 	#signal: AbortSignal | undefined;
 	#abortController: AbortController;
-	#session: string | undefined;
+	#sessionId: string | undefined;
 
 	constructor(params: WebdriverParams, hostAndPort: URL, eventbus: EventBus) {
 		this.#params = params;
@@ -105,10 +105,7 @@ class WebdriverSession {
 		this.#abortController = new AbortController();
 
 		this.#eventbus.addListener("run_complete", (action) => {
-			if (
-				"run_complete" === action.type &&
-				action.id === this.#params.sessionID
-			)
+			if ("run_complete" === action.type && action.id === this.#params.jrId)
 				this.#down();
 		});
 	}
@@ -116,10 +113,10 @@ class WebdriverSession {
 	async run() {
 		// check if already running
 
-		let { command, url, sessionID, timeoutMs } = this.#params;
+		let { command, url, jrId, timeoutMs } = this.#params;
 
 		this.#eventbus.dispatchAction({
-			id: this.#params.sessionID,
+			id: jrId,
 			type: "session_start",
 		});
 
@@ -131,14 +128,14 @@ class WebdriverSession {
 		this.#signal.addEventListener("abort", () => {
 			this.#eventbus.dispatchAction({
 				type: "session_closed",
-				id: this.#params.sessionID,
+				id: jrId,
 			});
 		});
 
 		let process = exec(command, { signal: this.#signal });
 		process.addListener("error", (error) => {
 			this.#eventbus.dispatchAction({
-				id: this.#params.sessionID,
+				id: jrId,
 				type: "session_error",
 				error,
 			});
@@ -162,11 +159,11 @@ class WebdriverSession {
 			let { sessionId } = json?.value;
 			if (typeof sessionId !== "string")
 				throw new Error("session is not a string");
-			this.#session = sessionId;
+			this.#sessionId = sessionId;
 
 			let cookie = {
 				name: "jackrabbit",
-				value: sessionID,
+				value: jrId,
 				path: "/",
 				domain: this.#hostAndPort.hostname,
 				httpOnly: true,
@@ -174,7 +171,7 @@ class WebdriverSession {
 
 			console.log("set cookie", cookie);
 			let cookieReq = await fetch(
-				new URL(`/session/${this.#session}/cookie`, url),
+				new URL(`/session/${this.#sessionId}/cookie`, url),
 				{
 					method: "POST",
 					headers,
@@ -189,7 +186,7 @@ class WebdriverSession {
 				throw new Error("set-cookie request failed");
 
 			let goToUrlRes = await fetch(
-				new URL(`/session/${this.#session}/url`, url),
+				new URL(`/session/${this.#sessionId}/url`, url),
 				{
 					method: "POST",
 					headers,
@@ -204,7 +201,7 @@ class WebdriverSession {
 			let error = e instanceof Error ? e : new Error("unknown session error");
 			this.#eventbus.dispatchAction({
 				type: "session_error",
-				id: this.#params.sessionID,
+				id: this.#params.jrId,
 				error,
 			});
 			this.#abortController.abort();
@@ -212,10 +209,10 @@ class WebdriverSession {
 	}
 
 	async #down() {
-		if (this.#session) {
+		if (this.#sessionId) {
 			let { url } = this.#params;
 			try {
-				await fetch(new URL(`/session/${this.#session}`, url), {
+				await fetch(new URL(`/session/${this.#sessionId}`, url), {
 					method: "DELETE",
 					headers,
 					body: null,
@@ -224,7 +221,7 @@ class WebdriverSession {
 			} catch (e) {
 				this.#eventbus.dispatchAction({
 					type: "session_error",
-					id: this.#params.sessionID,
+					id: this.#params.jrId,
 					error:
 						e instanceof Error
 							? e
