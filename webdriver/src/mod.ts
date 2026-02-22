@@ -44,4 +44,4 @@ server.listen({
 });
 
 // start test run
-webdrivers.runAll();
+webdrivers.run();

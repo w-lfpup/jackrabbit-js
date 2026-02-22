@@ -35,4 +35,4 @@ server.listen({
     signal,
 });
 // start test run
-webdrivers.runAll();
+webdrivers.run();

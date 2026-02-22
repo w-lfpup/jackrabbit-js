@@ -51,6 +51,12 @@ export class Router {
 			return res.end();
 		}
 
+		if (url === "/ping" && "GET" === method) {
+			res.setHeader("Content-Type", "text/html");
+			res.writeHead(200);
+			return res.end("The cookie train has arrived!");
+		}
+
 		// "test" home page
 		if (url === "/" && "GET" === method) {
 			let hangar = testHanger({
@@ -61,12 +67,6 @@ export class Router {
 			res.setHeader("Content-Type", "text/html");
 			res.writeHead(200);
 			return res.end(hangar);
-		}
-
-		if (url === "/cookie" && "GET" === method) {
-			res.setHeader("Content-Type", "text/html");
-			res.writeHead(200);
-			return res.end("The cookie train has arrived!");
 		}
 
 		// log test actions
@@ -99,15 +99,15 @@ export class Router {
 			return res.end();
 		}
 
+		// this assumes http 1.1
+		//
+		// only serve core and browser packages
 		let ext = "";
 		if (url.endsWith("/")) ext = "index.html";
 		let urlNoPrefix = url;
 		if (url.startsWith("/jackrabbit")) urlNoPrefix = url.substring(11);
-
 		let filePath = path.join(cwd, urlNoPrefix, ext);
-		// this assumes http 1.1
-		//
-		// only serve core and browser packages
+
 		let stream: fs.ReadStream | undefined;
 		if (url.startsWith("/jackrabbit/core/") && "GET" === method) {
 			stream = await getDirectoryScopedFile(filePath, corePath);

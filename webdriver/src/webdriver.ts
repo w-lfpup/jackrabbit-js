@@ -4,8 +4,6 @@ import type { EventBus, WebdriverActions } from "./eventbus.js";
 
 let headers = new Headers([["Content-Type", "application/json"]]);
 
-// create prmises for every session
-// start end rejection
 export class WebDrivers {
 	#config: ConfigInterface;
 	#eventbus: EventBus;
@@ -109,7 +107,6 @@ class WebdriverSession {
 			this.#abortController.signal,
 			AbortSignal.timeout(timeoutMs),
 		]);
-
 		this.#signal.addEventListener("abort", () => {
 			this.#eventbus.dispatchAction({
 				type: "session_closed",
@@ -125,6 +122,19 @@ class WebdriverSession {
 				error,
 			});
 			this.#abortController.abort();
+		});
+		this.#process.addListener("close", (statusCode) => {
+			if (statusCode) {
+				this.#eventbus.dispatchAction({
+					type: "session_error",
+					id: this.#params.jrId,
+					error: new Error(`process returned status code: ${statusCode}`),
+				});
+			}
+			this.#eventbus.dispatchAction({
+				type: "session_closed",
+				id: this.#params.jrId,
+			});
 		});
 
 		try {
@@ -146,8 +156,7 @@ class WebdriverSession {
 				throw new Error("session is not a string");
 			this.#sessionId = sessionId;
 
-			let cookieUrl = new URL("/cookie", this.#hostAndPort);
-			// go to cookie page
+			let cookieUrl = new URL("/ping", this.#hostAndPort);
 			let getCookie = await fetch(
 				new URL(`/session/${this.#sessionId}/url`, url),
 				{
@@ -161,31 +170,24 @@ class WebdriverSession {
 			if (200 !== getCookie.status)
 				throw new Error("go-to-cookie request failed");
 
-			let cookie = {
-				cookie: {
-					name: "jackrabbit",
-					value: jrId,
-					// following causes issues in firefox
-					// domain: this.#hostAndPort,
-					path: "/",
-					httpOnly: true,
-				},
-			};
-
-			console.log(cookie);
-			// console.log("set cookie", cookie);
 			let cookieReq = await fetch(
 				new URL(`/session/${this.#sessionId}/cookie`, url),
 				{
 					method: "POST",
 					headers,
-					body: JSON.stringify(cookie),
+					body: JSON.stringify({
+						cookie: {
+							name: "jackrabbit",
+							value: jrId,
+							// domain: this.#hostAndPort (issues in firefox)
+							path: "/",
+							httpOnly: true,
+						},
+					}),
 					signal: this.#signal,
 				},
 			);
 
-			console.log(cookieReq);
-			console.log(await cookieReq.text());
 			if (200 !== cookieReq.status)
 				throw new Error("set-cookie request failed");
 
@@ -235,10 +237,6 @@ class WebdriverSession {
 		}
 
 		this.#process?.kill();
-		this.#eventbus.dispatchAction({
-			type: "session_closed",
-			id: this.#params.jrId,
-		});
 	}
 }
 
@@ -246,9 +244,7 @@ async function untilWebdriverReady(
 	url: URL,
 	signal: AbortSignal | undefined,
 ): Promise<void> {
-	if (!signal) return;
-
-	while (!signal.aborted) {
+	while (signal && !signal.aborted) {
 		try {
 			let res = await fetch(new URL("/status", url), {
 				method: "GET",
