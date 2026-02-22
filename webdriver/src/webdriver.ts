@@ -95,6 +95,7 @@ class WebdriverSession {
 
 	async run() {
 		// check if already running
+		if (this.#process) return;
 
 		let { command, url, jrId, timeoutMs } = this.#params;
 
@@ -119,7 +120,7 @@ class WebdriverSession {
 			this.#eventbus.dispatchAction({
 				id: jrId,
 				type: "session_error",
-				error,
+				error: error.toString(),
 			});
 			this.#abortController.abort();
 		});
@@ -128,7 +129,7 @@ class WebdriverSession {
 				this.#eventbus.dispatchAction({
 					type: "session_error",
 					id: this.#params.jrId,
-					error: new Error(`process returned status code: ${statusCode}`),
+					error: `Process returned status code: ${statusCode}`,
 				});
 			}
 			this.#eventbus.dispatchAction({
@@ -204,17 +205,18 @@ class WebdriverSession {
 			if (200 !== goToUrlRes.status)
 				throw new Error("go-to-url request failed");
 		} catch (e) {
-			let error = e instanceof Error ? e : new Error("unknown session error");
 			this.#eventbus.dispatchAction({
 				type: "session_error",
 				id: this.#params.jrId,
-				error,
+				error: e?.toString() ?? "unknown error creating browser session",
 			});
 			this.#abortController.abort();
 		}
 	}
 
 	async #down() {
+		if (!this.#process) return;
+
 		if (this.#sessionId) {
 			let { url } = this.#params;
 			try {
@@ -228,10 +230,7 @@ class WebdriverSession {
 				this.#eventbus.dispatchAction({
 					type: "session_error",
 					id: this.#params.jrId,
-					error:
-						e instanceof Error
-							? e
-							: new Error("failed to delete session unknown error"),
+					error: e?.toString() ?? "failed to delete browser session error"
 				});
 			}
 		}

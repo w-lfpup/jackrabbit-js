@@ -10,7 +10,7 @@ interface WebdriverSessionStartAction extends WebdriverSessionAction {
 
 interface WebdriverSessionErrorAction extends WebdriverSessionAction {
 	type: "session_error";
-	error: Error;
+	error: string;
 }
 
 interface WebdriverSessionClosedAction extends WebdriverSessionAction {
