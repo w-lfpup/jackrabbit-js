@@ -1,6 +1,7 @@
 import type { ConfigInterface, WebdriverParams } from "./config.js";
 import { ChildProcess, exec } from "child_process";
 import type { EventBus, WebdriverActions } from "./eventbus.js";
+import type { IncomingMessage } from "http";
 
 let headers = new Headers([["Content-Type", "application/json"]]);
 
@@ -148,6 +149,8 @@ class WebdriverSession {
 				signal: this.#signal,
 			});
 			if (200 !== res.status) {
+				let cookieBody = await res.json();
+				console.log("err making sesion:", cookieBody);
 				throw new Error("Failed to create a session");
 			}
 
@@ -168,8 +171,11 @@ class WebdriverSession {
 				},
 			);
 
-			if (200 !== getCookie.status)
+			if (200 !== getCookie.status) {
+				let cookieBody = await getCookie.json();
+				console.log("err going to cookie:", cookieBody);
 				throw new Error("go-to-cookie request failed");
+			}
 
 			let cookieReq = await fetch(
 				new URL(`/session/${this.#sessionId}/cookie`, url),
@@ -189,8 +195,11 @@ class WebdriverSession {
 				},
 			);
 
-			if (200 !== cookieReq.status)
+			if (200 !== cookieReq.status) {
+				let cookieBody = await cookieReq.json();
+				console.log("err making cookie:", cookieBody);
 				throw new Error("set-cookie request failed");
+			}
 
 			let goToUrlRes = await fetch(
 				new URL(`/session/${this.#sessionId}/url`, url),
@@ -230,7 +239,7 @@ class WebdriverSession {
 				this.#eventbus.dispatchAction({
 					type: "session_error",
 					id: this.#params.jrId,
-					error: e?.toString() ?? "failed to delete browser session error"
+					error: e?.toString() ?? "failed to delete browser session error",
 				});
 			}
 		}
@@ -270,5 +279,23 @@ function sleep(timeMs: number): Promise<void> {
 		setTimeout(function () {
 			resolve();
 		}, timeMs);
+	});
+}
+
+function getRequestBody(req: IncomingMessage): Promise<any> {
+	return new Promise(function (resolve, reject) {
+		let data: Uint8Array[] = [];
+		req.addListener("data", function (chunk) {
+			data.push(chunk);
+		});
+		req.addListener("end", function () {
+			let actionStr = Buffer.concat(data).toString();
+			let action = JSON.parse(actionStr);
+
+			resolve(action);
+		});
+		req.addListener("error", function (err: Error) {
+			reject(err);
+		});
 	});
 }
