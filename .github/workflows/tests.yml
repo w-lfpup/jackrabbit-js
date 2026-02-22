@@ -16,9 +16,10 @@ jobs:
       #   run: npm ci
       # - name: Test
       #   run: npm run test
-      - name: WhatDO
-        run: $CHROMEWEBDRIVER --version
+
       - name: WhatMoreDO
         run: ls $CHROMEWEBDRIVER
+      - name: WhatDO
+        run: $CHROMEWEBDRIVER --version
       # - name: Test browsers
       #   run: npx jackrabbit_webdriver .github/workflows/browsers.json ./tests/dist/mod.js
