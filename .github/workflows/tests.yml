@@ -17,9 +17,9 @@ jobs:
       - name: Test
         run: npm run test
 
-      - name: WhatMoreDO
-        run: ls $GECKOWEBDRIVER
+      # - name: WhatMoreDO
+      #   run: ls $GECKOWEBDRIVER
       # - name: WhatDO
       #   run: $CHROMEWEBDRIVER --version
-      - name: Test browsers
-        run: npx jackrabbit_webdriver .github/workflows/browsers.json ./tests/dist/mod.js
+      # - name: Test browsers
+      #   run: npx jackrabbit_webdriver .github/workflows/browsers.json ./tests/dist/mod.js

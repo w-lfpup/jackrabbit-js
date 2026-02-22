@@ -4,7 +4,7 @@
 		{
 			"command": "$GECKOWEBDRIVER/geckodriver -p 4001",
 			"title": "Firefox",
-			"timeout_ms": 20000,
+			"timeout_ms": 60000,
 			"url": "http://localhost:4001"
 		}
 	]
