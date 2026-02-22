@@ -1,5 +1,5 @@
 {
-	"jackrabbit_url": "http://localhost:4000",
+	"host_and_port": "http://localhost:4000",
 	"webdrivers": [
 		{
 			"command": "CHROMEWEBDRIVER -p 4001",
