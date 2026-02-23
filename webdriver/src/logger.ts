@@ -27,6 +27,10 @@ export class Logger {
 	}
 
 	#log(action: WebdriverActions) {
+		if ("session_error" === action.type) {
+			this.errored = true;
+			console.log();
+		}
 		if ("log" !== action.type) return;
 
 		let { loggerAction, id, urlStr } = action;
