@@ -117,11 +117,15 @@ class WebdriverSession {
 			});
 		});
 
-		this.#process = exec(command, { signal: this.#signal }, function(err, stdout, stderr) {
-			if (err) console.log("err: ", err);
-			if (stdout) console.log("stdout:", stdout);
-			if (stderr) console.log("stderr", stderr);
-		});
+		this.#process = exec(
+			command,
+			{ signal: this.#signal },
+			function (err, stdout, stderr) {
+				if (err) console.log("err: ", err);
+				if (stdout) console.log("stdout:", stdout);
+				if (stderr) console.log("stderr", stderr);
+			},
+		);
 		this.#process.addListener("error", (error) => {
 			this.#eventbus.dispatchAction({
 				id: jrId,
@@ -236,18 +240,23 @@ class WebdriverSession {
 		if (this.#sessionId) {
 			let { url } = this.#params;
 			try {
-				let delReqest = await fetch(new URL(`/session/${this.#sessionId}`, url), {
-					method: "DELETE",
-					headers,
-					body: null,
-					signal: this.#signal,
-				});
+				let delReqest = await fetch(
+					new URL(`/session/${this.#sessionId}`, url),
+					{
+						method: "DELETE",
+						headers,
+						body: null,
+						signal: this.#signal,
+					},
+				);
 				if (200 !== delReqest.status) {
 					let cookieBody = await delReqest.json();
 					console.log("err deleting cookie:", cookieBody);
 					throw new Error("delete-cookie request failed");
 				}
+				console.log("deleted a session");
 			} catch (e) {
+				console.log("error deleting session");
 				this.#eventbus.dispatchAction({
 					type: "session_error",
 					id: this.#params.jrId,
@@ -255,6 +264,7 @@ class WebdriverSession {
 				});
 			}
 		}
+		console.log("kill the process!");
 
 		this.#process?.kill();
 	}
