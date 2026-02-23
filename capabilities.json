@@ -2,19 +2,6 @@
 	"host_and_port": "http://localhost:4000",
 	"webdrivers": [
 		{
-			"command": "geckodriver -p 4001",
-			"title": "Firefox",
-			"timeout_ms": 20000,
-			"url": "http://localhost:4001",
-			"capabilities": {
-				"alwaysMatch": {
-					"moz:firefoxOptions": {
-						"args": ["-headless"]
-					}
-				}
-			}
-		},
-		{
 			"command": "$CHROMEWEBDRIVER/chromedriver --port 4001",
 			"title": "Chrome",
 			"timeout_ms": 20000,
@@ -22,10 +9,10 @@
 			"capabilities": {
 				"alwaysMatch": {
 					"goog:chromeOptions": {
-						"args": ["--headless"]
+						"args": ["--headless", "--disable-gpu"]
 					}
 				}
 			}
-		},
+		}
 	]
 }
