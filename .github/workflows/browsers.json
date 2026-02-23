@@ -22,6 +22,7 @@
 			"capabilities": {
 				"alwaysMatch": {
 					"browserName": "chrome",
+					"version": "any",
 					"goog:chromeOptions": {
 						"args": ["headless"]
 					}
