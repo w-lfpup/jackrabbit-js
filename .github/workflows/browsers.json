@@ -20,12 +20,10 @@
 			"timeout_ms": 20000,
 			"url": "http://127.0.0.1:4001",
 			"capabilities": {
-				"alwaysMatch": {
 					"browserName": "chrome",
 					"goog:chromeOptions": {
 						"args": ["headless"]
 					}
-				}
 			}
 		}
 	]
