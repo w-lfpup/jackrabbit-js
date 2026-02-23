@@ -50,10 +50,14 @@ export class Logger implements LoggerInterface {
 			// verify two properties are correct type first
 			this.#collectionReceipts = new Array(action.expected_collection_count);
 			this.#data.startTime = action.time;
+			console.log("start run");
+		}
+
+		if ("end_run" === action.type) {
+			console.log("end_run");
 		}
 
 		if ("start_collection" === action.type) {
-			// create collection receipts
 			this.#collectionReceipts[action.collection_id] = {
 				title: action.collection_url,
 				numberOfTest: 0,
@@ -61,22 +65,40 @@ export class Logger implements LoggerInterface {
 				numberOfErrors: 0,
 				moduleReceipts: new Array(action.expected_module_count),
 			};
+			console.log("start:", action.collection_url);
+		}
+
+		if ("end_collection" === action.type) {
+			let collection = this.#collectionReceipts[action.collection_id];
+			if (collection) {
+				console.log("end:", collection.title);
+			}
 		}
 
 		if ("start_module" === action.type) {
-			// create test receipts
 			let moduleReceipts =
 				this.#collectionReceipts[action.collection_id]?.moduleReceipts;
 			if (moduleReceipts) {
 				moduleReceipts[action.module_id] = {
 					title: action.module_name,
-					assertions: [],
+					assertions: new Array(action.expected_test_count),
 				};
 			}
+
+			console.log("start module:", action.module_name);
+		}
+
+		if ("end_module" === action.type) {
+			this.#data.errored = true;
 		}
 
 		if ("module_error" === action.type) {
 			this.#data.errored = true;
+		}
+
+
+		if ("start_test" === action.type) {
+
 		}
 
 		if ("end_test" === action.type) {
@@ -84,16 +106,18 @@ export class Logger implements LoggerInterface {
 
 			if (Array.isArray(assertions)) {
 				this.#data.failed = assertions.length !== 0;
+				for (const assertion of assertions) {
+					console.log(`      ${assertion}`);
+				}
 			} else {
 				this.#data.failed = undefined !== assertions;
+				if (this.#data.failed) console.log(`      ${assertions}`);
 			}
 		}
 
 		if ("test_error" === action.type) {
 			this.#data.errored = true;
-		}
-
-		if ("end_run" === action.type) {
+			console.log("test error:", action.error);
 		}
 	}
 }
