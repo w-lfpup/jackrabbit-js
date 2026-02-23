@@ -2,6 +2,19 @@
 	"host_and_port": "http://127.0.0.1:4000",
 	"webdrivers": [
 		{
+			"command": "$CHROMEWEBDRIVER/chromedriver -p 4001",
+			"title": "Chrome",
+			"timeout_ms": 20000,
+			"url": "http://127.0.0.1:4001",
+			"capabilities": {
+				"alwaysMatch": {
+					"goog:chromeOptions": {
+						"args": ["--headless"]
+					}
+				}
+			}
+		},
+		{
 			"command": "$GECKOWEBDRIVER/geckodriver -p 4001",
 			"title": "Firefox",
 			"timeout_ms": 20000,
