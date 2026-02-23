@@ -121,9 +121,9 @@ class WebdriverSession {
 			command,
 			{ signal: this.#signal },
 			function (err, stdout, stderr) {
-				// if (err) console.log("err: ", err);
-				// if (stdout) console.log("stdout:", stdout);
-				// if (stderr) console.log("stderr", stderr);
+				if (err) console.log("err: ", err);
+				if (stdout) console.log("stdout:", stdout);
+				if (stderr) console.log("stderr", stderr);
 			},
 		);
 		this.#process.addListener("error", (error) => {
