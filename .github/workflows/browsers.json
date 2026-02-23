@@ -2,7 +2,7 @@
 	"host_and_port": "http://127.0.0.1:4000",
 	"webdrivers": [
 		{
-			"command": "$CHROMEWEBDRIVER/chromedriver -p 4001",
+			"command": "$CHROMEWEBDRIVER/chromedriver --help",
 			"title": "Chrome",
 			"timeout_ms": 20000,
 			"url": "http://127.0.0.1:4001",
