@@ -159,7 +159,7 @@ class WebdriverSession {
 				signal: this.#signal,
 			});
 			if (200 !== res.status) {
-				let cookieBody = await res.json();
+				let cookieBody = await res.text();
 				console.log("err making sesion:", cookieBody);
 				throw new Error("Failed to create a session");
 			}
