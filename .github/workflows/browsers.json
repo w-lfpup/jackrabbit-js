@@ -22,7 +22,7 @@
 			"capabilities": {
 				"alwaysMatch": {
 					"goog:chromeOptions": {
-						"args": ["--headless", "--no-sandbox"]
+						"args": ["--headless", "--window-size=1400x1000"]
 					}
 				}
 			}
