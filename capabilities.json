@@ -1,0 +1,17 @@
+{
+	"capabilities": {
+		"alwaysMatch": {
+			"browserName": "firefox",
+			"moz:firefoxOptions": {
+				"profile": "<base64 encoded profile>",
+				"args": ["-headless"],
+				"prefs": {
+					"dom.ipc.processCount": 8
+				},
+				"log": {
+					"level": "trace"
+				}
+			}
+		}
+	}
+}

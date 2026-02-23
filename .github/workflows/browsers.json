@@ -2,10 +2,17 @@
 	"host_and_port": "http://127.0.0.1:4000",
 	"webdrivers": [
 		{
-			"command": "$GECKOWEBDRIVER/geckodriver --headless --p 4001",
+			"command": "$GECKOWEBDRIVER/geckodriver --p 4001",
 			"title": "Firefox",
-			"timeout_ms": 60000,
-			"url": "http://127.0.0.1:4001"
+			"timeout_ms": 20000,
+			"url": "http://127.0.0.1:4001",
+			"capabilities": {
+				"alwaysMatch": {
+					"moz:firefoxOptions": {
+						"args": ["-headless"]
+					}
+				}
+			}
 		}
 	]
 }

@@ -98,7 +98,7 @@ class WebdriverSession {
 		// check if already running
 		if (this.#process) return;
 
-		let { command, url, jrId, timeoutMs } = this.#params;
+		let { command, url, jrId, timeoutMs, capabilities } = this.#params;
 
 		this.#eventbus.dispatchAction({
 			id: jrId,
@@ -142,10 +142,11 @@ class WebdriverSession {
 		try {
 			await untilWebdriverReady(url, this.#signal);
 
+			// needs to be browser specific
 			let res = await fetch(new URL("/session", url), {
 				method: "POST",
 				headers,
-				body: JSON.stringify({ capabilities: {} }),
+				body: JSON.stringify({ capabilities: capabilities ?? {} }),
 				signal: this.#signal,
 			});
 			if (200 !== res.status) {

@@ -5,13 +5,10 @@ interface WebdriverConfig {
 	url: URL;
 	title: string;
 	timeoutMs: number;
+	capabilities?: unknown;
 }
 
-export interface WebdriverParams {
-	command: string;
-	url: URL;
-	title: string;
-	timeoutMs: number;
+export interface WebdriverParams extends WebdriverConfig {
 	jrId: string;
 }
 
@@ -55,7 +52,7 @@ export async function createConfig(
 }
 
 export function createWebdriverParams(json: any): WebdriverConfig | Error {
-	let { command, url, title, timeout_ms } = json;
+	let { command, url, title, timeout_ms, capabilities } = json;
 
 	if (typeof command !== "string")
 		return new Error("WebdriverParams.command is not a string");
@@ -73,5 +70,6 @@ export function createWebdriverParams(json: any): WebdriverConfig | Error {
 		url: parsedUrl,
 		title,
 		timeoutMs: timeout_ms,
+		capabilities,
 	};
 }
