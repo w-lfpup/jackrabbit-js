@@ -19,4 +19,4 @@ jobs:
       # - name: Test browsers
       #   run: npx jackrabbit_webdriver .github/workflows/browsers.json ./tests/dist/mod.js
       - name: Help
-      - run: $CHROMEWEBDRIVER/chromedriver --help
+        run: $CHROMEWEBDRIVER/chromedriver --help
