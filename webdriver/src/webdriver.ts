@@ -89,6 +89,7 @@ class WebdriverSession {
 		this.#abortController = new AbortController();
 
 		this.#eventbus.addListener("run_complete", (action) => {
+			console.log("about to down a run");
 			if ("run_complete" === action.type && action.id === this.#params.jrId)
 				this.#down();
 		});
@@ -229,17 +230,23 @@ class WebdriverSession {
 	}
 
 	async #down() {
+		console.log("trying to down a run");
 		if (!this.#process) return;
-
+		console.log("process to down exists");
 		if (this.#sessionId) {
 			let { url } = this.#params;
 			try {
-				await fetch(new URL(`/session/${this.#sessionId}`, url), {
+				let delReqest = await fetch(new URL(`/session/${this.#sessionId}`, url), {
 					method: "DELETE",
 					headers,
 					body: null,
 					signal: this.#signal,
 				});
+				if (200 !== delReqest.status) {
+					let cookieBody = await delReqest.json();
+					console.log("err deleting cookie:", cookieBody);
+					throw new Error("delete-cookie request failed");
+				}
 			} catch (e) {
 				this.#eventbus.dispatchAction({
 					type: "session_error",
