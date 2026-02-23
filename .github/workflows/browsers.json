@@ -9,7 +9,7 @@
 			"capabilities": {
 				"alwaysMatch": {
 					"goog:chromeOptions": {
-						"args": ["-headless"]
+						"args": ["--headless"]
 					}
 				}
 			}
