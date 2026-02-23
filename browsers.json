@@ -1,11 +1,11 @@
 {
-	"host_and_port": "http://127.0.0.1:4000",
+	"host_and_port": "http://localhost:4000",
 	"webdrivers": [
 		{
 			"command": "geckodriver -p 4001",
 			"title": "Firefox",
 			"timeout_ms": 20000,
-			"url": "http://127.0.0.1:4001",
+			"url": "http://localhost:4001",
 			"capabilities": {
 				"alwaysMatch": {
 					"moz:firefoxOptions": {
