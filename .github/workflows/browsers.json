@@ -21,10 +21,8 @@
 			"url": "http://127.0.0.1:4001",
 			"capabilities": {
 				"alwaysMatch": {
-					"browserName": "chrome",
-					"version": "any",
 					"goog:chromeOptions": {
-						"args": ["headless"]
+						"args": ["--headless", "--no-sandbox"]
 					}
 				}
 			}
