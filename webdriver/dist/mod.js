@@ -20,8 +20,8 @@ let server = http.createServer();
 server.on("request", router.route);
 server.on("close", function () {
     console.log("closing the server");
-    console.log("failed?", logger.failed);
-    logger.cancelled || logger.failed ? process.exit(1) : process.exit(0);
+    console.log("failed?", logger.failed, logger.errored);
+    logger.errored || logger.failed ? process.exit(1) : process.exit(0);
 });
 let abortController = new AbortController();
 eventbus.addListener("end", function () {

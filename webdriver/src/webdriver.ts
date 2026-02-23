@@ -24,27 +24,25 @@ export class WebDrivers {
 
 	run() {
 		this.#eventbus.addListener("session_closed", (action) => {
-			let webdriver = this.#webdrivers[this.#currentIndex];
-			this.#currentIndex += 1;
+			if ("session_closed" !== action.type) return;
+			if (action.id !== this.#config.webdrivers[this.#currentIndex]?.jrId)
+				return;
 
-			if (webdriver) {
-				webdriver.run();
-			} else {
-				this.#eventbus.dispatchAction({
-					type: "end",
-				});
-			}
+			this.#currentIndex += 1;
+			let webdriver = this.#webdrivers[this.#currentIndex];
+			webdriver
+				? webdriver.run()
+				: this.#eventbus.dispatchAction({
+						type: "end",
+					});
 		});
 
 		let webdriver = this.#webdrivers[this.#currentIndex];
-		this.#currentIndex += 1;
-		if (webdriver) {
-			webdriver.run();
-		} else {
-			this.#eventbus.dispatchAction({
-				type: "end",
-			});
-		}
+		webdriver
+			? webdriver.run()
+			: this.#eventbus.dispatchAction({
+					type: "end",
+				});
 	}
 
 	runAll() {
@@ -89,14 +87,12 @@ class WebdriverSession {
 		this.#abortController = new AbortController();
 
 		this.#eventbus.addListener("run_complete", (action) => {
-			console.log("about to down a run");
 			if ("run_complete" === action.type && action.id === this.#params.jrId)
 				this.#down();
 		});
 	}
 
 	async run() {
-		// check if already running
 		if (this.#process) return;
 
 		let { command, url, jrId, timeoutMs, capabilities } = this.#params;
@@ -117,22 +113,13 @@ class WebdriverSession {
 			});
 		});
 
-		this.#process = exec(
-			command,
-			{ signal: this.#signal },
-			function (err, stdout, stderr) {
-				if (err) console.log("err: ", err);
-				if (stdout) console.log("stdout:", stdout);
-				if (stderr) console.log("stderr", stderr);
-			},
-		);
+		this.#process = exec(command, { signal: this.#signal });
 		this.#process.addListener("error", (error) => {
 			this.#eventbus.dispatchAction({
 				id: jrId,
 				type: "session_error",
 				error: error.toString(),
 			});
-			// this.#abortController.abort();
 		});
 		this.#process.addListener("exit", (statusCode) => {
 			if (statusCode) {
@@ -264,12 +251,9 @@ class WebdriverSession {
 				});
 			}
 		}
-		console.log("kill the process!");
 
 		this.#process.kill("SIGKILL");
 		this.#process = undefined;
-
-		console.log("process! was killed?");
 	}
 }
 
