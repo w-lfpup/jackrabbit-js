@@ -17,7 +17,6 @@ import type { EventBus, WebdriverActions } from "./eventbus.js";
 export class Logger {
 	failed: boolean = false;
 	errored: boolean = false;
-	cancelled: boolean = false;
 
 	#boundLog = this.#log.bind(this);
 	#eventbus: EventBus;
