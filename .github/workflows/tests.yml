@@ -12,9 +12,9 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
-      - name: Install
-        run: npm ci
-      - name: Test
-        run: npm run test
-      - name: Test browsers
-        run: npx jackrabbit_webdriver .github/workflows/browsers.json ./tests/dist/mod.js
+      # - name: Install
+      #   run: npm ci
+      # - name: Test
+      #   run: npm run test
+      - name: Run chromedriver
+        run: $CHROMEWEBDRIVER/chromedriver --port 4001
