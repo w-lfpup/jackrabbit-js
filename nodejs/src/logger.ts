@@ -80,12 +80,14 @@ export class Logger implements LoggerInterface {
 		}
 
 		if ("module_error" === action.type) {
+			this.#data.errored = true;
 		}
 
 		if ("end_test" === action.type) {
 		}
 
 		if ("test_error" === action.type) {
+			this.#data.errored = true;
 		}
 
 		if ("end_run" === action.type) {

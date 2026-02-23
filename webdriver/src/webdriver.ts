@@ -266,14 +266,10 @@ class WebdriverSession {
 		}
 		console.log("kill the process!");
 
-		this.#process.kill('SIGKILL');
+		this.#process.kill("SIGKILL");
 		this.#process = undefined;
 
 		console.log("process! was killed?");
-		// this.#eventbus.dispatchAction({
-		// 	type: "session_closed",
-		// 	id: this.#params.jrId,
-		// });
 	}
 }
 

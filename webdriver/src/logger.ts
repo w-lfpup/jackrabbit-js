@@ -50,18 +50,22 @@ export class Logger {
 			});
 		}
 		if ("run_error" === loggerAction.type) {
+			this.errored = true;
 		}
+
 		if ("start_module" === loggerAction.type) {
 		}
 		if ("end_module" === loggerAction.type) {
 		}
 		if ("module_error" === loggerAction.type) {
+			this.errored = true;
 		}
 		if ("start_test" === loggerAction.type) {
 		}
 		if ("end_test" === loggerAction.type) {
 		}
 		if ("test_error" === loggerAction.type) {
+			this.errored = true;
 		}
 
 		if ("end_test" === loggerAction.type) {
