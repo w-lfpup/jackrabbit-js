@@ -75,9 +75,9 @@ export class Logger {
 			let { assertions } = loggerAction;
 
 			if (Array.isArray(assertions)) {
-				if (assertions.length) this.failed = true;
+				this.failed = assertions.length !== 0;
 			} else {
-				if (undefined !== assertions) this.failed = true;
+				this.failed = undefined !== assertions;
 			}
 		}
 	}
