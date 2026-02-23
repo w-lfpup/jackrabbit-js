@@ -46,10 +46,6 @@ export class Logger implements LoggerInterface {
 	}
 
 	log(action: LoggerAction) {
-		// if ("start_run" === action.type) {
-		// 	this.#data.startTime = action.time;
-		// }
-
 		if ("start_run" === action.type) {
 			// verify two properties are correct type first
 			this.#collectionReceipts = new Array(action.expected_collection_count);
@@ -84,6 +80,13 @@ export class Logger implements LoggerInterface {
 		}
 
 		if ("end_test" === action.type) {
+			let { assertions } = action;
+
+			if (Array.isArray(assertions)) {
+				this.#data.failed = assertions.length !== 0;
+			} else {
+				this.#data.failed = undefined !== assertions;
+			}
 		}
 
 		if ("test_error" === action.type) {

@@ -23,7 +23,7 @@
 				"alwaysMatch": {
 					"browserName": "chrome",
 					"goog:chromeOptions": {
-						"args": ["--headless", "--disable-gpu", "--no-sandbox"]
+						"args": ["headless"]
 					}
 				}
 			}
