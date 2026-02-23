@@ -7,6 +7,10 @@ import type { LoggerAction, LoggerInterface } from "../../core/dist/mod.js";
  * I will come back to it when I feel like it.
  */
 
+/**
+ *
+ */
+
 interface LoggerData {
 	errored: boolean;
 	failed: boolean;
@@ -16,108 +20,75 @@ interface LoggerData {
 
 interface ModuleReceipt {
 	title: string;
-	assertions: LoggerAction[];
+	numberOfTests: number;
+	testActions: LoggerAction[];
 }
 
 interface CollectionReceipt {
 	title: string;
-	numberOfTest: number;
-	numberOfFails: number;
-	numberOfErrors: number;
+	numberOfModules: number;
 	moduleReceipts: ModuleReceipt[];
 }
 
 export class Logger implements LoggerInterface {
-	#data: LoggerData = {
-		failed: false,
-		errored: false,
-		startTime: 0,
-		testTime: 0,
-	};
-
-	#collectionReceipts: (CollectionReceipt | undefined)[] = [];
+	#failed: boolean = false;
+	#errored: boolean = false;
+	#testActions: LoggerAction[] = [];
 
 	get failed() {
-		return this.#data.failed;
+		return this.#failed;
 	}
 
 	get errored() {
-		return this.#data.errored;
+		return this.#errored;
 	}
 
 	log(action: LoggerAction) {
 		if ("start_run" === action.type) {
-			// verify two properties are correct type first
-			this.#collectionReceipts = new Array(action.expected_collection_count);
-			this.#data.startTime = action.time;
-			console.log("start run");
+			this.#testActions.push(action);
+			console.log("begin run");
 		}
 
 		if ("end_run" === action.type) {
-			console.log("end_run");
+			console.log("end run");
 		}
 
 		if ("start_collection" === action.type) {
-			this.#collectionReceipts[action.collection_id] = {
-				title: action.collection_url,
-				numberOfTest: 0,
-				numberOfFails: 0,
-				numberOfErrors: 0,
-				moduleReceipts: new Array(action.expected_module_count),
-			};
-			console.log("start:", action.collection_url);
+			this.#testActions.push(action);
 		}
 
-		if ("end_collection" === action.type) {
-			let collection = this.#collectionReceipts[action.collection_id];
-			if (collection) {
-				console.log("end:", collection.title);
-			}
+		if ("collection_error" === action.type) {
+			this.#errored = true;
+			this.#testActions.push(action);
 		}
 
 		if ("start_module" === action.type) {
-			let moduleReceipts =
-				this.#collectionReceipts[action.collection_id]?.moduleReceipts;
-			if (moduleReceipts) {
-				moduleReceipts[action.module_id] = {
-					title: action.module_name,
-					assertions: new Array(action.expected_test_count),
-				};
-			}
-
-			console.log("start module:", action.module_name);
-		}
-
-		if ("end_module" === action.type) {
-			this.#data.errored = true;
+			this.#testActions.push(action);
 		}
 
 		if ("module_error" === action.type) {
-			this.#data.errored = true;
-		}
-
-
-		if ("start_test" === action.type) {
-
+			// this.#errored = true;
+			this.#errored = true;
+			this.#testActions.push(action);
 		}
 
 		if ("end_test" === action.type) {
-			let { assertions } = action;
+			// move everything from null to undefined;
+			let assertions = action.assertions ?? undefined;
 
-			if (Array.isArray(assertions)) {
-				this.#data.failed = assertions.length !== 0;
-				for (const assertion of assertions) {
-					console.log(`      ${assertion}`);
-				}
-			} else {
-				this.#data.failed = undefined !== assertions;
-				if (this.#data.failed) console.log(`      ${assertions}`);
+			if (Array.isArray(assertions) && assertions.length) {
+				this.#failed = true;
+				this.#testActions.push(action);
+			}
+			if (!Array.isArray(assertions) && undefined !== assertions) {
+				this.#failed = true;
+				this.#testActions.push(action);
 			}
 		}
 
 		if ("test_error" === action.type) {
-			this.#data.errored = true;
-			console.log("test error:", action.error);
+			this.#errored = true;
+			this.#testActions.push(action);
 		}
 	}
 }
