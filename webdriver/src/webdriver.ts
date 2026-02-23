@@ -134,7 +134,7 @@ class WebdriverSession {
 			});
 			this.#abortController.abort();
 		});
-		this.#process.addListener("close", (statusCode) => {
+		this.#process.addListener("exit", (statusCode) => {
 			if (statusCode) {
 				this.#eventbus.dispatchAction({
 					type: "session_error",
@@ -270,10 +270,10 @@ class WebdriverSession {
 		this.#process = undefined;
 
 		console.log("process! was killed?");
-		this.#eventbus.dispatchAction({
-			type: "session_closed",
-			id: this.#params.jrId,
-		});
+		// this.#eventbus.dispatchAction({
+		// 	type: "session_closed",
+		// 	id: this.#params.jrId,
+		// });
 	}
 }
 
