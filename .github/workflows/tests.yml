@@ -17,4 +17,4 @@ jobs:
       # - name: Test
       #   run: npm run test
       - name: Run chromedriver
-        run: $CHROMEWEBDRIVER/chromedriver --port :5000
+        run: $CHROMEWEBDRIVER/chromedriver --port=4001
