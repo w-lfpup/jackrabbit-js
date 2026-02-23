@@ -23,6 +23,7 @@ export class Logger {
 
 	constructor(eventbus: EventBus) {
 		this.#eventbus = eventbus;
+		this.#eventbus.addListener("session_error", this.#boundLog);
 		this.#eventbus.addListener("log", this.#boundLog);
 	}
 
