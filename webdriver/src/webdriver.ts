@@ -132,7 +132,7 @@ class WebdriverSession {
 				type: "session_error",
 				error: error.toString(),
 			});
-			this.#abortController.abort();
+			// this.#abortController.abort();
 		});
 		this.#process.addListener("exit", (statusCode) => {
 			if (statusCode) {
