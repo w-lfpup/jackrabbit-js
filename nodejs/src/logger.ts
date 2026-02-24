@@ -1,3 +1,4 @@
+import { Assertions } from "../../core/dist/jackrabbit_types.js";
 import type { LoggerAction, LoggerInterface } from "../../core/dist/mod.js";
 
 /**
@@ -18,22 +19,38 @@ interface LoggerData {
 	testTime: number;
 }
 
+interface TestReceipt {
+	title: string;
+	assertions: Assertions;
+	error: string | undefined;
+}
+
 interface ModuleReceipt {
 	title: string;
-	numberOfTests: number;
-	testActions: LoggerAction[];
+	error: string | undefined;
+	testReceipts: (TestReceipt | undefined)[];
 }
 
 interface CollectionReceipt {
 	title: string;
+	error: string | undefined;
 	numberOfModules: number;
-	moduleReceipts: ModuleReceipt[];
+	moduleReceipts: (ModuleReceipt | undefined)[];
 }
 
 export class Logger implements LoggerInterface {
 	#failed: boolean = false;
 	#errored: boolean = false;
 	#testActions: LoggerAction[] = [];
+
+	#collectionReceipts: CollectionReceipt[] = [];
+
+	#data = {
+		errored: false,
+		failed: false,
+		startTime: 0,
+		endTime: 0,
+	};
 
 	get failed() {
 		return this.#failed;
@@ -45,7 +62,8 @@ export class Logger implements LoggerInterface {
 
 	log(action: LoggerAction) {
 		if ("start_run" === action.type) {
-			this.#testActions.push(action);
+			this.#data.startTime = action.time;
+			this.#collectionReceipts = new Array(action.expected_collection_count);
 		}
 
 		if ("end_run" === action.type) {
@@ -55,39 +73,89 @@ export class Logger implements LoggerInterface {
 		}
 
 		if ("start_collection" === action.type) {
-			this.#testActions.push(action);
+			this.#collectionReceipts[action.collection_id] = {
+				title: action.collection_url,
+				numberOfModules: action.expected_module_count,
+				moduleReceipts: new Array(action.expected_module_count),
+				error: undefined,
+			};
 		}
 
 		if ("collection_error" === action.type) {
 			this.#errored = true;
-			this.#testActions.push(action);
+			let receipt = this.#collectionReceipts[action.collection_id];
+			if (receipt) {
+				receipt.error = action.error;
+			}
 		}
 
 		if ("start_module" === action.type) {
-			this.#testActions.push(action);
+			let moduleReceipts =
+				this.#collectionReceipts[action.collection_id]?.moduleReceipts;
+			if (moduleReceipts) {
+				moduleReceipts[action.module_id] = {
+					title: action.module_name,
+					testReceipts: new Array(action.expected_test_count),
+					error: undefined,
+				};
+			}
 		}
 
 		if ("module_error" === action.type) {
 			this.#errored = true;
-			this.#testActions.push(action);
+			let receipt =
+				this.#collectionReceipts[action.collection_id]?.moduleReceipts?.[
+					action.module_id
+				];
+			if (receipt) {
+				receipt.error = action.error;
+			}
+		}
+
+		if ("start_test" === action.type) {
+			let testReceipt =
+				this.#collectionReceipts[action.collection_id]?.moduleReceipts[
+					action.module_id
+				]?.testReceipts;
+			if (testReceipt) {
+				testReceipt[action.test_id] = {
+					title: action.test_name,
+					assertions: undefined,
+					error: undefined,
+				};
+			}
 		}
 
 		if ("end_test" === action.type) {
+			let testReceipt =
+				this.#collectionReceipts[action.collection_id]?.moduleReceipts[
+					action.module_id
+				]?.testReceipts?.[action.test_id];
+			if (!testReceipt) return;
+
 			// move everything from null to undefined;
 			let assertions = action.assertions ?? undefined;
-
 			if (Array.isArray(assertions) && assertions.length) {
 				this.#failed = true;
-				this.#testActions.push(action);
 			}
 			if (!Array.isArray(assertions) && undefined !== assertions) {
 				this.#failed = true;
-				this.#testActions.push(action);
 			}
+
+			testReceipt.assertions = assertions;
 		}
 
 		if ("test_error" === action.type) {
 			this.#errored = true;
+
+			let testReceipt =
+				this.#collectionReceipts[action.collection_id]?.moduleReceipts[
+					action.module_id
+				]?.testReceipts?.[action.test_id];
+			if (!testReceipt) return;
+
+			testReceipt.error = action.error;
+
 			this.#testActions.push(action);
 		}
 	}

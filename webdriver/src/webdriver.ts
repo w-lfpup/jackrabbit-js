@@ -1,6 +1,6 @@
 import type { ConfigInterface, WebdriverParams } from "./config.js";
 import { ChildProcess, exec } from "child_process";
-import type { EventBus, WebdriverActions } from "./eventbus.js";
+import type { EventBus } from "./eventbus.js";
 import type { IncomingMessage } from "http";
 
 let headers = new Headers([["Content-Type", "application/json"]]);
