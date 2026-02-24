@@ -46,11 +46,12 @@ export class Logger implements LoggerInterface {
 	log(action: LoggerAction) {
 		if ("start_run" === action.type) {
 			this.#testActions.push(action);
-			console.log("begin run");
 		}
 
 		if ("end_run" === action.type) {
 			console.log("end run");
+			// log results
+			// iterate through logs and build an object
 		}
 
 		if ("start_collection" === action.type) {
@@ -67,7 +68,6 @@ export class Logger implements LoggerInterface {
 		}
 
 		if ("module_error" === action.type) {
-			// this.#errored = true;
 			this.#errored = true;
 			this.#testActions.push(action);
 		}

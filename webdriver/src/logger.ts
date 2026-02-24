@@ -17,8 +17,9 @@ import type { EventBus, WebdriverActions } from "./eventbus.js";
 export class Logger {
 	failed: boolean = false;
 	errored: boolean = false;
-
+	#webdriverActions: WebdriverActions[] = [];
 	#boundLog = this.#log.bind(this);
+
 	#eventbus: EventBus;
 
 	constructor(eventbus: EventBus) {
@@ -28,9 +29,15 @@ export class Logger {
 	}
 
 	#log(action: WebdriverActions) {
+		if ("session_start" === action.type) {
+			this.#webdriverActions.push(action);
+		}
+		if ("session_closed" === action.type) {
+			this.#webdriverActions.push(action);
+		}
 		if ("session_error" === action.type) {
 			this.errored = true;
-			console.log();
+			this.#webdriverActions.push(action);
 		}
 		if ("log" !== action.type) return;
 
@@ -38,38 +45,47 @@ export class Logger {
 
 		console.log("loggerAction:\n", loggerAction);
 
-		// if ("start_env" === loggerAction.type) {
-		// }
-		// if ("end_env" === loggerAction.type) {
-		// }
-		// if ("env_error" === loggerAction.type) {
-		// }
-
 		if ("start_run" === loggerAction.type) {
+			this.#webdriverActions.push(action);
 		}
+
 		if ("end_run" === loggerAction.type) {
+			this.#webdriverActions.push(action);
+
 			this.#eventbus.dispatchAction({
 				type: "run_complete",
 				id,
 			});
 		}
+
 		if ("run_error" === loggerAction.type) {
 			this.errored = true;
+			this.#webdriverActions.push(action);
 		}
 
 		if ("start_module" === loggerAction.type) {
+			this.#webdriverActions.push(action);
 		}
+
 		if ("end_module" === loggerAction.type) {
 		}
+
 		if ("module_error" === loggerAction.type) {
 			this.errored = true;
+			this.#webdriverActions.push(action);
 		}
+
 		if ("start_test" === loggerAction.type) {
+			this.#webdriverActions.push(action);
 		}
+
 		if ("end_test" === loggerAction.type) {
+			this.#webdriverActions.push(action);
 		}
+
 		if ("test_error" === loggerAction.type) {
 			this.errored = true;
+			this.#webdriverActions.push(action);
 		}
 
 		if ("end_test" === loggerAction.type) {

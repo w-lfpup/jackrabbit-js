@@ -1,34 +1,43 @@
 import { LoggerAction } from "../../core/dist/jackrabbit_types.js";
 
-interface WebdriverSessionAction {
+export interface WebdriverSessionAction {
 	id: string;
 }
 
-interface WebdriverSessionStartAction extends WebdriverSessionAction {
+export interface WebdriverSessionStartAction extends WebdriverSessionAction {
 	type: "session_start";
 }
 
-interface WebdriverSessionErrorAction extends WebdriverSessionAction {
+export interface WebdriverSessionErrorAction extends WebdriverSessionAction {
 	type: "session_error";
 	error: string;
 }
 
-interface WebdriverSessionClosedAction extends WebdriverSessionAction {
+export interface WebdriverSessionClosedAction extends WebdriverSessionAction {
 	type: "session_closed";
 }
 
-interface WebdriverRunCompleteAction extends WebdriverSessionAction {
+export interface WebdriverRunCompleteAction extends WebdriverSessionAction {
 	type: "run_complete";
 }
 
-interface WebdriverLogAction extends WebdriverSessionAction {
+export interface WebdriverLogAction extends WebdriverSessionAction {
 	type: "log";
 	urlStr: string | undefined;
 	loggerAction: LoggerAction;
 }
 
-interface WebdriverEndAction {
+export interface WebdriverEndAction {
 	type: "end";
+}
+
+export interface WebdriverActionMap {
+	session_start: WebdriverSessionStartAction;
+	session_error: WebdriverSessionClosedAction;
+	session_closed: WebdriverSessionErrorAction;
+	run_complete: WebdriverRunCompleteAction;
+	log: WebdriverLogAction;
+	end: WebdriverEndAction;
 }
 
 export type WebdriverActions =

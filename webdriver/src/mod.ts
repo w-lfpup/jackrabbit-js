@@ -25,8 +25,6 @@ let webdrivers = new WebDrivers(config, eventbus);
 let server = http.createServer();
 server.on("request", router.route);
 server.on("close", function () {
-	console.log("closing the server");
-	console.log("failed?", logger.failed, logger.errored);
 	logger.errored || logger.failed ? process.exit(1) : process.exit(0);
 });
 

@@ -51,8 +51,7 @@ export class WebDrivers {
 				let { id } = action;
 				let [indexStr] = id.split(":");
 				let index = parseInt(indexStr);
-				let webdriverTarget = this.#webdrivers[index];
-				if (webdriverTarget) {
+				if (this.#webdrivers[index]) {
 					if (id === this.#config.webdrivers[index]?.jrId)
 						this.#currentIndex += 1;
 				}
@@ -113,7 +112,17 @@ class WebdriverSession {
 			});
 		});
 
-		this.#process = exec(command, { signal: this.#signal });
+		this.#process = exec(
+			command,
+			{ signal: this.#signal },
+			(_err, _stdout, stderr) => {
+				this.#eventbus.dispatchAction({
+					id: jrId,
+					type: "session_error",
+					error: stderr.toString(),
+				});
+			},
+		);
 		this.#process.addListener("error", (error) => {
 			this.#eventbus.dispatchAction({
 				id: jrId,
