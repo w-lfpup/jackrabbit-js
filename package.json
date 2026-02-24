@@ -6,11 +6,13 @@
 	"workspaces": [
 		"core",
 		"tests",
-		"cli",
-		"nodejs_cli"
+		"nodejs",
+		"browser",
+		"webdriver"
 	],
 	"bin": {
-		"jackrabbit": "nodejs_cli/dist/mod.js"
+		"jackrabbit": "nodejs/dist/mod.js",
+		"jackrabbit_webdriver": "webdriver/dist/mod.js"
 	},
 	"scripts": {
 		"prepare": "npm run build",

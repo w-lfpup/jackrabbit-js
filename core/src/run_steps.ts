@@ -2,11 +2,22 @@ import type {
 	Assertions,
 	LoggerInterface,
 	TestModule,
+	Test,
+	TestOptions,
 } from "./jackrabbit_types.ts";
+
+interface ExecTestParams {
+	logger: LoggerInterface;
+	options: TestOptions | undefined;
+	jrTest: Test;
+	collection_id: number;
+	module_id: number;
+	test_id: number;
+}
 
 const TIMEOUT_INTERVAL_MS = 10000;
 
-function sleep(time: number): Promise<void> {
+export function sleep(time: number): Promise<void> {
 	return new Promise((resolve) => {
 		setTimeout(() => {
 			resolve();
@@ -14,125 +25,145 @@ function sleep(time: number): Promise<void> {
 	});
 }
 
-async function createTimeout(
-	timeoutMs: number = TIMEOUT_INTERVAL_MS,
-): Promise<Assertions> {
+async function failAfterTimeout(timeoutMs: number): Promise<Assertions> {
 	await sleep(timeoutMs);
 
 	return `timed out at ${performance.now()} after ${timeoutMs} ms.`;
 }
 
-async function execTest(
-	testModules: TestModule[],
-	logger: LoggerInterface,
-	moduleId: number,
-	testId: number,
-) {
-	if (logger.cancelled) return;
+async function execTest(params: ExecTestParams) {
+	const { logger, options, jrTest, test_id, collection_id, module_id } = params;
 
-	logger.log(testModules, {
+	const test_name = jrTest.name ?? test_id.toString();
+
+	logger.log({
+		collection_id,
+		module_id,
+		test_id,
+		test_name,
 		type: "start_test",
-		moduleId,
-		testId,
 	});
 
-	const { tests, options } = testModules[moduleId];
+	let start_time = performance.now();
 
-	const testFunc = tests[testId];
-	const startTime = performance.now();
-	const assertions = await Promise.race([
-		createTimeout(options.timeoutMs),
-		testFunc(),
-	]);
+	let assertions: Assertions;
+	try {
+		assertions = await Promise.race([
+			failAfterTimeout(options?.timeoutMs ?? TIMEOUT_INTERVAL_MS),
+			jrTest(),
+		]);
 
-	if (logger.cancelled) return;
+		let end_time = performance.now();
 
-	const endTime = performance.now();
-
-	logger.log(testModules, {
-		type: "end_test",
-		assertions,
-		endTime,
-		moduleId,
-		startTime,
-		testId,
-	});
+		logger.log({
+			assertions,
+			collection_id,
+			start_time,
+			end_time,
+			module_id,
+			test_id,
+			type: "end_test",
+		});
+	} catch (e: unknown) {
+		return logger.log({
+			collection_id,
+			error: e?.toString() ?? "wild test error",
+			module_id,
+			test_id,
+			type: "test_error",
+		});
+	}
 }
 
 async function execCollection(
-	testModules: TestModule[],
 	logger: LoggerInterface,
-	moduleId: number,
+	testModule: TestModule,
+	collection_id: number,
+	module_id: number,
 ) {
-	if (logger.cancelled) return;
-
-	const { tests } = testModules[moduleId];
+	const { tests, options } = testModule;
 
 	const wrappedTests = [];
-	for (let [testID] of tests.entries()) {
-		wrappedTests.push(execTest(testModules, logger, moduleId, testID));
+	for (let [test_id, jrTest] of tests.entries()) {
+		wrappedTests.push(function () {
+			return execTest({
+				logger,
+				options,
+				jrTest,
+				collection_id,
+				module_id,
+				test_id,
+			});
+		});
 	}
-
-	if (logger.cancelled) return;
 
 	await Promise.all(wrappedTests);
 }
 
 async function execCollectionOrdered(
-	testModules: TestModule[],
 	logger: LoggerInterface,
-	moduleId: number,
+	testModule: TestModule,
+	collection_id: number,
+	module_id: number,
 ) {
-	const { tests } = testModules[moduleId];
+	const { tests, options } = testModule;
 
-	for (let [testID] of tests.entries()) {
-		if (logger.cancelled) return;
-
-		await execTest(testModules, logger, moduleId, testID);
+	for (let [test_id, jrTest] of tests.entries()) {
+		await execTest({
+			logger,
+			options,
+			jrTest,
+			collection_id,
+			module_id,
+			test_id,
+		});
 	}
 }
 
-export async function startRun(
+export async function runCollection(
 	logger: LoggerInterface,
 	testModules: TestModule[],
+	collection_id: number,
+	collection_url: string,
 ) {
-	logger.log(testModules, {
-		type: "start_run",
-		time: performance.now(),
+	logger.log({
+		collection_id,
+		collection_url,
+		expected_module_count: testModules.length,
+		type: "start_collection",
 	});
 
-	for (let [moduleId, testModule] of testModules.entries()) {
-		if (logger.cancelled) return;
-
-		logger.log(testModules, {
-			type: "start_module",
-			moduleId,
-		});
-
+	for (let [module_id, testModule] of testModules.entries()) {
 		const { options } = testModule;
+
+		const module_name = options?.title ?? module_id.toString();
+
+		logger.log({
+			type: "start_module",
+			module_id,
+			module_name,
+			collection_id,
+			expected_test_count: testModule.tests.length,
+		});
+
 		options?.runAsynchronously
-			? await execCollection(testModules, logger, moduleId)
-			: await execCollectionOrdered(testModules, logger, moduleId);
+			? await execCollection(logger, testModule, collection_id, module_id)
+			: await execCollectionOrdered(
+					logger,
+					testModule,
+					collection_id,
+					module_id,
+				);
 
-		if (logger.cancelled) return;
-
-		logger.log(testModules, {
+		logger.log({
 			type: "end_module",
-			moduleId,
+			collection_id,
+			module_id,
 		});
 	}
 
-	logger.log(testModules, {
-		type: "end_run",
-		time: performance.now(),
-	});
-}
-
-export function cancelRun(logger: LoggerInterface, testModules: TestModule[]) {
-	if (logger.cancelled) return;
-
-	logger.log(testModules, {
-		type: "cancel_run",
-		time: performance.now(),
+	logger.log({
+		type: "end_collection",
+		collection_id,
 	});
 }

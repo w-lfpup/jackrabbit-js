@@ -1,11 +1,14 @@
 node_modules/
-
-cli/dist/
 core/dist/
+browser/dist/
+nodejs/dist/
 tests/dist/
+webdriver/dist/
 
-# to prevent removal of the file to preserve exec -x
-nodejs_cli/dist/*
-!nodejs_cli/dist/mod.js
+# odd but important to preserve exec privleges 
+!nodejs/dist/mod.js
+!webdriver/dist/mod.js
 
 *.tsbuildinfo
+.DS_Store
+browser.local.json

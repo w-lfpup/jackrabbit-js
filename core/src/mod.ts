@@ -2,8 +2,8 @@ export type {
 	LoggerAction,
 	LoggerInterface,
 	Test,
-	Options,
+	TestOptions,
 	TestModule,
 } from "./jackrabbit_types.ts";
 
-export { startRun, cancelRun } from "./run_steps.js";
+export { runCollection, sleep } from "./run_steps.js";

@@ -2,74 +2,118 @@ interface Stringable {
 	toString: Object["toString"];
 }
 
-export type Assertions = Stringable | Stringable[] | undefined;
+export type Assertions = Stringable | Stringable[] | undefined | null;
 
 type SyncTest = () => Assertions;
 type AsyncTest = () => Promise<Assertions>;
 export type Test = SyncTest | AsyncTest;
 
-export interface Options {
+export interface TestOptions {
 	runAsynchronously?: boolean;
 	timeoutMs?: number;
 	title?: string;
 }
 
 export interface TestModule {
+	options?: TestOptions;
 	tests: Test[];
-	options: Options;
 }
 
 interface StartRun {
-	type: "start_run";
+	expected_collection_count: number;
 	time: number;
+	type: "start_run";
 }
 
 interface EndRun {
-	type: "end_run";
 	time: number;
+	type: "end_run";
 }
 
-interface CancelRun {
-	type: "cancel_run";
-	time: number;
+interface RunError {
+	error: string;
+	type: "run_error";
+}
+
+interface StartTestCollection {
+	collection_id: number;
+	collection_url: string;
+	expected_module_count: number;
+	type: "start_collection";
+}
+
+interface EndTestCollection {
+	collection_id: number;
+	type: "end_collection";
+}
+
+interface TestCollectionError {
+	collection_id: number;
+	error: string;
+	type: "collection_error";
 }
 
 interface StartModule {
+	collection_id: number;
+	expected_test_count: number;
+	module_id: number;
+	module_name: string;
 	type: "start_module";
-	moduleId: number;
 }
 
 interface EndModule {
+	collection_id: number;
+	module_id: number;
 	type: "end_module";
-	moduleId: number;
+}
+
+interface ModuleError {
+	collection_id: number;
+	error: string;
+	module_id: number;
+	type: "module_error";
 }
 
 interface StartTest {
+	collection_id: number;
+	module_id: number;
+	test_id: number;
+	test_name: string;
 	type: "start_test";
-	testId: number;
-	moduleId: number;
 }
 
 interface EndTest {
-	type: "end_test";
-	testId: number;
-	moduleId: number;
-	startTime: number;
-	endTime: number;
 	assertions: Assertions;
+	collection_id: number;
+	module_id: number;
+	test_id: number;
+	start_time: number;
+	end_time: number;
+	type: "end_test";
+}
+
+interface TestError {
+	collection_id: number;
+	error: string;
+	module_id: number;
+	test_id: number;
+	type: "test_error";
 }
 
 export type LoggerAction =
 	| StartRun
 	| EndRun
-	| CancelRun
+	| RunError
+	| StartTestCollection
+	| EndTestCollection
+	| TestCollectionError
 	| StartModule
+	| ModuleError
 	| EndModule
 	| StartTest
-	| EndTest;
+	| EndTest
+	| TestError;
 
 export interface LoggerInterface {
-	readonly failed: boolean;
-	readonly cancelled: boolean;
-	log(testModules: TestModule[], action: LoggerAction): void;
+	log(action: LoggerAction): void;
 }

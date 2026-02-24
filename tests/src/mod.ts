@@ -1,39 +1,61 @@
 import * as FailTests from "./test_fail.test.js";
 import * as PassTests from "./test_pass.test.js";
+import * as ErrorTests from "./test_error.test.js";
 
-import { startRun } from "../../core/dist/mod.js";
+import { runCollection } from "../../core/dist/mod.js";
 import { TestLogger } from "./test_logger.js";
 
 // Test pass and fail behavior
 
 const failTestModules = [FailTests];
 const passTestModules = [PassTests];
+const errorTestModules = [ErrorTests];
 
 // jackrabbit test run won't pass failing tests
 async function testsFail() {
 	let logger = new TestLogger();
-	await startRun(logger, failTestModules);
+	await runCollection(logger, [FailTests], 0, "test_pass.tests.js");
 
+	if (logger.errored) throw new Error("an error occured");
 	if (!logger.failed) return "fail tests failed to fail";
 }
 
 // jackrabbit test run won't fail passing tests
 async function testsPass() {
 	let logger = new TestLogger();
-	await startRun(logger, passTestModules);
+	await runCollection(logger, [PassTests], 1, "test_fail.tests.js");
 
+	if (logger.errored) throw new Error("an error occured");
 	if (logger.failed) return "passing tests failed to pass";
 }
 
-const tests = [testsFail, testsPass];
+async function testsError() {
+	let logger = new TestLogger();
+	await runCollection(logger, [ErrorTests], 2, "test_error.tests.js");
 
-const options = {
-	title: "Failures and Successes",
+	if (!logger.errored) return "tests failed to error";
+	if (logger.failed) return "tests should error not fail";
+}
+
+const testFailures = {
+	tests: [testsFail],
+	options: {
+		title: "Failures",
+	},
 };
 
-const testModule = {
-	tests,
-	options,
+const testSuccesses = {
+	tests: [testsPass],
+	options: {
+		title: "Sucesses",
+	},
 };
 
-export const testModules = [testModule];
+const testErrors = {
+	tests: [testsError],
+	options: {
+		title: "Errors",
+	},
+};
+
+export const testModules = [testFailures, testSuccesses, testErrors];
