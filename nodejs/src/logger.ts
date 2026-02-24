@@ -58,11 +58,8 @@ export class Logger implements LoggerInterface {
 		}
 
 		if ("end_run" === action.type) {
-			console.log("end run");
 			this.#data.endTime = action.time;
 			logResults(this.#data, this.#collectionReceipts);
-			// log results
-			// iterate through logs and build an object
 		}
 
 		if ("start_collection" === action.type) {
