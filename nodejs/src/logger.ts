@@ -1,17 +1,6 @@
 import { Assertions } from "../../core/dist/jackrabbit_types.js";
 import type { LoggerAction, LoggerInterface } from "../../core/dist/mod.js";
 
-/**
- * TODO(taylorvann):
- *
- * Logging tests in order is not a priority.
- * I will come back to it when I feel like it.
- */
-
-/**
- *
- */
-
 interface LoggerData {
 	errored: boolean;
 	failed: boolean;
@@ -28,6 +17,7 @@ interface TestReceipt {
 interface ModuleReceipt {
 	title: string;
 	error: string | undefined;
+	numberOfTests: number;
 	testReceipts: (TestReceipt | undefined)[];
 }
 
@@ -41,7 +31,6 @@ interface CollectionReceipt {
 export class Logger implements LoggerInterface {
 	#failed: boolean = false;
 	#errored: boolean = false;
-	#testActions: LoggerAction[] = [];
 
 	#collectionReceipts: CollectionReceipt[] = [];
 
@@ -95,6 +84,7 @@ export class Logger implements LoggerInterface {
 			if (moduleReceipts) {
 				moduleReceipts[action.module_id] = {
 					title: action.module_name,
+					numberOfTests: action.expected_test_count,
 					testReceipts: new Array(action.expected_test_count),
 					error: undefined,
 				};
@@ -155,8 +145,6 @@ export class Logger implements LoggerInterface {
 			if (!testReceipt) return;
 
 			testReceipt.error = action.error;
-
-			this.#testActions.push(action);
 		}
 	}
 }
