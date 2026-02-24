@@ -5,6 +5,7 @@ interface LoggerData {
 	errored: boolean;
 	failed: boolean;
 	startTime: number;
+	endTime: number;
 	testTime: number;
 }
 
@@ -39,6 +40,7 @@ export class Logger implements LoggerInterface {
 		failed: false,
 		startTime: 0,
 		endTime: 0,
+		testTime: 0,
 	};
 
 	get failed() {
@@ -57,6 +59,8 @@ export class Logger implements LoggerInterface {
 
 		if ("end_run" === action.type) {
 			console.log("end run");
+			this.#data.endTime = action.time;
+			logResults(this.#data, this.#collectionReceipts);
 			// log results
 			// iterate through logs and build an object
 		}
@@ -133,6 +137,7 @@ export class Logger implements LoggerInterface {
 			}
 
 			testReceipt.assertions = assertions;
+			this.#data.testTime += Math.max(0, action.end_time - action.start_time);
 		}
 
 		if ("test_error" === action.type) {
@@ -149,7 +154,7 @@ export class Logger implements LoggerInterface {
 	}
 }
 
-function logResults(data: LoggerData, time: number) {
+function logResults(data: LoggerData, collectionReceipts: CollectionReceipt[]) {
 	let status_with_color = data.failed
 		? yellow("\u{2717} failed")
 		: blue("\u{2714} passed");
@@ -158,7 +163,7 @@ function logResults(data: LoggerData, time: number) {
 		status_with_color = gray("\u{2717} errored");
 	}
 
-	const overhead = time - data.startTime;
+	const overhead = data.endTime - data.startTime;
 	console.log(`Results:
 ${status_with_color}
   duration: ${data.testTime.toFixed(4)} mS
