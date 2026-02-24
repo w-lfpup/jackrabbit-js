@@ -112,17 +112,7 @@ class WebdriverSession {
 			});
 		});
 
-		this.#process = exec(
-			command,
-			{ signal: this.#signal },
-			(_err, _stdout, stderr) => {
-				this.#eventbus.dispatchAction({
-					id: jrId,
-					type: "session_error",
-					error: stderr.toString(),
-				});
-			},
-		);
+		this.#process = exec(command, { signal: this.#signal });
 		this.#process.addListener("error", (error) => {
 			this.#eventbus.dispatchAction({
 				id: jrId,
