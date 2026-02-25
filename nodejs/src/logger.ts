@@ -53,7 +53,7 @@ export class Logger implements LoggerInterface {
 			this.#data.endTime = action.time;
 
 			// buildResults
-			// logResults(this.#data, this.#collectionReceipts);
+			logResults(this.#data, this.#receipts);
 		}
 
 		if ("start_collection" === action.type) {
@@ -100,7 +100,7 @@ export class Logger implements LoggerInterface {
 	}
 }
 
-function logResults(data: LoggerData, receipts: Receipts[]) {
+function logResults(data: LoggerData, receipts: Receipts) {
 	let status_with_color = data.failed
 		? yellow("\u{2717} failed")
 		: blue("\u{2714} passed");
