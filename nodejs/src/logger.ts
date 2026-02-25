@@ -24,15 +24,20 @@ interface TestResults {
 
 interface ModuleResults {
 	loggerAction: LoggerAction;
-	tests: Map<number, TestResults>;
+	tests: TestResults[];
 }
 
 interface CollectionResults {
 	loggerAction: LoggerAction;
-	modules: Map<number, ModuleResults>;
+	modules: ModuleResults[];
 }
 
-type Results = Map<number, CollectionResults>;
+interface RunResults {
+	loggerAction: LoggerAction;
+	collections: CollectionResults[];
+}
+
+type Results = CollectionResults[];
 
 export class Logger implements LoggerInterface {
 	#receipts: Receipts = {
@@ -150,39 +155,45 @@ function gray(text: string) {
 	return `\x1b[100m\x1b[97m${text}\x1b[0m`;
 }
 
-function buildResults(receipts: Receipts): Results {
-	let results = new Map<number, CollectionResults>();
+function buildResults(receipts: Receipts): RunResults | undefined {
+	let runAction = receipts.runs[0];
+	if (!runAction) return;
+
+	let results: RunResults = {
+		loggerAction: runAction,
+		collections: [],
+	};
 
 	for (let loggerAction of receipts.collections) {
 		if ("start_collection" === loggerAction.type) {
-			results.set(loggerAction.collection_id, {
+			results.collections[loggerAction.collection_id] = {
 				loggerAction,
-				modules: new Map(),
-			});
+				modules: [],
+			};
 		}
 	}
 
 	for (let loggerAction of receipts.modules) {
 		if ("start_module" === loggerAction.type) {
-			let collection = results.get(loggerAction.collection_id);
+			let collection = results.collections[loggerAction.collection_id];
 			if (collection)
-				collection.modules.set(loggerAction.module_id, {
+				collection.modules[loggerAction.module_id] = {
 					loggerAction,
-					tests: new Map(),
-				});
+					tests: [],
+				};
 		}
 	}
 
 	for (let loggerAction of receipts.tests) {
 		if ("start_test" === loggerAction.type) {
-			let collection = results.get(loggerAction.collection_id);
+			let collection = results.collections[loggerAction.collection_id];
 			if (collection) {
-				let module = collection.modules.get(loggerAction.collection_id);
+				let module = collection.modules[loggerAction.collection_id];
 				if (module)
-					module.tests.set(loggerAction.test_id, {
+					module.tests[loggerAction.test_id] = {
 						loggerStartAction: loggerAction,
 						loggerEndAction: undefined,
-					});
+					};
 			}
 		}
 	}
@@ -192,11 +203,11 @@ function buildResults(receipts: Receipts): Results {
 			"end_test" === loggerAction.type ||
 			"test_error" === loggerAction.type
 		) {
-			let collection = results.get(loggerAction.collection_id);
+			let collection = results.collections[loggerAction.collection_id];
 			if (collection) {
-				let module = collection.modules.get(loggerAction.collection_id);
+				let module = collection.modules[loggerAction.collection_id];
 				if (module) {
-					let testResult = module.tests.get(loggerAction.test_id);
+					let testResult = module.tests[loggerAction.test_id];
 					if (testResult) testResult.loggerEndAction = loggerAction;
 				}
 			}
@@ -206,4 +217,9 @@ function buildResults(receipts: Receipts): Results {
 	return results;
 }
 
-function logResults(results: Results) {}
+function logResults(results: RunResults | undefined) {
+	if (!results) return;
+
+	for (const collection of results.collections) {
+	}
+}
