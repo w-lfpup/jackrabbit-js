@@ -24,16 +24,28 @@ interface TestResults {
 
 interface ModuleResults {
 	loggerAction: LoggerAction;
-	tests: (TestResults | undefined)[];
+	fails: number;
+	errors: number;
+	tests: number;
+	startedTests: number;
+	testResults: (TestResults | undefined)[];
 }
 
 interface CollectionResults {
 	loggerAction: LoggerAction;
+	fails: number;
+	errors: number;
+	tests: number;
+	startedTests: number;
 	modules: (ModuleResults | undefined)[];
 }
 
 interface RunResults {
 	loggerAction: LoggerAction;
+	fails: number;
+	errors: number;
+	tests: number;
+	startedTests: number;
 	collections: (CollectionResults | undefined)[];
 }
 
@@ -106,7 +118,11 @@ export class Logger implements LoggerInterface {
 			if (Array.isArray(assertions) && assertions.length) {
 				this.#data.failed = true;
 			}
-			if (!Array.isArray(assertions) && undefined !== assertions) {
+			if (
+				!Array.isArray(assertions) &&
+				undefined !== assertions &&
+				null !== assertions
+			) {
 				this.#data.failed = true;
 			}
 
@@ -160,6 +176,10 @@ function buildResults(receipts: Receipts): RunResults | undefined {
 
 	let results: RunResults = {
 		loggerAction: runAction,
+		fails: 0,
+		errors: 0,
+		tests: 0,
+		startedTests: 0,
 		collections: [],
 	};
 
@@ -168,6 +188,10 @@ function buildResults(receipts: Receipts): RunResults | undefined {
 			results.collections[loggerAction.collection_id] = {
 				loggerAction,
 				modules: [],
+				fails: 0,
+				errors: 0,
+				tests: 0,
+				startedTests: 0,
 			};
 		}
 	}
@@ -178,7 +202,11 @@ function buildResults(receipts: Receipts): RunResults | undefined {
 			if (collection)
 				collection.modules[loggerAction.module_id] = {
 					loggerAction,
-					tests: [],
+					testResults: [],
+					fails: 0,
+					tests: 0,
+					errors: 0,
+					startedTests: 0,
 				};
 		}
 	}
@@ -187,27 +215,65 @@ function buildResults(receipts: Receipts): RunResults | undefined {
 		if ("start_test" === loggerAction.type) {
 			let collection = results.collections[loggerAction.collection_id];
 			if (collection) {
-				let module = collection.modules[loggerAction.collection_id];
-				if (module)
-					module.tests[loggerAction.test_id] = {
+				let module = collection.modules[loggerAction.module_id];
+				if (module) {
+					results.startedTests += 1;
+					collection.startedTests += 1;
+					module.startedTests += 1;
+					module.testResults[loggerAction.test_id] = {
 						loggerStartAction: loggerAction,
 						loggerEndAction: undefined,
 					};
+				}
 			}
 		}
 	}
 
+	// this is where we declare collections or modules have failed
 	for (let loggerAction of receipts.testResults) {
-		if (
-			"end_test" === loggerAction.type ||
-			"test_error" === loggerAction.type
-		) {
+		if ("end_test" === loggerAction.type) {
 			let collection = results.collections[loggerAction.collection_id];
 			if (collection) {
-				let module = collection.modules[loggerAction.collection_id];
+				let module = collection.modules[loggerAction.module_id];
 				if (module) {
-					let testResult = module.tests[loggerAction.test_id];
+					results.tests += 1;
+					collection.tests += 1;
+					module.tests += 1;
+
+					let testResult = module.testResults[loggerAction.test_id];
 					if (testResult) testResult.loggerEndAction = loggerAction;
+
+					let { assertions } = loggerAction;
+					const isAssertionArray =
+						Array.isArray(assertions) && assertions.length;
+					// might be worth just sticking with language standard "none" like "" or 0 or false
+					const isAssertion =
+						!Array.isArray(assertions) &&
+						undefined !== assertions &&
+						null !== assertions;
+					if (isAssertion || isAssertionArray) {
+						results.fails += 1;
+						collection.fails += 1;
+						module.fails += 1;
+					}
+				}
+			}
+		}
+
+		if ("test_error" === loggerAction.type) {
+			let collection = results.collections[loggerAction.collection_id];
+			if (collection) {
+				let module = collection.modules[loggerAction.module_id];
+				if (module) {
+					let testResult = module.testResults[loggerAction.test_id];
+					if (testResult) testResult.loggerEndAction = loggerAction;
+
+					let { error } = loggerAction;
+					if (error) {
+						results.errors += 1;
+						collection.errors += 1;
+						module.errors += 1;
+					}
 				}
 			}
 		}
@@ -219,12 +285,25 @@ function buildResults(receipts: Receipts): RunResults | undefined {
 function logResults(results: RunResults | undefined) {
 	if (!results) return;
 
+	const output: string[] = [];
+
+	// need to have a "result string" that we add to whenever new stuff is uncovered
+
+	// couple functions
+	// one iterate through tests and create an array of strings
+
 	for (const collection of results.collections) {
 		if (!collection) continue;
 
 		let { loggerAction } = collection;
-		if ("start_collection" === loggerAction.type) {
-			console.log(`${loggerAction.collection_url}`);
+		if ("start_collection" !== loggerAction.type) continue;
+
+		console.log(`${loggerAction.collection_url}`);
+
+		if (!collection.fails && !collection.errors) {
+			console.log(
+				`${loggerAction.expected_module_count} collections with ${collection.tests} total tests`,
+			);
 		}
 
 		for (const module of collection.modules) {
@@ -233,45 +312,34 @@ function logResults(results: RunResults | undefined) {
 			let { loggerAction } = module;
 			if ("start_module" !== loggerAction.type) continue;
 
-
-			let fails = 0;
-			let errors = 0;
-			let noShows = 0;
-
-			for (const test of module.tests) {
-				if (!test) {
-					noShows += 1
-					continue;
-				}
-
-				let testAction = test.loggerEndAction;
-				if ("test_error" === testAction?.type) {
-					errors += 1;
-				}
-				if ("end_test" === testAction?.type) {
-					let {assertions} = testAction;
-					if (Array.isArray(assertions) && assertions.length) {
-						fails += 1;
-					}
-
-					if (assertions !== undefined && assertions !== null) {
-						fails += 1;
-					}
-				}
-			}
-
-			let signal = " ";
-			if (fails) signal = "\u{2717}";
-			if (errors) signal = "\u{2717}";
-
-			let delta = Math.max(0, loggerAction.expected_test_count - fails - errors - noShows);
-
-			if (delta === loggerAction.expected_test_count) {
-			console.log(`  ${signal} ${loggerAction.module_name} ${delta}/${loggerAction.expected_test_count}`);
-			} else {
-				console.log(`  ${signal} ${loggerAction.module_name}
-	${delta}/${loggerAction.expected_test_count} with ${fails} fails and ${errors} errors`)
+			for (const test of module.testResults) {
 			}
 		}
 	}
 }
+
+// if collection passes
+
+// collection.test.js
+// [checkbox] 3/3 modules 147/147 tests
+
+// colleciton.test.js
+//   test_module
+
+// 		let signal = " ";
+// 		if (fails) signal = "\u{2717}";
+// 		if (errors) signal = "\u{2717}";
+
+// 		let delta = Math.max(
+// 			0,
+// 			loggerAction.expected_test_count - fails - errors - noShows,
+// 		);
+
+// 		if (delta === loggerAction.expected_test_count) {
+// 			console.log(
+// 				`${loggerAction.module_name} ${delta}/${loggerAction.expected_test_count}`,
+// 			);
+// 		} else {
+// 			console.log(`${loggerAction.module_name} ${delta}/${loggerAction.expected_test_count}
+// ${fails} fails and ${errors} errors`);
+// 		}
