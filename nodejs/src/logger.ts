@@ -303,7 +303,7 @@ function logResults(results: RunResults | undefined) {
 		// if tests and started tests are === AND
 		if (!collection.fails && !collection.errors) {
 			console.log(
-				`${loggerAction.expected_module_count} collections with ${collection.tests} tests`,
+				`${loggerAction.expected_module_count} collections, ${collection.tests} tests`,
 			);
 
 			continue;
