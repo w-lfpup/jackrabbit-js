@@ -3,7 +3,7 @@ function testStuffAndPass(): undefined {
 }
 
 function testMoreStuffAndPass() {
-	return [];
+	return ["yo"];
 }
 
 async function testStuffAndPassAsync(): Promise<undefined> {

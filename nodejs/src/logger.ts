@@ -300,10 +300,13 @@ function logResults(results: RunResults | undefined) {
 
 		console.log(`${loggerAction.collection_url}`);
 
+		// if tests and started tests are === AND
 		if (!collection.fails && !collection.errors) {
 			console.log(
-				`${loggerAction.expected_module_count} collections with ${collection.tests} total tests`,
+				`${loggerAction.expected_module_count} collections with ${collection.tests} tests`,
 			);
+
+			continue;
 		}
 
 		for (const module of collection.modules) {
@@ -312,34 +315,52 @@ function logResults(results: RunResults | undefined) {
 			let { loggerAction } = module;
 			if ("start_module" !== loggerAction.type) continue;
 
+			let delta = Math.max(0, module.tests - module.fails - module.errors);
+
+			if (delta === loggerAction.expected_test_count) continue;
+			console.log(
+				`  ${loggerAction.module_name}  ${delta}/${loggerAction.expected_test_count}`,
+			);
+
 			for (const test of module.testResults) {
+				if (test) {
+					let { loggerStartAction, loggerEndAction } = test;
+
+					if ("start_test" === loggerStartAction.type) {
+						if ("end_test" === loggerEndAction?.type) {
+							let { assertions } = loggerEndAction;
+							const isAssertionArray =
+								Array.isArray(assertions) && assertions.length;
+							const isAssertion =
+								!Array.isArray(assertions) &&
+								undefined !== assertions &&
+								null !== assertions;
+
+							if (isAssertion || isAssertionArray) {
+								let { test_name } = loggerStartAction;
+								console.log(`    ${test_name}`);
+							}
+
+							if (isAssertion) {
+								console.log(`      - ${assertions}`);
+							}
+
+							if (isAssertionArray) {
+								for (const assertion of assertions) {
+									console.log(`      - ${assertion}`);
+								}
+							}
+						}
+
+						if ("test_error" === loggerEndAction?.type) {
+							let { test_name } = loggerStartAction;
+							console.log(
+								`      ${test_name}\n      error:\n      ${loggerEndAction.error}`,
+							);
+						}
+					}
+				}
 			}
 		}
 	}
 }
-
-// if collection passes
-
-// collection.test.js
-// [checkbox] 3/3 modules 147/147 tests
-
-// colleciton.test.js
-//   test_module
-
-// 		let signal = " ";
-// 		if (fails) signal = "\u{2717}";
-// 		if (errors) signal = "\u{2717}";
-
-// 		let delta = Math.max(
-// 			0,
-// 			loggerAction.expected_test_count - fails - errors - noShows,
-// 		);
-
-// 		if (delta === loggerAction.expected_test_count) {
-// 			console.log(
-// 				`${loggerAction.module_name} ${delta}/${loggerAction.expected_test_count}`,
-// 			);
-// 		} else {
-// 			console.log(`${loggerAction.module_name} ${delta}/${loggerAction.expected_test_count}
-// ${fails} fails and ${errors} errors`);
-// 		}
