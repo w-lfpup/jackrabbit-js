@@ -15,7 +15,7 @@
 			}
 		},
 		{
-			"command": "$GECKOWEBDRIVER/geckodriver -p 4001",
+			"command": "$CHROMEWEBDRIVER/chromewebdriver --port=4001",
 			"title": "Firefox",
 			"timeout_ms": 20000,
 			"url": "http://127.0.0.1:4001",
