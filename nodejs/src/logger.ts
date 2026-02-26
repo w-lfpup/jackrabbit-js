@@ -24,20 +24,18 @@ interface TestResults {
 
 interface ModuleResults {
 	loggerAction: LoggerAction;
-	tests: TestResults[];
+	tests: (TestResults | undefined)[];
 }
 
 interface CollectionResults {
 	loggerAction: LoggerAction;
-	modules: ModuleResults[];
+	modules: (ModuleResults | undefined)[];
 }
 
 interface RunResults {
 	loggerAction: LoggerAction;
-	collections: CollectionResults[];
+	collections: (CollectionResults | undefined)[];
 }
-
-type Results = CollectionResults[];
 
 export class Logger implements LoggerInterface {
 	#receipts: Receipts = {
@@ -135,10 +133,11 @@ function logRun(data: LoggerData, receipts: Receipts) {
 	logResults(results);
 
 	const total = data.endTime - data.startTime;
-	console.log(`Results:
+	console.log(`
 ${status_with_color}
-  duration: ${data.testTime.toFixed(4)} mS
-  total: ${total.toFixed(4)} mS`);
+duration: ${data.testTime.toFixed(4)} mS
+total: ${total.toFixed(4)} mS
+`);
 }
 
 // 39 - default foreground color
@@ -221,5 +220,58 @@ function logResults(results: RunResults | undefined) {
 	if (!results) return;
 
 	for (const collection of results.collections) {
+		if (!collection) continue;
+
+		let { loggerAction } = collection;
+		if ("start_collection" === loggerAction.type) {
+			console.log(`${loggerAction.collection_url}`);
+		}
+
+		for (const module of collection.modules) {
+			if (!module) continue;
+
+			let { loggerAction } = module;
+			if ("start_module" !== loggerAction.type) continue;
+
+
+			let fails = 0;
+			let errors = 0;
+			let noShows = 0;
+
+			for (const test of module.tests) {
+				if (!test) {
+					noShows += 1
+					continue;
+				}
+
+				let testAction = test.loggerEndAction;
+				if ("test_error" === testAction?.type) {
+					errors += 1;
+				}
+				if ("end_test" === testAction?.type) {
+					let {assertions} = testAction;
+					if (Array.isArray(assertions) && assertions.length) {
+						fails += 1;
+					}
+
+					if (assertions !== undefined && assertions !== null) {
+						fails += 1;
+					}
+				}
+			}
+
+			let signal = " ";
+			if (fails) signal = "\u{2717}";
+			if (errors) signal = "\u{2717}";
+
+			let delta = Math.max(0, loggerAction.expected_test_count - fails - errors - noShows);
+
+			if (delta === loggerAction.expected_test_count) {
+			console.log(`  ${signal} ${loggerAction.module_name} ${delta}/${loggerAction.expected_test_count}`);
+			} else {
+				console.log(`  ${signal} ${loggerAction.module_name}
+	${delta}/${loggerAction.expected_test_count} with ${fails} fails and ${errors} errors`)
+			}
+		}
 	}
 }
