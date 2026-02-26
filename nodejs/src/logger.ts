@@ -88,6 +88,8 @@ export class Logger implements LoggerInterface {
 			logRun(this.#data, this.#receipts);
 		}
 
+		// run error
+
 		if ("start_collection" === action.type) {
 			this.#receipts.collections.push(action);
 		}
@@ -287,11 +289,6 @@ function logResults(results: RunResults | undefined) {
 
 	const output: string[] = [];
 
-	// need to have a "result string" that we add to whenever new stuff is uncovered
-
-	// couple functions
-	// one iterate through tests and create an array of strings
-
 	for (const collection of results.collections) {
 		if (!collection) continue;
 
@@ -355,7 +352,7 @@ function logResults(results: RunResults | undefined) {
 						if ("test_error" === loggerEndAction?.type) {
 							let { test_name } = loggerStartAction;
 							console.log(
-								`      ${test_name}\n      error:\n      ${loggerEndAction.error}`,
+								`      ${test_name}\n      [error] ${loggerEndAction.error}`,
 							);
 						}
 					}

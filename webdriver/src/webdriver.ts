@@ -24,7 +24,6 @@ export class WebDrivers {
 
 	run() {
 		this.#eventbus.addListener("session_closed", (action) => {
-			if ("session_closed" !== action.type) return;
 			if (action.id !== this.#config.webdrivers[this.#currentIndex]?.jrId)
 				return;
 
@@ -47,20 +46,18 @@ export class WebDrivers {
 
 	runAll() {
 		this.#eventbus.addListener("session_closed", (action) => {
-			if ("session_closed" === action.type) {
-				let { id } = action;
-				let [indexStr] = id.split(":");
-				let index = parseInt(indexStr);
-				if (this.#webdrivers[index]) {
-					if (id === this.#config.webdrivers[index]?.jrId)
-						this.#currentIndex += 1;
-				}
+			let { id } = action;
+			let [indexStr] = id.split(":");
+			let index = parseInt(indexStr);
+			if (this.#webdrivers[index]) {
+				if (id === this.#config.webdrivers[index]?.jrId)
+					this.#currentIndex += 1;
+			}
 
-				if (this.#currentIndex === this.#webdrivers.length) {
-					this.#eventbus.dispatchAction({
-						type: "end",
-					});
-				}
+			if (this.#currentIndex === this.#webdrivers.length) {
+				this.#eventbus.dispatchAction({
+					type: "end",
+				});
 			}
 		});
 
@@ -251,6 +248,7 @@ class WebdriverSession {
 			}
 		}
 
+		// true if success false otherwise
 		this.#process.kill("SIGKILL");
 		this.#process = undefined;
 	}

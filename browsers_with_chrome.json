@@ -22,7 +22,7 @@
 			"capabilities": {
 				"alwaysMatch": {
 					"goog:chromeOptions": {
-						"args": ["--headless"]
+						"args": ["--headless", "--disable-gpu", "--no-sandbox"]
 					}
 				}
 			}

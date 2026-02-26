@@ -48,25 +48,37 @@ export type WebdriverActions =
 	| WebdriverEndAction
 	| WebdriverLogAction;
 
-interface EventBusListener {
+interface TypedEventBusListener<
+	K extends keyof WebdriverActionMap = keyof WebdriverActionMap,
+> {
+	(action: WebdriverActionMap[K]): void;
+}
+
+interface EventBusListener extends TypedEventBusListener {
 	(action: WebdriverActions): void;
 }
 
 export interface EventBusInterface {
-	addListener(type: string, listener: EventBusListener): void;
+	addListener<K extends keyof WebdriverActionMap>(
+		type: K,
+		listener: TypedEventBusListener<K>,
+	): void;
 	dispatchAction(action: WebdriverActions): void;
 }
 
 export class EventBus implements EventBusInterface {
 	#eventMap: Map<string, EventBusListener[]> = new Map();
 
-	addListener(type: string, cb: EventBusListener) {
+	addListener<K extends keyof WebdriverActionMap>(
+		type: K,
+		cb: TypedEventBusListener<K>,
+	) {
 		let listeners = this.#eventMap.get(type);
 		if (!listeners) {
 			listeners = [];
 			this.#eventMap.set(type, listeners);
 		}
-		listeners.push(cb);
+		listeners.push(cb as EventBusListener);
 	}
 
 	dispatchAction(action: WebdriverActions) {
