@@ -14,6 +14,39 @@ import type { EventBus, WebdriverActions } from "./eventbus.js";
 
 // need to track each web driver
 
+interface TestResults {
+	loggerStartAction: LoggerAction;
+	loggerEndAction: LoggerAction | undefined;
+}
+
+interface ModuleResults {
+	loggerAction: LoggerAction;
+	fails: number;
+	errors: number;
+	tests: number;
+	startedTests: number;
+	testResults: (TestResults | undefined)[];
+}
+
+interface CollectionResults {
+	loggerAction: LoggerAction;
+	fails: number;
+	errors: number;
+	tests: number;
+	startedTests: number;
+	modules: (ModuleResults | undefined)[];
+}
+
+interface RunResults {
+	startTime: number;
+	fails: number;
+	errors: number;
+	tests: number;
+	startedTests: number;
+	webdriverName: string;
+	collections: (CollectionResults | undefined)[];
+}
+
 export class Logger {
 	failed: boolean = false;
 	errored: boolean = false;
@@ -27,6 +60,9 @@ export class Logger {
 		this.#eventbus.addListener("session_error", this.#boundLog);
 		this.#eventbus.addListener("log", this.#boundLog);
 	}
+
+	// get output
+	// output being a array of a string
 
 	#log(action: WebdriverActions) {
 		if ("session_start" === action.type) {
