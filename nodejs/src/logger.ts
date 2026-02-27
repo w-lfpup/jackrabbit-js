@@ -1,22 +1,5 @@
 import type { LoggerAction, LoggerInterface } from "../../core/dist/mod.js";
 
-interface LoggerData {
-	errors: number;
-	fails: number;
-	startTime: number;
-	endTime: number;
-	testTime: number;
-}
-
-interface Receipts {
-	runData: LoggerData;
-	collections: LoggerAction[];
-	modules: LoggerAction[];
-	tests: LoggerAction[];
-	testResults: LoggerAction[];
-	errors: LoggerAction[];
-}
-
 interface TestResults {
 	loggerStartAction: LoggerAction;
 	loggerEndAction: LoggerAction | undefined;
@@ -205,9 +188,7 @@ function gray(text: string) {
 	return `\x1b[100m\x1b[97m${text}\x1b[0m`;
 }
 
-function getResultsAsString(
-	results: RunResults,
-): string {
+function getResultsAsString(results: RunResults): string {
 	const output: string[] = [];
 
 	for (const collection of results.collections) {
