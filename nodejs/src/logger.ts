@@ -206,10 +206,8 @@ function gray(text: string) {
 }
 
 function getResultsAsString(
-	results: RunResults | undefined,
-): string | undefined {
-	if (!results) return;
-
+	results: RunResults,
+): string {
 	const output: string[] = [];
 
 	for (const collection of results.collections) {
