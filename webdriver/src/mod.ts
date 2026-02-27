@@ -17,14 +17,17 @@ if (config instanceof Error) {
 }
 
 let eventbus = new EventBus();
-let logger = new Logger(eventbus);
+// logger needs to be a part of webdrivers or have a config with
+// the webdrivers
+let logger = new Logger(config, eventbus);
 let router = new Router(config, eventbus);
 let webdrivers = new WebDrivers(config, eventbus);
 
 // run server
 let server = http.createServer();
-server.on("request", router.route);
-server.on("close", function () {
+server.addListener("request", router.route);
+server.addListener("close", function () {
+	// logger.log()
 	logger.errored || logger.failed ? process.exit(1) : process.exit(0);
 });
 

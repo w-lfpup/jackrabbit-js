@@ -2,6 +2,7 @@ import type {
 	LoggerAction,
 	LoggerInterface,
 } from "../../core/dist/jackrabbit_types.js";
+import type { ConfigInterface } from "./config.js";
 import type { EventBus, WebdriverActions } from "./eventbus.js";
 
 // A LOG Event would allow me to send actions
@@ -43,22 +44,44 @@ interface RunResults {
 	errors: number;
 	tests: number;
 	startedTests: number;
-	webdriverName: string;
+	webdriverSession: WebdriverActions | undefined;
 	collections: (CollectionResults | undefined)[];
 }
 
+// Session (chrome firefox etc)
+//   Collection
+//.    Modules
+//.      Tests
+
 export class Logger {
-	failed: boolean = false;
-	errored: boolean = false;
-	#webdriverActions: WebdriverActions[] = [];
 	#boundLog = this.#log.bind(this);
 
 	#eventbus: EventBus;
 
-	constructor(eventbus: EventBus) {
+	#results: RunResults = {
+		startTime: 0,
+		fails: 0,
+		errors: 0,
+		tests: 0,
+		startedTests: 0,
+		webdriverSession: undefined,
+		collections: [],
+	};
+
+	constructor(config: ConfigInterface, eventbus: EventBus) {
 		this.#eventbus = eventbus;
 		this.#eventbus.addListener("session_error", this.#boundLog);
 		this.#eventbus.addListener("log", this.#boundLog);
+	}
+
+	get errored() {
+		// for any session is their run errored?
+		return this.#results.errors !== 0;
+	}
+
+	get failed() {
+		// for any session did their run fail?
+		return this.#results.fails !== 0;
 	}
 
 	// get output
@@ -66,14 +89,11 @@ export class Logger {
 
 	#log(action: WebdriverActions) {
 		if ("session_start" === action.type) {
-			this.#webdriverActions.push(action);
+			this.#results.webdriverSession = action;
 		}
 		if ("session_closed" === action.type) {
-			this.#webdriverActions.push(action);
 		}
 		if ("session_error" === action.type) {
-			this.errored = true;
-			this.#webdriverActions.push(action);
 		}
 		if ("log" !== action.type) return;
 
@@ -82,12 +102,9 @@ export class Logger {
 		console.log("loggerAction:\n", loggerAction);
 
 		if ("start_run" === loggerAction.type) {
-			this.#webdriverActions.push(action);
 		}
 
 		if ("end_run" === loggerAction.type) {
-			this.#webdriverActions.push(action);
-
 			this.#eventbus.dispatchAction({
 				type: "run_complete",
 				id,
@@ -95,43 +112,27 @@ export class Logger {
 		}
 
 		if ("run_error" === loggerAction.type) {
-			this.errored = true;
-			this.#webdriverActions.push(action);
 		}
 
 		if ("start_module" === loggerAction.type) {
-			this.#webdriverActions.push(action);
 		}
 
 		if ("end_module" === loggerAction.type) {
 		}
 
 		if ("module_error" === loggerAction.type) {
-			this.errored = true;
-			this.#webdriverActions.push(action);
 		}
 
 		if ("start_test" === loggerAction.type) {
-			this.#webdriverActions.push(action);
 		}
 
 		if ("end_test" === loggerAction.type) {
-			this.#webdriverActions.push(action);
 		}
 
 		if ("test_error" === loggerAction.type) {
-			this.errored = true;
-			this.#webdriverActions.push(action);
 		}
 
 		if ("end_test" === loggerAction.type) {
-			let { assertions } = loggerAction;
-
-			if (Array.isArray(assertions)) {
-				this.failed = assertions.length !== 0;
-			} else {
-				this.failed = undefined !== assertions;
-			}
 		}
 	}
 }

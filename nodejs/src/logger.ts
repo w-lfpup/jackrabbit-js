@@ -83,7 +83,7 @@ export class Logger implements LoggerInterface {
 
 		if ("end_run" === action.type) {
 			this.#results.endTime = action.time;
-			logRun(this.#results);
+			console.log(getResultsAsString(this.#results));
 		}
 
 		if ("start_collection" === action.type) {
@@ -191,25 +191,6 @@ export class Logger implements LoggerInterface {
 	}
 }
 
-function logRun(results: RunResults) {
-	let status_with_color = results.fails
-		? yellow("\u{2717} failed")
-		: blue("\u{2714} passed");
-
-	if (results.errors) {
-		status_with_color = gray("\u{2717} errored");
-	}
-
-	logResults(results);
-
-	const total = results.endTime - results.startTime;
-	console.log(`
-${status_with_color}
-duration: ${results.testTime.toFixed(4)} mS
-total: ${total.toFixed(4)} mS
-`);
-}
-
 // 39 - default foreground color
 // 49 - default background color
 function blue(text: string) {
@@ -224,7 +205,9 @@ function gray(text: string) {
 	return `\x1b[100m\x1b[97m${text}\x1b[0m`;
 }
 
-function logResults(results: RunResults | undefined) {
+function getResultsAsString(
+	results: RunResults | undefined,
+): string | undefined {
 	if (!results) return;
 
 	const output: string[] = [];
@@ -235,11 +218,11 @@ function logResults(results: RunResults | undefined) {
 		let { loggerAction } = collection;
 		if ("start_collection" !== loggerAction.type) continue;
 
-		console.log(`${loggerAction.collection_url}`);
+		output.push(`${loggerAction.collection_url}`);
 
 		// if tests and started tests are === AND
 		if (!collection.fails && !collection.errors) {
-			console.log(
+			output.push(
 				`${loggerAction.expected_module_count} collections, ${collection.tests} tests`,
 			);
 
@@ -255,19 +238,19 @@ function logResults(results: RunResults | undefined) {
 			let delta = Math.max(0, module.tests - module.fails - module.errors);
 
 			if (delta === loggerAction.expected_test_count) continue;
-			console.log(
+			output.push(
 				`  ${loggerAction.module_name}  ${delta}/${loggerAction.expected_test_count}`,
 			);
 
 			for (const test of module.testResults) {
 				if (!test) continue;
-				
+
 				let { loggerStartAction, loggerEndAction } = test;
 				if ("start_test" !== loggerStartAction.type) continue;
 
 				if ("test_error" === loggerEndAction?.type) {
 					let { test_name } = loggerStartAction;
-					console.log(
+					output.push(
 						`      ${test_name}\n      [error] ${loggerEndAction.error}`,
 					);
 				}
@@ -283,20 +266,37 @@ function logResults(results: RunResults | undefined) {
 
 					if (isAssertion || isAssertionArray) {
 						let { test_name } = loggerStartAction;
-						console.log(`    ${test_name}`);
+						output.push(`    ${test_name}`);
 					}
 
 					if (isAssertion) {
-						console.log(`      - ${assertions}`);
+						output.push(`      - ${assertions}`);
 					}
 
 					if (isAssertionArray) {
 						for (const assertion of assertions) {
-							console.log(`      - ${assertion}`);
+							output.push(`      - ${assertion}`);
 						}
 					}
 				}
 			}
 		}
 	}
+
+	let status_with_color = results.fails
+		? yellow("\u{2717} failed")
+		: blue("\u{2714} passed");
+
+	if (results.errors) {
+		status_with_color = gray("\u{2717} errored");
+	}
+
+	const total = results.endTime - results.startTime;
+	output.push(`
+${status_with_color}
+duration: ${results.testTime.toFixed(4)} mS
+total: ${total.toFixed(4)} mS
+`);
+
+	return output.join("\n");
 }
