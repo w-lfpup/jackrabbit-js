@@ -71,12 +71,9 @@ export class Router {
 
 		// log test actions
 		if (url.startsWith("/log/") && "POST" === method) {
-			console.log("log has a cookie?", req.headers.cookie);
-
 			let id: string | undefined;
 			let cookies = req.headers.cookie?.split(";") ?? [];
 			for (const cookieLine of cookies) {
-				console.log(cookieLine);
 				if (cookieLine.startsWith("jackrabbit=")) {
 					let [_name, value] = cookieLine.split("=");
 					id = value;

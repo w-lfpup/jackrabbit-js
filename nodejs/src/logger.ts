@@ -59,6 +59,10 @@ export class Logger implements LoggerInterface {
 		return this.#results.errors !== 0;
 	}
 
+	get resultsAsStr(): string {
+		return getResultsAsString(this.#results);
+	}
+
 	log(action: LoggerAction) {
 		if ("start_run" === action.type) {
 			this.#results.startTime = action.time;
@@ -66,7 +70,6 @@ export class Logger implements LoggerInterface {
 
 		if ("end_run" === action.type) {
 			this.#results.endTime = action.time;
-			console.log(getResultsAsString(this.#results));
 		}
 
 		if ("start_collection" === action.type) {
@@ -103,7 +106,6 @@ export class Logger implements LoggerInterface {
 		}
 
 		if ("start_test" === action.type) {
-			// this.#results.tests.push(action);
 			let collection = this.#results.collections[action.collection_id];
 			if (collection) {
 				let module = collection.modules[action.module_id];
@@ -202,7 +204,8 @@ function getResultsAsString(results: RunResults): string {
 		// if tests and started tests are === AND
 		if (!collection.fails && !collection.errors) {
 			output.push(
-				`${loggerAction.expected_module_count} collections, ${collection.tests} tests`,
+				`${collection.tests} tests
+${loggerAction.expected_module_count} modules`,
 			);
 
 			continue;
