@@ -21,7 +21,7 @@ let webdrivers = new WebDrivers(config, eventbus);
 let server = http.createServer();
 server.addListener("request", router.route);
 server.addListener("close", function () {
-    // logger.log()
+    console.log(logger.results);
     logger.errored || logger.failed ? process.exit(1) : process.exit(0);
 });
 let abortController = new AbortController();

@@ -217,9 +217,7 @@ class WebdriverSession {
 	}
 
 	async #down() {
-		console.log("trying to down a run");
 		if (!this.#process) return;
-		console.log("process to down exists");
 		if (this.#sessionId) {
 			let { url } = this.#params;
 			try {
@@ -237,7 +235,6 @@ class WebdriverSession {
 					console.log("err deleting cookie:", cookieBody);
 					throw new Error("delete-cookie request failed");
 				}
-				console.log("deleted a session");
 			} catch (e) {
 				console.log("error deleting session");
 				this.#eventbus.dispatchAction({
