@@ -2,7 +2,7 @@ import type {
 	LoggerAction,
 	LoggerInterface,
 } from "../../core/dist/jackrabbit_types.js";
-import type { ConfigInterface } from "./config.js";
+import type { ConfigInterface, WebdriverParams } from "./config.js";
 import type { EventBus, WebdriverActions } from "./eventbus.js";
 
 // A LOG Event would allow me to send actions
@@ -44,7 +44,10 @@ interface RunResults {
 	errors: number;
 	tests: number;
 	startedTests: number;
-	webdriverSession: WebdriverActions | undefined;
+	endTime: number;
+	errorLogs: LoggerAction[];
+	testTime: number;
+	webdriverParams: WebdriverParams;
 	collections: (CollectionResults | undefined)[];
 }
 
@@ -58,50 +61,67 @@ export class Logger {
 
 	#eventbus: EventBus;
 
-	#results: RunResults = {
-		startTime: 0,
-		fails: 0,
-		errors: 0,
-		tests: 0,
-		startedTests: 0,
-		webdriverSession: undefined,
-		collections: [],
-	};
+	#results: Map<string, RunResults> = new Map();
 
 	constructor(config: ConfigInterface, eventbus: EventBus) {
 		this.#eventbus = eventbus;
-		this.#eventbus.addListener("session_error", this.#boundLog);
+		// this.#eventbus.addListener("session_error", this.#boundLog);
 		this.#eventbus.addListener("log", this.#boundLog);
-	}
 
-	get errored() {
-		// for any session is their run errored?
-		return this.#results.errors !== 0;
+		for (let webdriverParams of config.webdrivers) {
+			this.#results.set(webdriverParams.jrId, {
+				startTime: 0,
+				fails: 0,
+				errors: 0,
+				tests: 0,
+				endTime: 0,
+				testTime: 0,
+				errorLogs: [],
+				startedTests: 0,
+				webdriverParams,
+				collections: [],
+			});
+		}
 	}
 
 	get failed() {
 		// for any session did their run fail?
-		return this.#results.fails !== 0;
+		for (let [, result] of this.#results) {
+			if (result.fails) return true;
+		}
 	}
+
+	get errored() {
+		// for any session is their run errored?
+		for (let [, result] of this.#results) {
+			if (result.fails) return true;
+		}
+	}
+
+	// get results(): string {
+	// 	return getResultsAsString(this.#results);
+	// }
 
 	// get output
 	// output being a array of a string
 
 	#log(action: WebdriverActions) {
-		if ("session_start" === action.type) {
-			this.#results.webdriverSession = action;
-		}
-		if ("session_closed" === action.type) {
-		}
-		if ("session_error" === action.type) {
-		}
+		// if ("session_start" === action.type) {
+		// }
+		// if ("session_closed" === action.type) {
+		// }
+		// if ("session_error" === action.type) {
+		// }
+
 		if ("log" !== action.type) return;
+
+		let results = this.#results.get(action.id);
+		if (!results) return;
 
 		let { loggerAction, id, urlStr } = action;
 
-		console.log("loggerAction:\n", loggerAction);
-
 		if ("start_run" === loggerAction.type) {
+			results.startTime = loggerAction.time;
 		}
 
 		if ("end_run" === loggerAction.type) {
@@ -115,6 +135,16 @@ export class Logger {
 		}
 
 		if ("start_module" === loggerAction.type) {
+			let collection = results.collections[loggerAction.collection_id];
+			if (collection)
+				collection.modules[loggerAction.module_id] = {
+					loggerAction,
+					testResults: [],
+					fails: 0,
+					tests: 0,
+					errors: 0,
+					startedTests: 0,
+				};
 		}
 
 		if ("end_module" === loggerAction.type) {
@@ -124,12 +154,71 @@ export class Logger {
 		}
 
 		if ("start_test" === loggerAction.type) {
+			let collection = results.collections[loggerAction.collection_id];
+			if (collection) {
+				let module = collection.modules[loggerAction.module_id];
+				if (module) {
+					results.startedTests += 1;
+					collection.startedTests += 1;
+					module.startedTests += 1;
+					module.testResults[loggerAction.test_id] = {
+						loggerStartAction: loggerAction,
+						loggerEndAction: undefined,
+					};
+				}
+			}
 		}
 
 		if ("end_test" === loggerAction.type) {
+			let collection = results.collections[loggerAction.collection_id];
+			if (collection) {
+				let module = collection.modules[loggerAction.module_id];
+				if (module) {
+					results.tests += 1;
+					collection.tests += 1;
+					module.tests += 1;
+
+					let testResult = module.testResults[loggerAction.test_id];
+					if (testResult) testResult.loggerEndAction = loggerAction;
+
+					let { assertions } = loggerAction;
+					const isAssertionArray =
+						Array.isArray(assertions) && assertions.length;
+					// might be worth just sticking with language standard "none" like "" or 0 or false
+					const isAssertion =
+						!Array.isArray(assertions) &&
+						undefined !== assertions &&
+						null !== assertions;
+					if (isAssertion || isAssertionArray) {
+						results.fails += 1;
+						collection.fails += 1;
+						module.fails += 1;
+					}
+				}
+			}
+
+			results.testTime += Math.max(
+				0,
+				loggerAction.end_time - loggerAction.start_time,
+			);
 		}
 
 		if ("test_error" === loggerAction.type) {
+			let collection = results.collections[loggerAction.collection_id];
+			if (collection) {
+				let module = collection.modules[loggerAction.module_id];
+				if (module) {
+					let testResult = module.testResults[loggerAction.test_id];
+					if (testResult) testResult.loggerEndAction = loggerAction;
+
+					let { error } = loggerAction;
+					if (error) {
+						results.errors += 1;
+						collection.errors += 1;
+						module.errors += 1;
+					}
+				}
+			}
 		}
 
 		if ("end_test" === loggerAction.type) {
