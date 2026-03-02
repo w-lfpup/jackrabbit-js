@@ -17,32 +17,27 @@ if (config instanceof Error) {
 }
 
 let eventbus = new EventBus();
-// logger needs to be a part of webdrivers or have a config with
-// the webdrivers
 let logger = new Logger(config, eventbus);
 let router = new Router(config, eventbus);
 let webdrivers = new WebDrivers(config, eventbus);
 
-// run server
+// setup server
 let server = http.createServer();
 server.addListener("request", router.route);
 server.addListener("close", function () {
 	console.log(logger.results);
 	logger.errored || logger.failed ? process.exit(1) : process.exit(0);
 });
-
-let abortController = new AbortController();
 eventbus.addListener("end", function () {
-	abortController.abort();
+	server.close();
 });
 
-let { signal } = abortController;
+// run server
 let { port, hostname } = config.hostAndPort;
 server.listen({
 	port,
 	hostname,
-	signal,
 });
 
 // start test run
-webdrivers.run();
+config.runAsynchronously ? webdrivers.runAll() : webdrivers.run();

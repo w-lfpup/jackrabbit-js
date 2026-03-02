@@ -1,5 +1,6 @@
 {
 	"host_and_port": "http://localhost:4000",
+	"runAsynchronously": false,
 	"webdrivers": [
 		{
 			"command": "geckodriver -p 4001",
@@ -15,10 +16,10 @@
 			}
 		},
 		{
-			"command": "/Users/taylor/workspace/chromedriver-mac-arm64/chromedriver --port=4001",
+			"command": "/Users/taylor/workspace/chromedriver-mac-arm64/chromedriver --port=4002",
 			"title": "Chrome",
 			"timeout_ms": 20000,
-			"url": "http://localhost:4001",
+			"url": "http://localhost:4002",
 			"capabilities": {
 				"alwaysMatch": {
 					"goog:chromeOptions": {
