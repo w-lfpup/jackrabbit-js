@@ -26,7 +26,8 @@ interface ModuleResults {
 	fails: number;
 	errors: number;
 	tests: number;
-	startedTests: number;
+	finishedTests: number;
+	errorLogs: LoggerAction[];
 	testResults: (TestResults | undefined)[];
 }
 
@@ -35,7 +36,8 @@ interface CollectionResults {
 	fails: number;
 	errors: number;
 	tests: number;
-	startedTests: number;
+	finishedTests: number;
+	errorLogs: LoggerAction[];
 	modules: (ModuleResults | undefined)[];
 }
 
@@ -44,7 +46,7 @@ interface RunResults {
 	fails: number;
 	errors: number;
 	tests: number;
-	startedTests: number;
+	finishedTests: number;
 	endTime: number;
 	errorLogs: LoggerAction[];
 	testTime: number;
@@ -56,7 +58,8 @@ interface SessionResults {
 	fails: number;
 	errors: number;
 	tests: number;
-	startedTests: number;
+	finishedTests: number;
+	errorLogs: WebdriverActions[];
 	runs: Map<string, RunResults>;
 }
 
@@ -66,7 +69,8 @@ interface SessionResults {
 //.      Tests
 
 export class Logger {
-	#boundLog = this.#log.bind(this);
+	#boundLog = this.#onLog.bind(this);
+	#boundError = this.#onError.bind(this);
 
 	#eventbus: EventBus;
 
@@ -74,7 +78,8 @@ export class Logger {
 		fails: 0,
 		errors: 0,
 		tests: 0,
-		startedTests: 0,
+		finishedTests: 0,
+		errorLogs: [],
 		runs: new Map(),
 	};
 
@@ -82,6 +87,7 @@ export class Logger {
 		this.#eventbus = eventbus;
 		// this.#eventbus.addListener("session_error", this.#boundLog);
 		this.#eventbus.addListener("log", this.#boundLog);
+		this.#eventbus.addListener("log", this.#boundError);
 
 		for (let webdriverParams of config.webdrivers) {
 			this.#results.runs.set(webdriverParams.jrId, {
@@ -92,7 +98,7 @@ export class Logger {
 				endTime: 0,
 				testTime: 0,
 				errorLogs: [],
-				startedTests: 0,
+				finishedTests: 0,
 				webdriverParams,
 				collections: [],
 			});
@@ -113,15 +119,15 @@ export class Logger {
 
 	// get output
 	// output being a array of a string
+	#onError(action: WebdriverActions) {
+		if ("session_error" === action.type) {
+			this.#results.errors += 1;
+			this.#results.errorLogs.push(action);
+		}
+	}
 
-	#log(action: WebdriverActions) {
+	#onLog(action: WebdriverActions) {
 		console.log(action);
-		// if ("session_start" === action.type) {
-		// }
-		// if ("session_closed" === action.type) {
-		// }
-		// if ("session_error" === action.type) {
-		// }
 
 		if ("log" !== action.type) return;
 
@@ -143,37 +149,52 @@ export class Logger {
 		}
 
 		if ("run_error" === loggerAction.type) {
+			results.errors += 1;
+			results.errorLogs.push(loggerAction);
 		}
 
 		if ("start_collection" === loggerAction.type) {
-			// this.#results.collections.push(action);
 			results.collections[loggerAction.collection_id] = {
 				loggerAction,
 				modules: [],
+				errorLogs: [],
 				fails: 0,
 				errors: 0,
 				tests: 0,
-				startedTests: 0,
+				finishedTests: 0,
 			};
 		}
 
 		if ("start_module" === loggerAction.type) {
 			let collection = results.collections[loggerAction.collection_id];
-			if (collection)
+			if (collection) {
 				collection.modules[loggerAction.module_id] = {
 					loggerAction,
 					testResults: [],
+					errorLogs: [],
 					fails: 0,
-					tests: 0,
+					tests: loggerAction.expected_test_count,
 					errors: 0,
-					startedTests: 0,
+					finishedTests: 0,
 				};
+
+				collection.tests += loggerAction.expected_test_count;
+				results.tests += loggerAction.expected_test_count;
+				this.#results.tests += loggerAction.expected_test_count;
+			}
 		}
 
 		if ("end_module" === loggerAction.type) {
 		}
 
 		if ("module_error" === loggerAction.type) {
+			let collection = results.collections[loggerAction.collection_id];
+			if (collection) {
+				let module = collection.modules[loggerAction.module_id];
+				if (module) {
+					module.errorLogs.push(loggerAction);
+				}
+			}
 		}
 
 		if ("start_test" === loggerAction.type) {
@@ -181,10 +202,6 @@ export class Logger {
 			if (collection) {
 				let module = collection.modules[loggerAction.module_id];
 				if (module) {
-					this.#results.startedTests += 1;
-					results.startedTests += 1;
-					collection.startedTests += 1;
-					module.startedTests += 1;
 					module.testResults[loggerAction.test_id] = {
 						loggerStartAction: loggerAction,
 						loggerEndAction: undefined,
@@ -198,13 +215,19 @@ export class Logger {
 			if (collection) {
 				let module = collection.modules[loggerAction.module_id];
 				if (module) {
-					this.#results.tests += 1;
-					results.tests += 1;
-					collection.tests += 1;
-					module.tests += 1;
+					this.#results.finishedTests += 1;
+					results.finishedTests += 1;
+					collection.finishedTests += 1;
+					module.finishedTests += 1;
 
 					let testResult = module.testResults[loggerAction.test_id];
-					if (testResult) testResult.loggerEndAction = loggerAction;
+					if (testResult) {
+						testResult.loggerEndAction = loggerAction;
+						this.#results.finishedTests += 1;
+						results.finishedTests += 1;
+						collection.finishedTests += 1;
+						module.finishedTests += 1;
+					}
 
 					let { assertions } = loggerAction;
 					const isAssertionArray =
@@ -235,10 +258,8 @@ export class Logger {
 				let module = collection.modules[loggerAction.module_id];
 				if (module) {
 					let testResult = module.testResults[loggerAction.test_id];
-					if (testResult) testResult.loggerEndAction = loggerAction;
-
-					let { error } = loggerAction;
-					if (error) {
+					if (testResult) {
+						testResult.loggerEndAction = loggerAction;
 						this.#results.errors += 1;
 						results.errors += 1;
 						collection.errors += 1;
@@ -246,9 +267,6 @@ export class Logger {
 					}
 				}
 			}
-		}
-
-		if ("end_test" === loggerAction.type) {
 		}
 	}
 }
