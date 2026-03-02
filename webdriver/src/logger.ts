@@ -1,8 +1,4 @@
-import { SessionOptions } from "http2";
-import type {
-	LoggerAction,
-	LoggerInterface,
-} from "../../core/dist/jackrabbit_types.js";
+import type { LoggerAction } from "../../core/dist/jackrabbit_types.js";
 import type { ConfigInterface, WebdriverParams } from "./config.js";
 import type {
 	EventBus,
@@ -10,17 +6,6 @@ import type {
 	WebdriverLogAction,
 	WebdriverSessionErrorAction,
 } from "./eventbus.js";
-import { log } from "console";
-
-// A LOG Event would allow me to send actions
-//
-
-// log sync -> print out results as they happen
-// log async -> save results print when all done
-
-// need config for webdriver names and stuff
-
-// need to track each web driver
 
 interface TestResults {
 	loggerStartAction: LoggerAction;
@@ -68,11 +53,6 @@ interface SessionResults {
 	errorLogs: WebdriverActions[];
 	runs: Map<string, RunResults>;
 }
-
-// Session (chrome firefox etc)
-//   Collection
-//.    Modules
-//.      Tests
 
 export class Logger {
 	#eventbus: EventBus;
@@ -132,8 +112,6 @@ export class Logger {
 
 	#boundLog = this.#onLog.bind(this);
 	#onLog(action: WebdriverLogAction) {
-		console.log(action);
-
 		if ("log" !== action.type) return;
 
 		let results = this.#results.runs.get(action.id);
