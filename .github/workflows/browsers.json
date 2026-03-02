@@ -22,7 +22,7 @@
 			"capabilities": {
 				"alwaysMatch": {
 					"goog:chromeOptions": {
-						"args": ["--headless", "--no-sandbox", "--disable-dev-shm-usage"]
+						"args": ["--headless", "--start-maximized"]
 					}
 				}
 			}
