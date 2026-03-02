@@ -33,8 +33,8 @@ export interface WebdriverEndAction {
 
 export interface WebdriverActionMap {
 	session_start: WebdriverSessionStartAction;
-	session_error: WebdriverSessionClosedAction;
-	session_closed: WebdriverSessionErrorAction;
+	session_error: WebdriverSessionErrorAction;
+	session_closed: WebdriverSessionClosedAction;
 	run_complete: WebdriverRunCompleteAction;
 	log: WebdriverLogAction;
 	end: WebdriverEndAction;

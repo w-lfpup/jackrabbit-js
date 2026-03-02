@@ -4,7 +4,13 @@ import type {
 	LoggerInterface,
 } from "../../core/dist/jackrabbit_types.js";
 import type { ConfigInterface, WebdriverParams } from "./config.js";
-import type { EventBus, WebdriverActions } from "./eventbus.js";
+import type {
+	EventBus,
+	WebdriverActions,
+	WebdriverLogAction,
+	WebdriverSessionErrorAction,
+} from "./eventbus.js";
+import { log } from "console";
 
 // A LOG Event would allow me to send actions
 //
@@ -69,9 +75,6 @@ interface SessionResults {
 //.      Tests
 
 export class Logger {
-	#boundLog = this.#onLog.bind(this);
-	#boundError = this.#onError.bind(this);
-
 	#eventbus: EventBus;
 
 	#results: SessionResults = {
@@ -87,7 +90,7 @@ export class Logger {
 		this.#eventbus = eventbus;
 		// this.#eventbus.addListener("session_error", this.#boundLog);
 		this.#eventbus.addListener("log", this.#boundLog);
-		this.#eventbus.addListener("log", this.#boundError);
+		this.#eventbus.addListener("session_error", this.#boundError);
 
 		for (let webdriverParams of config.webdrivers) {
 			this.#results.runs.set(webdriverParams.jrId, {
@@ -119,14 +122,16 @@ export class Logger {
 
 	// get output
 	// output being a array of a string
-	#onError(action: WebdriverActions) {
+	#boundError = this.#onError.bind(this);
+	#onError(action: WebdriverSessionErrorAction) {
 		if ("session_error" === action.type) {
 			this.#results.errors += 1;
 			this.#results.errorLogs.push(action);
 		}
 	}
 
-	#onLog(action: WebdriverActions) {
+	#boundLog = this.#onLog.bind(this);
+	#onLog(action: WebdriverLogAction) {
 		console.log(action);
 
 		if ("log" !== action.type) return;
@@ -149,6 +154,7 @@ export class Logger {
 		}
 
 		if ("run_error" === loggerAction.type) {
+			this.#results.errors += 1;
 			results.errors += 1;
 			results.errorLogs.push(loggerAction);
 		}
@@ -163,6 +169,17 @@ export class Logger {
 				tests: 0,
 				finishedTests: 0,
 			};
+		}
+
+		if ("collection_error" === loggerAction.type) {
+			let collection = results.collections[loggerAction.collection_id];
+			if (collection) {
+				this.#results.errors += 1;
+				results.errors += 1;
+				collection.errors += 1;
+
+				collection.errorLogs.push(loggerAction);
+			}
 		}
 
 		if ("start_module" === loggerAction.type) {
@@ -184,14 +201,15 @@ export class Logger {
 			}
 		}
 
-		if ("end_module" === loggerAction.type) {
-		}
-
 		if ("module_error" === loggerAction.type) {
 			let collection = results.collections[loggerAction.collection_id];
 			if (collection) {
 				let module = collection.modules[loggerAction.module_id];
 				if (module) {
+					this.#results.errors += 1;
+					results.errors += 1;
+					collection.errors += 1;
+					module.errors += 1;
 					module.errorLogs.push(loggerAction);
 				}
 			}
