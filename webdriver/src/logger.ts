@@ -115,6 +115,7 @@ export class Logger {
 	// output being a array of a string
 
 	#log(action: WebdriverActions) {
+		console.log(action);
 		// if ("session_start" === action.type) {
 		// }
 		// if ("session_closed" === action.type) {
