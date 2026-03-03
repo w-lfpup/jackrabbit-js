@@ -28,6 +28,8 @@ interface CollectionResults {
 	errors: number;
 	expectedTests: number;
 	finishedTests: number;
+	expectedModules: number;
+	finishedModules: number;
 	errorLogs: LoggerAction[];
 	modules: (ModuleResults | undefined)[];
 }
@@ -38,6 +40,10 @@ interface RunResults {
 	errors: number;
 	expectedTests: number;
 	finishedTests: number;
+	expectedModules: number;
+	finishedModules: number;
+	expectedCollections: number;
+	finishedCollections: number;
 	endTime: number;
 	errorLogs: LoggerAction[];
 	testTime: number;
@@ -64,7 +70,6 @@ export class Logger {
 
 	constructor(config: ConfigInterface, eventbus: EventBus) {
 		this.#eventbus = eventbus;
-		// this.#eventbus.addListener("session_error", this.#boundLog);
 		this.#eventbus.addListener("log", this.#boundLog);
 		this.#eventbus.addListener("session_error", this.#boundError);
 
@@ -74,10 +79,14 @@ export class Logger {
 				fails: 0,
 				errors: 0,
 				expectedTests: 0,
+				expectedModules: 0,
 				endTime: 0,
 				testTime: 0,
 				errorLogs: [],
 				finishedTests: 0,
+				finishedModules: 0,
+				expectedCollections: 0,
+				finishedCollections: 0,
 				webdriverParams,
 				collections: [],
 			});
@@ -115,6 +124,7 @@ export class Logger {
 
 		if ("start_run" === loggerAction.type) {
 			results.startTime = loggerAction.time;
+			results.expectedCollections = loggerAction.expected_collection_count;
 		}
 
 		if ("end_run" === loggerAction.type) {
@@ -138,9 +148,20 @@ export class Logger {
 				errorLogs: [],
 				fails: 0,
 				errors: 0,
+				expectedModules: loggerAction.expected_module_count,
+				finishedModules: 0,
 				expectedTests: 0,
 				finishedTests: 0,
 			};
+
+			results.expectedModules += loggerAction.expected_module_count;
+		}
+
+		if ("end_collection" === loggerAction.type) {
+			let collection = results.collections[loggerAction.collection_id];
+			if (collection) {
+				results.finishedCollections += 1;
+			}
 		}
 
 		if ("collection_error" === loggerAction.type) {
@@ -169,6 +190,17 @@ export class Logger {
 
 				collection.expectedTests += loggerAction.expected_test_count;
 				results.expectedTests += loggerAction.expected_test_count;
+			}
+		}
+
+		if ("end_module" === loggerAction.type) {
+			let collection = results.collections[loggerAction.collection_id];
+			if (collection) {
+				let module = collection.modules[loggerAction.module_id];
+				if (module) {
+					results.finishedModules += 1;
+					collection.finishedModules += 1;
+				}
 			}
 		}
 
@@ -261,8 +293,14 @@ function getResultsAsString(sessionResults: SessionResults): string {
 		output.push(`
 ${result.webdriverParams.title}`);
 
-		if (!result.fails && !result.errors && result.expectedTests === result.finishedTests) {
-			output.push(`${result.expectedTests} tests`);
+		if (
+			!result.fails &&
+			!result.errors &&
+			result.expectedTests === result.finishedTests
+		) {
+			output.push(`  ${result.finishedTests} tests
+  ${result.finishedModules} modules
+  ${result.finishedCollections} collections`);
 
 			// N tests
 			// N modules
@@ -316,7 +354,10 @@ ${loggerAction.expected_module_count} modules`,
 				let { loggerAction } = module;
 				if ("start_module" !== loggerAction.type) continue;
 
-				let delta = Math.max(0, module.finishedTests - module.fails - module.errors);
+				let delta = Math.max(
+					0,
+					module.finishedTests - module.fails - module.errors,
+				);
 
 				if (delta === loggerAction.expected_test_count) continue;
 				output.push(
