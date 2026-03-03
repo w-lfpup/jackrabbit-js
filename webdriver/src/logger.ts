@@ -48,8 +48,6 @@ interface RunResults {
 interface SessionResults {
 	fails: number;
 	errors: number;
-	expectedTests: number;
-	finishedTests: number;
 	errorLogs: WebdriverActions[];
 	runs: Map<string, RunResults>;
 }
@@ -60,8 +58,6 @@ export class Logger {
 	#results: SessionResults = {
 		fails: 0,
 		errors: 0,
-		expectedTests: 0,
-		finishedTests: 0,
 		errorLogs: [],
 		runs: new Map(),
 	};
@@ -173,7 +169,6 @@ export class Logger {
 
 				collection.expectedTests += loggerAction.expected_test_count;
 				results.expectedTests += loggerAction.expected_test_count;
-				this.#results.expectedTests += loggerAction.expected_test_count;
 			}
 		}
 
@@ -212,7 +207,6 @@ export class Logger {
 					let testResult = module.testResults[loggerAction.test_id];
 					if (testResult) {
 						testResult.loggerEndAction = loggerAction;
-						this.#results.finishedTests += 1;
 						results.finishedTests += 1;
 						collection.finishedTests += 1;
 						module.finishedTests += 1;
