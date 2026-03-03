@@ -22,5 +22,5 @@ export function testHanger(params: TestHangerParams) {
 	</head>
 	<body></body>
 </html>
-	`;
+`;
 }

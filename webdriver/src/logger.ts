@@ -16,7 +16,7 @@ interface ModuleResults {
 	loggerAction: LoggerAction;
 	fails: number;
 	errors: number;
-	tests: number;
+	expectedTests: number;
 	finishedTests: number;
 	errorLogs: LoggerAction[];
 	testResults: (TestResults | undefined)[];
@@ -26,7 +26,7 @@ interface CollectionResults {
 	loggerAction: LoggerAction;
 	fails: number;
 	errors: number;
-	tests: number;
+	expectedTests: number;
 	finishedTests: number;
 	errorLogs: LoggerAction[];
 	modules: (ModuleResults | undefined)[];
@@ -36,7 +36,7 @@ interface RunResults {
 	startTime: number;
 	fails: number;
 	errors: number;
-	tests: number;
+	expectedTests: number;
 	finishedTests: number;
 	endTime: number;
 	errorLogs: LoggerAction[];
@@ -48,7 +48,7 @@ interface RunResults {
 interface SessionResults {
 	fails: number;
 	errors: number;
-	tests: number;
+	expectedTests: number;
 	finishedTests: number;
 	errorLogs: WebdriverActions[];
 	runs: Map<string, RunResults>;
@@ -60,7 +60,7 @@ export class Logger {
 	#results: SessionResults = {
 		fails: 0,
 		errors: 0,
-		tests: 0,
+		expectedTests: 0,
 		finishedTests: 0,
 		errorLogs: [],
 		runs: new Map(),
@@ -77,7 +77,7 @@ export class Logger {
 				startTime: 0,
 				fails: 0,
 				errors: 0,
-				tests: 0,
+				expectedTests: 0,
 				endTime: 0,
 				testTime: 0,
 				errorLogs: [],
@@ -112,12 +112,10 @@ export class Logger {
 
 	#boundLog = this.#onLog.bind(this);
 	#onLog(action: WebdriverLogAction) {
-		if ("log" !== action.type) return;
-
 		let results = this.#results.runs.get(action.id);
 		if (!results) return;
 
-		let { loggerAction, id, urlStr } = action;
+		let { loggerAction, id } = action;
 
 		if ("start_run" === loggerAction.type) {
 			results.startTime = loggerAction.time;
@@ -144,7 +142,7 @@ export class Logger {
 				errorLogs: [],
 				fails: 0,
 				errors: 0,
-				tests: 0,
+				expectedTests: 0,
 				finishedTests: 0,
 			};
 		}
@@ -168,14 +166,14 @@ export class Logger {
 					testResults: [],
 					errorLogs: [],
 					fails: 0,
-					tests: loggerAction.expected_test_count,
+					expectedTests: loggerAction.expected_test_count,
 					errors: 0,
 					finishedTests: 0,
 				};
 
-				collection.tests += loggerAction.expected_test_count;
-				results.tests += loggerAction.expected_test_count;
-				this.#results.tests += loggerAction.expected_test_count;
+				collection.expectedTests += loggerAction.expected_test_count;
+				results.expectedTests += loggerAction.expected_test_count;
+				this.#results.expectedTests += loggerAction.expected_test_count;
 			}
 		}
 
@@ -211,11 +209,6 @@ export class Logger {
 			if (collection) {
 				let module = collection.modules[loggerAction.module_id];
 				if (module) {
-					this.#results.finishedTests += 1;
-					results.finishedTests += 1;
-					collection.finishedTests += 1;
-					module.finishedTests += 1;
-
 					let testResult = module.testResults[loggerAction.test_id];
 					if (testResult) {
 						testResult.loggerEndAction = loggerAction;
@@ -274,8 +267,12 @@ function getResultsAsString(sessionResults: SessionResults): string {
 		output.push(`
 ${result.webdriverParams.title}`);
 
-		if (!result.fails && !result.errors) {
-			output.push(`${result.tests} tests`);
+		if (!result.fails && !result.errors && result.expectedTests === result.finishedTests) {
+			output.push(`${result.expectedTests} tests`);
+
+			// N tests
+			// N modules
+			// N collections
 
 			continue;
 		}
@@ -312,7 +309,7 @@ ${result.webdriverParams.title}`);
 			// if tests and started tests are === AND
 			if (!collection.fails && !collection.errors) {
 				output.push(
-					`${collection.tests} tests
+					`${collection.expectedTests} tests
 ${loggerAction.expected_module_count} modules`,
 				);
 
@@ -325,7 +322,7 @@ ${loggerAction.expected_module_count} modules`,
 				let { loggerAction } = module;
 				if ("start_module" !== loggerAction.type) continue;
 
-				let delta = Math.max(0, module.tests - module.fails - module.errors);
+				let delta = Math.max(0, module.finishedTests - module.fails - module.errors);
 
 				if (delta === loggerAction.expected_test_count) continue;
 				output.push(

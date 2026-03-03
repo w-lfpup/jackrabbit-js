@@ -23,7 +23,6 @@ export interface WebdriverRunCompleteAction extends WebdriverSessionAction {
 
 export interface WebdriverLogAction extends WebdriverSessionAction {
 	type: "log";
-	urlStr: string | undefined;
 	loggerAction: LoggerAction;
 }
 

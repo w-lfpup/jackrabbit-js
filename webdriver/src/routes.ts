@@ -84,7 +84,6 @@ export class Router {
 				let loggerAction = await getLoggerActionFromRequestBody(req);
 				this.#eventbus.dispatchAction({
 					type: "log",
-					urlStr: req.url,
 					loggerAction,
 					id,
 				});
