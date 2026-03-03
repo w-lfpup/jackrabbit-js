@@ -18,7 +18,7 @@ interface ModuleResults {
 	fails: number;
 	errors: number;
 	expectedTests: number;
-	finishedTests: number;
+	completedTests: number;
 	errorLogs: LoggerAction[];
 	testResults: (TestResults | undefined)[];
 }
@@ -28,9 +28,9 @@ interface CollectionResults {
 	fails: number;
 	errors: number;
 	expectedTests: number;
-	finishedTests: number;
+	completedTests: number;
 	expectedModules: number;
-	finishedModules: number;
+	completedModules: number;
 	errorLogs: LoggerAction[];
 	modules: (ModuleResults | undefined)[];
 }
@@ -42,11 +42,11 @@ interface RunResults {
 	endTime: number;
 	testTime: number;
 	expectedTests: number;
-	finishedTests: number;
+	completedTests: number;
 	expectedModules: number;
-	finishedModules: number;
+	completedModules: number;
 	expectedCollections: number;
-	finishedCollections: number;
+	completedCollections: number;
 	errorLogs: LoggerAction[];
 	webdriverParams: WebdriverParams;
 	collections: (CollectionResults | undefined)[];
@@ -86,10 +86,10 @@ export class Logger {
 				endTime: 0,
 				testTime: 0,
 				errorLogs: [],
-				finishedTests: 0,
-				finishedModules: 0,
+				completedTests: 0,
+				completedModules: 0,
 				expectedCollections: 0,
-				finishedCollections: 0,
+				completedCollections: 0,
 				webdriverParams,
 				collections: [],
 			});
@@ -103,6 +103,8 @@ export class Logger {
 	get errored() {
 		return this.#results.errors !== 0;
 	}
+
+	// get completed() {}
 
 	get results(): string {
 		return getResultsAsString(this.#results);
@@ -152,9 +154,9 @@ export class Logger {
 				fails: 0,
 				errors: 0,
 				expectedModules: loggerAction.expected_module_count,
-				finishedModules: 0,
+				completedModules: 0,
 				expectedTests: 0,
-				finishedTests: 0,
+				completedTests: 0,
 			};
 
 			results.expectedModules += loggerAction.expected_module_count;
@@ -164,7 +166,7 @@ export class Logger {
 			let collection = results.collections[loggerAction.collection_id];
 			if (!collection) return;
 
-			results.finishedCollections += 1;
+			results.completedCollections += 1;
 		}
 
 		if ("collection_error" === loggerAction.type) {
@@ -189,7 +191,7 @@ export class Logger {
 				fails: 0,
 				expectedTests: loggerAction.expected_test_count,
 				errors: 0,
-				finishedTests: 0,
+				completedTests: 0,
 			};
 
 			collection.expectedTests += loggerAction.expected_test_count;
@@ -203,8 +205,8 @@ export class Logger {
 			let module = collection.modules[loggerAction.module_id];
 			if (!module) return;
 
-			results.finishedModules += 1;
-			collection.finishedModules += 1;
+			results.completedModules += 1;
+			collection.completedModules += 1;
 		}
 
 		if ("module_error" === loggerAction.type) {
@@ -245,9 +247,9 @@ export class Logger {
 			if (!testResult) return;
 
 			testResult.loggerEndAction = loggerAction;
-			results.finishedTests += 1;
-			collection.finishedTests += 1;
-			module.finishedTests += 1;
+			results.completedTests += 1;
+			collection.completedTests += 1;
+			module.completedTests += 1;
 
 			let { assertions } = loggerAction;
 			const isAssertionArray = Array.isArray(assertions) && assertions.length;
@@ -306,13 +308,13 @@ ${result.webdriverParams.title}`);
 		if (
 			!result.fails &&
 			!result.errors &&
-			result.expectedTests === result.finishedTests &&
-			result.expectedModules === result.finishedModules &&
-			result.expectedCollections === result.finishedCollections
+			result.expectedTests === result.completedTests &&
+			result.expectedModules === result.completedModules &&
+			result.expectedCollections === result.completedCollections
 		) {
-			output.push(`${space}${result.finishedTests} tests
-${space}${result.finishedModules} modules
-${space}${result.finishedCollections} collections`);
+			output.push(`${space}${result.completedTests} tests
+${space}${result.completedModules} modules
+${space}${result.completedCollections} collections`);
 			continue;
 		}
 
@@ -333,8 +335,8 @@ ${space}${result.finishedCollections} collections`);
 			if (
 				!collection.fails &&
 				!collection.errors &&
-				collection.expectedTests === collection.finishedTests &&
-				collection.expectedModules === collection.finishedModules
+				collection.expectedTests === collection.completedTests &&
+				collection.expectedModules === collection.completedModules
 			) {
 				output.push(
 					`${space.repeat(2)}${collection.expectedTests} tests
@@ -363,7 +365,7 @@ ${space.repeat(2)}${loggerAction.expected_module_count} modules`,
 				if (
 					!module.fails &&
 					!module.errors &&
-					module.expectedTests === module.finishedTests
+					module.expectedTests === module.completedTests
 				) {
 					output.push(`${space.repeat(3)}${collection.expectedTests} tests`);
 					continue;

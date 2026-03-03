@@ -109,14 +109,25 @@ class WebdriverSession {
 			});
 		});
 
-		this.#process = exec(command, { signal: this.#signal });
-		this.#process.addListener("error", (error) => {
-			this.#eventbus.dispatchAction({
-				id: jrId,
-				type: "session_error",
-				error: error.toString(),
-			});
-		});
+		this.#process = exec(
+			command,
+			{ signal: this.#signal },
+			(_error, _stdout, stderr) => {
+				if (stderr)
+					this.#eventbus.dispatchAction({
+						id: jrId,
+						type: "session_error",
+						error: stderr,
+					});
+			},
+		);
+		// this.#process.addListener("error", (error) => {
+		// 	this.#eventbus.dispatchAction({
+		// 		id: jrId,
+		// 		type: "session_error",
+		// 		error: error.toString(),
+		// 	});
+		// });
 		this.#process.addListener("exit", (statusCode) => {
 			if (statusCode) {
 				this.#eventbus.dispatchAction({
