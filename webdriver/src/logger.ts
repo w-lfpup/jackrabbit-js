@@ -296,7 +296,9 @@ ${result.webdriverParams.title}`);
 		if (
 			!result.fails &&
 			!result.errors &&
-			result.expectedTests === result.finishedTests
+			result.expectedTests === result.finishedTests &&
+			result.expectedModules === result.finishedModules &&
+			result.expectedCollections === result.finishedCollections
 		) {
 			output.push(`  ${result.finishedTests} tests
   ${result.finishedModules} modules
