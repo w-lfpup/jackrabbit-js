@@ -58,76 +58,12 @@ export class Router {
 		}
 
 		// "test" home page
-		if (url === "/" && "GET" === method) {
-			let hangar = testHanger({
-				jackrabbit_url: this.#config.hostAndPort,
-				test_collections: process.argv.slice(3),
-			});
-
-			res.setHeader("Content-Type", "text/html");
-			res.writeHead(200);
-			return res.end(hangar);
-		}
+		serveTestPage(req, res, this.#config);
 
 		// log test actions
-		if (url.startsWith("/log/") && "POST" === method) {
-			let id: string | undefined;
-			let cookies = req.headers.cookie?.split(";") ?? [];
-			for (const cookieLine of cookies) {
-				if (cookieLine.startsWith("jackrabbit=")) {
-					let [_name, value] = cookieLine.split("=");
-					id = value;
-				}
-			}
+		logAction(req, res, this.#eventbus);
 
-			if (id) {
-				let loggerAction = await getLoggerActionFromRequestBody(req);
-				this.#eventbus.dispatchAction({
-					type: "log",
-					loggerAction,
-					id,
-				});
-				res.writeHead(200);
-			} else {
-				res.writeHead(403);
-			}
-
-			return res.end();
-		}
-
-		// this assumes http 1.1
-		//
-		// only serve core and browser packages
-		let ext = "";
-		if (url.endsWith("/")) ext = "index.html";
-		let urlNoPrefix = url;
-		if (url.startsWith("/jackrabbit")) urlNoPrefix = url.substring(11);
-		let filePath = path.join(cwd, urlNoPrefix, ext);
-
-		let stream: fs.ReadStream | undefined;
-		if (url.startsWith("/jackrabbit/core/") && "GET" === method) {
-			stream = await getDirectoryScopedFile(filePath, corePath);
-		}
-		if (url.startsWith("/jackrabbit/browser/") && "GET" === method) {
-			stream = await getDirectoryScopedFile(filePath, browserPath);
-		}
-
-		if (!url.startsWith("/jackrabbit") && "GET" === method) {
-			stream = await getDirectoryScopedFile(filePath, cwd);
-		}
-
-		if (stream) {
-			// throwing errors and stuff
-			const ext = path.extname(filePath).substring(1).toLowerCase();
-			let mimeType = MIME_TYPES[ext] ?? MIME_TYPES["octet"];
-			res.setHeader("Content-Type", mimeType);
-			res.writeHead(200);
-			stream.pipe(res);
-		} else {
-			res.setHeader("Content-Type", MIME_TYPES["html"]);
-			res.writeHead(404);
-			res.end();
-		}
+		await serveFile(req, res);
 	}
 }
 
@@ -161,4 +97,93 @@ async function getDirectoryScopedFile(
 		await fs.promises.access(filePath);
 		return fs.createReadStream(filePath);
 	} catch {}
+}
+
+function serveTestPage(
+	req: IncomingMessage,
+	res: ServerResponse,
+	config: ConfigInterface,
+) {
+	let { url, method } = req;
+
+	if (url === "/" && "GET" === method) {
+		let hangar = testHanger({
+			jackrabbit_url: config.hostAndPort,
+			test_collections: process.argv.slice(3),
+		});
+
+		res.setHeader("Content-Type", "text/html");
+		res.writeHead(200);
+		return res.end(hangar);
+	}
+}
+
+async function logAction(
+	req: IncomingMessage,
+	res: ServerResponse,
+	eventbus: EventBus,
+) {
+	let { url, method } = req;
+
+	if (url?.startsWith("/log/") && "POST" === method) {
+		let id: string | undefined;
+		let cookies = req.headers.cookie?.split(";") ?? [];
+		for (const cookieLine of cookies) {
+			if (cookieLine.startsWith("jackrabbit=")) {
+				let [_name, value] = cookieLine.split("=");
+				id = value;
+			}
+		}
+
+		if (id) {
+			let loggerAction = await getLoggerActionFromRequestBody(req);
+			eventbus.dispatchAction({
+				type: "log",
+				loggerAction,
+				id,
+			});
+			res.writeHead(200);
+		} else {
+			res.writeHead(403);
+		}
+
+		return res.end();
+	}
+}
+
+async function serveFile(req: IncomingMessage, res: ServerResponse) {
+	let { url, method } = req;
+
+	if (!url) return;
+
+	let ext = "";
+	if (url.endsWith("/")) ext = "index.html";
+	let urlNoPrefix = url;
+	if (url.startsWith("/jackrabbit")) urlNoPrefix = url.substring(11);
+	let filePath = path.join(cwd, urlNoPrefix, ext);
+
+	let stream: fs.ReadStream | undefined;
+	if (url.startsWith("/jackrabbit/core/") && "GET" === method) {
+		stream = await getDirectoryScopedFile(filePath, corePath);
+	}
+	if (url.startsWith("/jackrabbit/browser/") && "GET" === method) {
+		stream = await getDirectoryScopedFile(filePath, browserPath);
+	}
+
+	if (!url.startsWith("/jackrabbit") && "GET" === method) {
+		stream = await getDirectoryScopedFile(filePath, cwd);
+	}
+
+	if (stream) {
+		// throwing errors and stuff
+		const ext = path.extname(filePath).substring(1).toLowerCase();
+		let mimeType = MIME_TYPES[ext] ?? MIME_TYPES["octet"];
+		res.setHeader("Content-Type", mimeType);
+		res.writeHead(200);
+		stream.pipe(res);
+	} else {
+		res.setHeader("Content-Type", MIME_TYPES["html"]);
+		res.writeHead(404);
+		res.end();
+	}
 }

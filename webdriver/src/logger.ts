@@ -294,6 +294,11 @@ function getResultsAsString(sessionResults: SessionResults): string {
 
 	let space = "  ";
 
+	for (let errorAction of sessionResults.errorLogs) {
+		if ("session_error" !== errorAction.type) continue;
+		output.push(`${space}[session_error]\n${errorAction.error}`);
+	}
+
 	for (let [index, result] of sessionResults.runs) {
 		output.push(`
 ${result.webdriverParams.title}`);
@@ -310,6 +315,11 @@ ${result.webdriverParams.title}`);
 ${space}${result.finishedModules} modules
 ${space}${result.finishedCollections} collections`);
 			continue;
+		}
+
+		for (let errorAction of result.errorLogs) {
+			if ("run_error" !== errorAction.type) continue;
+			output.push(`${space}[run_error] ${errorAction.error}`);
 		}
 
 		for (const collection of result.collections) {
@@ -335,6 +345,13 @@ ${space.repeat(2)}${loggerAction.expected_module_count} modules`,
 				continue;
 			}
 
+			for (let errorAction of collection.errorLogs) {
+				if ("collection_error" !== errorAction.type) continue;
+				output.push(
+					`${space.repeat(2)}[collection_error] ${errorAction.error}`,
+				);
+			}
+
 			for (const module of collection.modules) {
 				if (!module) continue;
 
@@ -351,6 +368,11 @@ ${space.repeat(2)}${loggerAction.expected_module_count} modules`,
 				) {
 					output.push(`${space.repeat(3)}${collection.expectedTests} tests`);
 					continue;
+				}
+
+				for (let errorAction of module.errorLogs) {
+					if ("collection_error" !== errorAction.type) continue;
+					output.push(`${space.repeat(2)}[module_error] ${errorAction.error}`);
 				}
 
 				for (const test of module.testResults) {
@@ -415,6 +437,7 @@ ${space.repeat(4)}[error] ${loggerEndAction.error}`,
 		totalTime += run.endTime - run.startTime;
 		testTime += run.testTime;
 	}
+
 	output.push(`
 ${status_with_color}
 duration: ${testTime.toFixed(4)} mS
