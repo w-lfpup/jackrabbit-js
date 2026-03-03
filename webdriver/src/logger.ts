@@ -301,11 +301,6 @@ ${result.webdriverParams.title}`);
 			output.push(`  ${result.finishedTests} tests
   ${result.finishedModules} modules
   ${result.finishedCollections} collections`);
-
-			// N tests
-			// N modules
-			// N collections
-
 			continue;
 		}
 		// if session has met requirements
