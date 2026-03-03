@@ -45,110 +45,100 @@ export class Router {
 	async #route(req: IncomingMessage, res: ServerResponse) {
 		let { url, method } = req;
 
-		if (!url) {
-			res.setHeader("Content-Type", "text/html");
-			res.writeHead(400);
-			return res.end();
-		}
-
-		if (url === "/ping" && "GET" === method) {
-			res.setHeader("Content-Type", "text/html");
-			res.writeHead(200);
-			return res.end("The cookie train has arrived!");
-		}
+		if (serveBadRequest(req, res)) return;
+		if (servePing(req, res)) return;
+		if (serveTestPage(req, res, this.#config)) return;
 
 		// "test" home page
-		serveTestPage(req, res, this.#config);
+		if (url === "/" && "GET" === method) {
+			let hangar = testHanger({
+				jackrabbit_url: this.#config.hostAndPort,
+				test_collections: process.argv.slice(3),
+			});
+
+			res.setHeader("Content-Type", "text/html");
+			res.writeHead(200);
+			return res.end(hangar);
+		}
 
 		// log test actions
-		logAction(req, res, this.#eventbus);
+		if (url?.startsWith("/log/") && "POST" === method) {
+			let id: string | undefined;
+			let cookies = req.headers.cookie?.split(";") ?? [];
+			for (const cookieLine of cookies) {
+				if (cookieLine.startsWith("jackrabbit=")) {
+					let [_name, value] = cookieLine.split("=");
+					id = value;
+				}
+			}
+
+			if (id) {
+				let loggerAction = await getLoggerActionFromRequestBody(req);
+				this.#eventbus.dispatchAction({
+					type: "log",
+					// urlStr: req.url,
+					loggerAction,
+					id,
+				});
+				res.writeHead(200);
+			} else {
+				res.writeHead(403);
+			}
+
+			return res.end();
+		}
 
 		await serveFile(req, res);
 	}
 }
 
-function getLoggerActionFromRequestBody(
+function serveBadRequest(
 	req: IncomingMessage,
-): Promise<LoggerAction> {
-	return new Promise(function (resolve, reject) {
-		let data: Uint8Array[] = [];
-		req.addListener("data", function (chunk) {
-			data.push(chunk);
-		});
-		req.addListener("end", function () {
-			let actionStr = Buffer.concat(data).toString();
-			let action = JSON.parse(actionStr) as LoggerAction;
+	res: ServerResponse,
+): boolean {
+	let { url } = req;
+	if (url) return false;
 
-			resolve(action);
-		});
-		req.addListener("error", function (err: Error) {
-			reject(err);
-		});
-	});
+	res.setHeader("Content-Type", "text/html");
+	res.writeHead(400);
+	res.end();
+
+	return true;
 }
 
-async function getDirectoryScopedFile(
-	filePath: string,
-	basePath: string,
-): Promise<fs.ReadStream | undefined> {
-	if (!filePath.startsWith(basePath)) return;
+function servePing(
+	req: IncomingMessage,
+	res: ServerResponse,
+): boolean {
+	let { url, method } = req;
+	if (url !== "/ping" || "GET" !== method) return false;
 
-	try {
-		await fs.promises.access(filePath);
-		return fs.createReadStream(filePath);
-	} catch {}
+	res.setHeader("Content-Type", "text/html");
+	res.writeHead(200);
+	res.end("The cookie train has arrived!");
+
+	return true;
 }
 
 function serveTestPage(
 	req: IncomingMessage,
 	res: ServerResponse,
 	config: ConfigInterface,
-) {
+): boolean {
 	let { url, method } = req;
 
-	if (url === "/" && "GET" === method) {
-		let hangar = testHanger({
-			jackrabbit_url: config.hostAndPort,
-			test_collections: process.argv.slice(3),
-		});
+	if (url !== "/" || "GET" !== method) return false;
 
-		res.setHeader("Content-Type", "text/html");
-		res.writeHead(200);
-		return res.end(hangar);
-	}
-}
+	let hangar = testHanger({
+		jackrabbit_url: config.hostAndPort,
+		test_collections: process.argv.slice(3),
+	});
 
-async function logAction(
-	req: IncomingMessage,
-	res: ServerResponse,
-	eventbus: EventBus,
-) {
-	let { url, method } = req;
-
-	if (url?.startsWith("/log/") && "POST" === method) {
-		let id: string | undefined;
-		let cookies = req.headers.cookie?.split(";") ?? [];
-		for (const cookieLine of cookies) {
-			if (cookieLine.startsWith("jackrabbit=")) {
-				let [_name, value] = cookieLine.split("=");
-				id = value;
-			}
-		}
-
-		if (id) {
-			let loggerAction = await getLoggerActionFromRequestBody(req);
-			eventbus.dispatchAction({
-				type: "log",
-				loggerAction,
-				id,
-			});
-			res.writeHead(200);
-		} else {
-			res.writeHead(403);
-		}
-
-		return res.end();
-	}
+	res.setHeader("Content-Type", "text/html");
+	res.writeHead(200);
+	res.end(hangar);
+	
+	return true;
 }
 
 async function serveFile(req: IncomingMessage, res: ServerResponse) {
@@ -186,4 +176,36 @@ async function serveFile(req: IncomingMessage, res: ServerResponse) {
 		res.writeHead(404);
 		res.end();
 	}
+}
+
+function getLoggerActionFromRequestBody(
+	req: IncomingMessage,
+): Promise<LoggerAction> {
+	return new Promise(function (resolve, reject) {
+		let data: Uint8Array[] = [];
+		req.addListener("data", function (chunk) {
+			data.push(chunk);
+		});
+		req.addListener("end", function () {
+			let actionStr = Buffer.concat(data).toString();
+			let action = JSON.parse(actionStr) as LoggerAction;
+
+			resolve(action);
+		});
+		req.addListener("error", function (err: Error) {
+			reject(err);
+		});
+	});
+}
+
+async function getDirectoryScopedFile(
+	filePath: string,
+	basePath: string,
+): Promise<fs.ReadStream | undefined> {
+	if (!filePath.startsWith(basePath)) return;
+
+	try {
+		await fs.promises.access(filePath);
+		return fs.createReadStream(filePath);
+	} catch {}
 }
