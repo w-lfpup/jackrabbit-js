@@ -31,7 +31,7 @@ export async function createConfig(
 		if (!hostAndPort)
 			throw new Error(`config: invalid host_and_port json property`);
 
-		let { runAsynchronously } = json;
+		let { run_asynchronously: runAsynchronously } = json;
 		if (
 			typeof runAsynchronously !== "boolean" &&
 			undefined !== runAsynchronously
