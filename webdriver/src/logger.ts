@@ -12,6 +12,7 @@ interface TestResults {
 	loggerEndAction: LoggerAction | undefined;
 }
 
+// remove logger actions
 interface ModuleResults {
 	loggerAction: LoggerAction;
 	fails: number;
@@ -35,22 +36,24 @@ interface CollectionResults {
 }
 
 interface RunResults {
-	startTime: number;
 	fails: number;
 	errors: number;
+	startTime: number;
+	endTime: number;
+	testTime: number;
 	expectedTests: number;
 	finishedTests: number;
 	expectedModules: number;
 	finishedModules: number;
 	expectedCollections: number;
 	finishedCollections: number;
-	endTime: number;
 	errorLogs: LoggerAction[];
-	testTime: number;
 	webdriverParams: WebdriverParams;
 	collections: (CollectionResults | undefined)[];
 }
 
+// track if session started or not
+// if browser never launched
 interface SessionResults {
 	fails: number;
 	errors: number;
@@ -289,10 +292,13 @@ export class Logger {
 function getResultsAsString(sessionResults: SessionResults): string {
 	const output: string[] = [];
 
+	let space = "  ";
+
 	for (let [index, result] of sessionResults.runs) {
 		output.push(`
 ${result.webdriverParams.title}`);
 
+		// When everything goes right :3
 		if (
 			!result.fails &&
 			!result.errors &&
@@ -300,32 +306,11 @@ ${result.webdriverParams.title}`);
 			result.expectedModules === result.finishedModules &&
 			result.expectedCollections === result.finishedCollections
 		) {
-			output.push(`  ${result.finishedTests} tests
-  ${result.finishedModules} modules
-  ${result.finishedCollections} collections`);
+			output.push(`${space}${result.finishedTests} tests
+${space}${result.finishedModules} modules
+${space}${result.finishedCollections} collections`);
 			continue;
 		}
-		// if session has met requirements
-
-		// * firefox
-		//   43/43 tests
-		//   7/7 modules
-		//   3/3 collections
-		//
-		// * safari
-		//   43/43 tests
-		//   7/7 modules
-		//   3/3 collections
-
-		//	 chrome
-		//   /djfksldjf
-		//.    23/23 tests
-		//.    3/3 modules
-		//.  /kdiop9
-		//.    x ModuleA
-		//.        testName
-		//.          - assertion
-		//.
 
 		for (const collection of result.collections) {
 			if (!collection) continue;
@@ -333,13 +318,18 @@ ${result.webdriverParams.title}`);
 			let { loggerAction } = collection;
 			if ("start_collection" !== loggerAction.type) continue;
 
-			output.push(`${loggerAction.collection_url}`);
+			output.push(`${space}${loggerAction.collection_url}`);
 
-			// if tests and started tests are === AND
-			if (!collection.fails && !collection.errors) {
+			// when everything in the collection goes right
+			if (
+				!collection.fails &&
+				!collection.errors &&
+				collection.expectedTests === collection.finishedTests &&
+				collection.expectedModules === collection.finishedModules
+			) {
 				output.push(
-					`${collection.expectedTests} tests
-${loggerAction.expected_module_count} modules`,
+					`${space.repeat(2)}${collection.expectedTests} tests
+${space.repeat(2)}${loggerAction.expected_module_count} modules`,
 				);
 
 				continue;
@@ -351,15 +341,17 @@ ${loggerAction.expected_module_count} modules`,
 				let { loggerAction } = module;
 				if ("start_module" !== loggerAction.type) continue;
 
-				let delta = Math.max(
-					0,
-					module.finishedTests - module.fails - module.errors,
-				);
+				output.push(`${space.repeat(2)}${loggerAction.module_name}`);
 
-				if (delta === loggerAction.expected_test_count) continue;
-				output.push(
-					`  ${loggerAction.module_name}  ${delta}/${loggerAction.expected_test_count}`,
-				);
+				// when everything in the module goes right
+				if (
+					!module.fails &&
+					!module.errors &&
+					module.expectedTests === module.finishedTests
+				) {
+					output.push(`${space.repeat(3)}${collection.expectedTests} tests`);
+					continue;
+				}
 
 				for (const test of module.testResults) {
 					if (!test) continue;
@@ -370,7 +362,8 @@ ${loggerAction.expected_module_count} modules`,
 					if ("test_error" === loggerEndAction?.type) {
 						let { test_name } = loggerStartAction;
 						output.push(
-							`      ${test_name}\n      [error] ${loggerEndAction.error}`,
+							`${space.repeat(3)}${test_name}
+${space.repeat(4)}[error] ${loggerEndAction.error}`,
 						);
 					}
 
@@ -385,16 +378,16 @@ ${loggerAction.expected_module_count} modules`,
 
 						if (isAssertion || isAssertionArray) {
 							let { test_name } = loggerStartAction;
-							output.push(`    ${test_name}`);
+							output.push(`${space.repeat(3)}${test_name}`);
 						}
 
 						if (isAssertion) {
-							output.push(`      - ${assertions}`);
+							output.push(`${space.repeat(4)}- ${assertions}`);
 						}
 
 						if (isAssertionArray) {
 							for (const assertion of assertions) {
-								output.push(`      - ${assertion}`);
+								output.push(`${space.repeat(4)}- ${assertion}`);
 							}
 						}
 					}
@@ -402,21 +395,6 @@ ${loggerAction.expected_module_count} modules`,
 			}
 		}
 	}
-
-	// 	let status_with_color = results.fails
-	// 		? yellow("\u{2717} failed")
-	// 		: blue("\u{2714} passed");
-
-	// 	if (results.errors) {
-	// 		status_with_color = gray("\u{2717} errored");
-	// 	}
-
-	// 	const total = results.endTime - results.startTime;
-	// 	output.push(`
-	// ${status_with_color}
-	// duration: ${results.testTime.toFixed(4)} mS
-	// total: ${total.toFixed(4)} mS
-	// `);
 
 	// failed
 	// passed
