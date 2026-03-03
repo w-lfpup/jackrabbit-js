@@ -162,106 +162,105 @@ export class Logger {
 
 		if ("end_collection" === loggerAction.type) {
 			let collection = results.collections[loggerAction.collection_id];
-			if (collection) {
-				results.finishedCollections += 1;
-			}
+			if (!collection) return;
+
+			results.finishedCollections += 1;
 		}
 
 		if ("collection_error" === loggerAction.type) {
 			let collection = results.collections[loggerAction.collection_id];
-			if (collection) {
-				this.#results.errors += 1;
-				results.errors += 1;
-				collection.errors += 1;
+			if (!collection) return;
 
-				collection.errorLogs.push(loggerAction);
-			}
+			this.#results.errors += 1;
+			results.errors += 1;
+			collection.errors += 1;
+
+			collection.errorLogs.push(loggerAction);
 		}
 
 		if ("start_module" === loggerAction.type) {
 			let collection = results.collections[loggerAction.collection_id];
-			if (collection) {
-				collection.modules[loggerAction.module_id] = {
-					loggerAction,
-					testResults: [],
-					errorLogs: [],
-					fails: 0,
-					expectedTests: loggerAction.expected_test_count,
-					errors: 0,
-					finishedTests: 0,
-				};
+			if (!collection) return;
 
-				collection.expectedTests += loggerAction.expected_test_count;
-				results.expectedTests += loggerAction.expected_test_count;
-			}
+			collection.modules[loggerAction.module_id] = {
+				loggerAction,
+				testResults: [],
+				errorLogs: [],
+				fails: 0,
+				expectedTests: loggerAction.expected_test_count,
+				errors: 0,
+				finishedTests: 0,
+			};
+
+			collection.expectedTests += loggerAction.expected_test_count;
+			results.expectedTests += loggerAction.expected_test_count;
 		}
 
 		if ("end_module" === loggerAction.type) {
 			let collection = results.collections[loggerAction.collection_id];
-			if (collection) {
-				let module = collection.modules[loggerAction.module_id];
-				if (module) {
-					results.finishedModules += 1;
-					collection.finishedModules += 1;
-				}
-			}
+			if (!collection) return;
+
+			let module = collection.modules[loggerAction.module_id];
+			if (!module) return;
+
+			results.finishedModules += 1;
+			collection.finishedModules += 1;
 		}
 
 		if ("module_error" === loggerAction.type) {
 			let collection = results.collections[loggerAction.collection_id];
-			if (collection) {
-				let module = collection.modules[loggerAction.module_id];
-				if (module) {
-					this.#results.errors += 1;
-					results.errors += 1;
-					collection.errors += 1;
-					module.errors += 1;
-					module.errorLogs.push(loggerAction);
-				}
-			}
+			if (!collection) return;
+
+			let module = collection.modules[loggerAction.module_id];
+			if (!module) return;
+
+			this.#results.errors += 1;
+			results.errors += 1;
+			collection.errors += 1;
+			module.errors += 1;
+			module.errorLogs.push(loggerAction);
 		}
 
 		if ("start_test" === loggerAction.type) {
 			let collection = results.collections[loggerAction.collection_id];
-			if (collection) {
-				let module = collection.modules[loggerAction.module_id];
-				if (module) {
-					module.testResults[loggerAction.test_id] = {
-						loggerStartAction: loggerAction,
-						loggerEndAction: undefined,
-					};
-				}
-			}
+			if (!collection) return;
+
+			let module = collection.modules[loggerAction.module_id];
+			if (!module) return;
+
+			module.testResults[loggerAction.test_id] = {
+				loggerStartAction: loggerAction,
+				loggerEndAction: undefined,
+			};
 		}
 
 		if ("end_test" === loggerAction.type) {
 			let collection = results.collections[loggerAction.collection_id];
-			if (collection) {
-				let module = collection.modules[loggerAction.module_id];
-				if (module) {
-					let testResult = module.testResults[loggerAction.test_id];
-					if (testResult) {
-						testResult.loggerEndAction = loggerAction;
-						results.finishedTests += 1;
-						collection.finishedTests += 1;
-						module.finishedTests += 1;
-					}
+			if (!collection) return;
 
-					let { assertions } = loggerAction;
-					const isAssertionArray =
-						Array.isArray(assertions) && assertions.length;
-					// might be worth just sticking with language standard "none" like "" or 0 or false
-					const isAssertion =
-						!Array.isArray(assertions) &&
-						undefined !== assertions &&
-						null !== assertions;
-					if (isAssertion || isAssertionArray) {
-						this.#results.fails += 1;
-						results.fails += 1;
-						collection.fails += 1;
-						module.fails += 1;
-					}
-				}
+			let module = collection.modules[loggerAction.module_id];
+			if (!module) return;
+
+			let testResult = module.testResults[loggerAction.test_id];
+			if (!testResult) return;
+
+			testResult.loggerEndAction = loggerAction;
+			results.finishedTests += 1;
+			collection.finishedTests += 1;
+			module.finishedTests += 1;
+
+			let { assertions } = loggerAction;
+			const isAssertionArray = Array.isArray(assertions) && assertions.length;
+			// might be worth just sticking with language standard "none" like "" or 0 or false
+			const isAssertion =
+				!Array.isArray(assertions) &&
+				undefined !== assertions &&
+				null !== assertions;
+			if (isAssertion || isAssertionArray) {
+				this.#results.fails += 1;
+				results.fails += 1;
+				collection.fails += 1;
+				module.fails += 1;
 			}
 
 			results.testTime += Math.max(
@@ -272,19 +271,19 @@ export class Logger {
 
 		if ("test_error" === loggerAction.type) {
 			let collection = results.collections[loggerAction.collection_id];
-			if (collection) {
-				let module = collection.modules[loggerAction.module_id];
-				if (module) {
-					let testResult = module.testResults[loggerAction.test_id];
-					if (testResult) {
-						testResult.loggerEndAction = loggerAction;
-						this.#results.errors += 1;
-						results.errors += 1;
-						collection.errors += 1;
-						module.errors += 1;
-					}
-				}
-			}
+			if (!collection) return;
+
+			let module = collection.modules[loggerAction.module_id];
+			if (!module) return;
+
+			let testResult = module.testResults[loggerAction.test_id];
+			if (!testResult) return;
+
+			testResult.loggerEndAction = loggerAction;
+			this.#results.errors += 1;
+			results.errors += 1;
+			collection.errors += 1;
+			module.errors += 1;
 		}
 	}
 }
@@ -418,11 +417,6 @@ ${space.repeat(4)}[error] ${loggerEndAction.error}`,
 		}
 	}
 
-	// failed
-	// passed
-	// errored
-	// incomplete
-
 	let status_with_color = sessionResults.fails
 		? yellow("\u{2717} failed")
 		: blue("\u{2714} passed");
@@ -433,7 +427,7 @@ ${space.repeat(4)}[error] ${loggerEndAction.error}`,
 
 	let totalTime = 0;
 	let testTime = 0;
-	for (let [index, run] of sessionResults.runs) {
+	for (let [, run] of sessionResults.runs) {
 		totalTime += run.endTime - run.startTime;
 		testTime += run.testTime;
 	}
