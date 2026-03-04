@@ -27,6 +27,12 @@
 					}
 				}
 			}
+		},
+		{
+			"command": "safaridriver -p 4001",
+			"title": "Safari",
+			"timeout_ms": 20000,
+			"url": "http://localhost:4001"
 		}
 	]
 }
