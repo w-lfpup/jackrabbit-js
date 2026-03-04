@@ -61,6 +61,10 @@ interface SessionResults {
 	runs: Map<string, RunResults>;
 }
 
+
+const SPACE = "  ";
+
+
 export class Logger {
 	#eventbus: EventBus;
 
@@ -293,11 +297,10 @@ export class Logger {
 function getResultsAsString(sessionResults: SessionResults): string {
 	const output: string[] = [];
 
-	let space = "  ";
 
 	for (let errorAction of sessionResults.errorLogs) {
 		if ("session_error" !== errorAction.type) continue;
-		output.push(`${space}[session_error]\n${errorAction.error}`);
+		output.push(`${SPACE}[session_error]\n${errorAction.error}`);
 	}
 
 	for (let [index, result] of sessionResults.runs) {
@@ -312,15 +315,15 @@ ${result.webdriverParams.title}`);
 			result.expectedModules === result.completedModules &&
 			result.expectedCollections === result.completedCollections
 		) {
-			output.push(`${space}${result.completedTests} tests
-${space}${result.completedModules} modules
-${space}${result.completedCollections} collections`);
+			output.push(`${SPACE}${result.completedTests} tests
+${SPACE}${result.completedModules} modules
+${SPACE}${result.completedCollections} collections`);
 			continue;
 		}
 
 		for (let errorAction of result.errorLogs) {
 			if ("run_error" !== errorAction.type) continue;
-			output.push(`${space}[run_error] ${errorAction.error}`);
+			output.push(`${SPACE}[run_error] ${errorAction.error}`);
 		}
 
 		for (const collection of result.collections) {
@@ -329,7 +332,7 @@ ${space}${result.completedCollections} collections`);
 			let { loggerAction } = collection;
 			if ("start_collection" !== loggerAction.type) continue;
 
-			output.push(`${space}${loggerAction.collection_url}`);
+			output.push(`${SPACE}${loggerAction.collection_url}`);
 
 			// when everything in the collection goes right
 			if (
@@ -339,8 +342,8 @@ ${space}${result.completedCollections} collections`);
 				collection.expectedModules === collection.completedModules
 			) {
 				output.push(
-					`${space.repeat(2)}${collection.expectedTests} tests
-${space.repeat(2)}${loggerAction.expected_module_count} modules`,
+					`${SPACE.repeat(2)}${collection.expectedTests} tests
+${SPACE.repeat(2)}${loggerAction.expected_module_count} modules`,
 				);
 
 				continue;
@@ -349,7 +352,7 @@ ${space.repeat(2)}${loggerAction.expected_module_count} modules`,
 			for (let errorAction of collection.errorLogs) {
 				if ("collection_error" !== errorAction.type) continue;
 				output.push(
-					`${space.repeat(2)}[collection_error] ${errorAction.error}`,
+					`${SPACE.repeat(2)}[collection_error] ${errorAction.error}`,
 				);
 			}
 
@@ -359,7 +362,7 @@ ${space.repeat(2)}${loggerAction.expected_module_count} modules`,
 				let { loggerAction } = module;
 				if ("start_module" !== loggerAction.type) continue;
 
-				output.push(`${space.repeat(2)}${loggerAction.module_name}`);
+				output.push(`${SPACE.repeat(2)}${loggerAction.module_name}`);
 
 				// when everything in the module goes right
 				if (
@@ -367,13 +370,13 @@ ${space.repeat(2)}${loggerAction.expected_module_count} modules`,
 					!module.errors &&
 					module.expectedTests === module.completedTests
 				) {
-					output.push(`${space.repeat(3)}${collection.expectedTests} tests`);
+					output.push(`${SPACE.repeat(3)}${collection.expectedTests} tests`);
 					continue;
 				}
 
 				for (let errorAction of module.errorLogs) {
 					if ("collection_error" !== errorAction.type) continue;
-					output.push(`${space.repeat(2)}[module_error] ${errorAction.error}`);
+					output.push(`${SPACE.repeat(2)}[module_error] ${errorAction.error}`);
 				}
 
 				for (const test of module.testResults) {
@@ -385,8 +388,8 @@ ${space.repeat(2)}${loggerAction.expected_module_count} modules`,
 					if ("test_error" === loggerEndAction?.type) {
 						let { test_name } = loggerStartAction;
 						output.push(
-							`${space.repeat(3)}${test_name}
-${space.repeat(4)}[error] ${loggerEndAction.error}`,
+							`${SPACE.repeat(3)}${test_name}
+${SPACE.repeat(4)}[error] ${loggerEndAction.error}`,
 						);
 					}
 
@@ -401,16 +404,16 @@ ${space.repeat(4)}[error] ${loggerEndAction.error}`,
 
 						if (isAssertion || isAssertionArray) {
 							let { test_name } = loggerStartAction;
-							output.push(`${space.repeat(3)}${test_name}`);
+							output.push(`${SPACE.repeat(3)}${test_name}`);
 						}
 
 						if (isAssertion) {
-							output.push(`${space.repeat(4)}- ${assertions}`);
+							output.push(`${SPACE.repeat(4)}- ${assertions}`);
 						}
 
 						if (isAssertionArray) {
 							for (const assertion of assertions) {
-								output.push(`${space.repeat(4)}- ${assertion}`);
+								output.push(`${SPACE.repeat(4)}- ${assertion}`);
 							}
 						}
 					}
