@@ -137,32 +137,12 @@ class WebdriverSession {
 
 	async #down() {
 		if (!this.#process) return;
-		if (this.#sessionId) {
-			let { url } = this.#params;
-			try {
-				let delReqest = await fetch(
-					new URL(`/session/${this.#sessionId}`, url),
-					{
-						method: "DELETE",
-						headers,
-						body: null,
-						signal: this.#signal,
-					},
-				);
-				if (200 !== delReqest.status) {
-					let cause = await delReqest.json();
-					throw new Error("delete-cookie request failed", { cause });
-				}
-			} catch (e) {
-				this.#eventbus.dispatchAction({
-					type: "session_error",
-					id: this.#params.jrId,
-					error: e?.toString() ?? "failed to delete browser session error",
-				});
-			}
-		}
-
-		// true if success false otherwise
+		await deleteSession(
+			this.#params,
+			this.#signal,
+			this.#eventbus,
+			this.#sessionId,
+		);
 		this.#process.kill("SIGKILL");
 		this.#process = undefined;
 	}
@@ -352,6 +332,33 @@ async function goToTestPage(
 	});
 
 	if (200 !== goToUrlRes.status) throw new Error("go-to-url request failed");
+}
+
+async function deleteSession(
+	params: WebdriverParams,
+	signal: AbortSignal | undefined,
+	eventbus: EventBus,
+	sessionId: string | undefined,
+) {
+	let { url } = params;
+	try {
+		let delReqest = await fetch(new URL(`/session/${sessionId}`, url), {
+			method: "DELETE",
+			headers,
+			body: null,
+			signal: signal,
+		});
+		if (200 !== delReqest.status) {
+			let cause = await delReqest.json();
+			throw new Error("delete-cookie request failed", { cause });
+		}
+	} catch (e) {
+		eventbus.dispatchAction({
+			type: "session_error",
+			id: params.jrId,
+			error: e?.toString() ?? "failed to delete browser session error",
+		});
+	}
 }
 
 function sleep(timeMs: number): Promise<void> {
