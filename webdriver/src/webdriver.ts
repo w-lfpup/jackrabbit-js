@@ -252,6 +252,7 @@ async function getSession(params: WebdriverParams, signal: AbortSignal) {
 	});
 	if (200 !== res.status) {
 		let cause = await res.text();
+		console.log(cause);
 		throw new Error("Failed to create a session", { cause });
 	}
 
