@@ -138,7 +138,12 @@ function logAction(
 async function serveFile(req: IncomingMessage, res: ServerResponse) {
 	let { url, method } = req;
 
-	if (!url) return;
+	if (!url) {
+		res.setHeader("Content-Type", MIME_TYPES["html"]);
+		res.writeHead(400);
+		res.end();
+		return;
+	}
 
 	let ext = "";
 	if (url.endsWith("/")) ext = "index.html";
@@ -159,7 +164,8 @@ async function serveFile(req: IncomingMessage, res: ServerResponse) {
 	}
 
 	if (stream) {
-		// throwing errors and stuff
+		// throws errors if not a string
+		// filepath is always a string
 		const ext = path.extname(filePath).substring(1).toLowerCase();
 		let mimeType = MIME_TYPES[ext] ?? MIME_TYPES["octet"];
 		res.setHeader("Content-Type", mimeType);

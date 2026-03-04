@@ -91,7 +91,7 @@ class WebdriverSession {
 	async run() {
 		if (this.#process) return;
 
-		let { command, url, jrId, timeoutMs, capabilities } = this.#params;
+		let { command, jrId, timeoutMs } = this.#params;
 
 		this.#eventbus.dispatchAction({
 			id: jrId,
@@ -112,22 +112,27 @@ class WebdriverSession {
 		this.#process = exec(
 			command,
 			{ signal: this.#signal },
-			(_error, _stdout, stderr) => {
-				if (stderr)
-					this.#eventbus.dispatchAction({
-						id: jrId,
-						type: "session_error",
-						error: stderr,
-					});
+			(error, _stdout, stderr) => {
+				// session_stdout
+				// session_stderr
+
+				if (error && stderr) {
+				}
+				// this.#eventbus.dispatchAction({
+				// 	id: jrId,
+				//  title,
+				// 	type: "stderr",
+				// 	error: stderr,
+				// });
 			},
 		);
-		// this.#process.addListener("error", (error) => {
-		// 	this.#eventbus.dispatchAction({
-		// 		id: jrId,
-		// 		type: "session_error",
-		// 		error: error.toString(),
-		// 	});
-		// });
+		this.#process.addListener("error", (error) => {
+			this.#eventbus.dispatchAction({
+				id: jrId,
+				type: "session_error",
+				error: error.toString(),
+			});
+		});
 		this.#process.addListener("exit", (statusCode) => {
 			if (statusCode) {
 				this.#eventbus.dispatchAction({
@@ -143,82 +148,26 @@ class WebdriverSession {
 		});
 
 		try {
-			await untilWebdriverReady(url, this.#signal);
-
-			// needs to be browser specific
-			let res = await fetch(new URL("/session", url), {
-				method: "POST",
-				headers,
-				body: JSON.stringify({ capabilities: capabilities ?? {} }),
-				signal: this.#signal,
-			});
-			if (200 !== res.status) {
-				let cause = await res.text();
-				throw new Error("Failed to create a session", { cause });
-			}
-
-			let json = await res.json();
-			let { sessionId } = json?.value;
-			if (typeof sessionId !== "string")
-				throw new Error("session is not a string");
-			this.#sessionId = sessionId;
-
-			let cookieUrl = new URL("/ping", this.#hostAndPort);
-			let getCookie = await fetch(
-				new URL(`/session/${this.#sessionId}/url`, url),
-				{
-					method: "POST",
-					headers,
-					body: JSON.stringify({ url: cookieUrl }),
-					signal: this.#signal,
-				},
+			await untilWebdriverReady(this.#params, this.#signal);
+			this.#sessionId = await getSession(this.#params, this.#signal);
+			await goToPing(
+				this.#params,
+				this.#signal,
+				this.#sessionId,
+				this.#hostAndPort,
 			);
-
-			if (200 !== getCookie.status) {
-				let cause = await getCookie.json();
-				throw new Error("go-to-cookie request failed", { cause });
-			}
-
-			let cookieReq = await fetch(
-				new URL(`/session/${this.#sessionId}/cookie`, url),
-				{
-					method: "POST",
-					headers,
-					body: JSON.stringify({
-						cookie: {
-							name: "jackrabbit",
-							value: jrId,
-							// domain: this.#hostAndPort (issues in firefox)
-							path: "/",
-							httpOnly: true,
-						},
-					}),
-					signal: this.#signal,
-				},
+			await setCookie(this.#params, this.#signal, this.#sessionId);
+			await goToTestPage(
+				this.#params,
+				this.#signal,
+				this.#sessionId,
+				this.#hostAndPort,
 			);
-
-			if (200 !== cookieReq.status) {
-				let cause = await cookieReq.json();
-				throw new Error("set-cookie request failed", { cause });
-			}
-
-			let goToUrlRes = await fetch(
-				new URL(`/session/${this.#sessionId}/url`, url),
-				{
-					method: "POST",
-					headers,
-					body: JSON.stringify({ url: this.#hostAndPort }),
-					signal: this.#signal,
-				},
-			);
-
-			if (200 !== goToUrlRes.status)
-				throw new Error("go-to-url request failed");
 		} catch (e) {
 			this.#eventbus.dispatchAction({
 				type: "session_error",
 				id: this.#params.jrId,
-				error: e?.toString() ?? "unknown error creating browser session",
+				error: e?.toString() ?? "Unknown error creating browser session",
 			});
 			this.#abortController.abort();
 		}
@@ -258,9 +207,11 @@ class WebdriverSession {
 }
 
 async function untilWebdriverReady(
-	url: URL,
+	params: WebdriverParams,
 	signal: AbortSignal | undefined,
 ): Promise<void> {
+	let { url } = params;
+
 	while (signal && !signal.aborted) {
 		try {
 			let res = await fetch(new URL("/status", url), {
@@ -281,6 +232,95 @@ async function untilWebdriverReady(
 	}
 
 	throw new Error("Webdriver was never ready.");
+}
+
+async function getSession(params: WebdriverParams, signal: AbortSignal) {
+	let { url, capabilities } = params;
+
+	let res = await fetch(new URL("/session", url), {
+		method: "POST",
+		headers,
+		body: JSON.stringify({ capabilities: capabilities ?? {} }),
+		signal,
+	});
+	if (200 !== res.status) {
+		let cause = await res.text();
+		throw new Error("Failed to create a session", { cause });
+	}
+
+	let json = await res.json();
+	let { sessionId } = json?.value;
+	if (typeof sessionId !== "string") throw new Error("session is not a string");
+
+	return sessionId;
+}
+
+async function goToPing(
+	params: WebdriverParams,
+	signal: AbortSignal,
+	sessionId: string,
+	hostAndPort: URL,
+) {
+	let { url } = params;
+
+	let pingUrl = new URL("/ping", hostAndPort);
+	let getCookie = await fetch(new URL(`/session/${sessionId}/url`, url), {
+		method: "POST",
+		headers,
+		body: JSON.stringify({ url: pingUrl }),
+		signal,
+	});
+
+	if (200 !== getCookie.status) {
+		let cause = await getCookie.json();
+		throw new Error("go-to-cookie request failed", { cause });
+	}
+}
+
+async function setCookie(
+	params: WebdriverParams,
+	signal: AbortSignal,
+	sessionId: string,
+) {
+	let { url, jrId } = params;
+
+	let cookieReq = await fetch(new URL(`/session/${sessionId}/cookie`, url), {
+		method: "POST",
+		headers,
+		body: JSON.stringify({
+			cookie: {
+				name: "jackrabbit",
+				value: jrId,
+				// domain: this.#hostAndPort (issues in firefox)
+				path: "/",
+				httpOnly: true,
+			},
+		}),
+		signal,
+	});
+
+	if (200 !== cookieReq.status) {
+		let cause = await cookieReq.json();
+		throw new Error("set-cookie request failed", { cause });
+	}
+}
+
+async function goToTestPage(
+	params: WebdriverParams,
+	signal: AbortSignal,
+	sessionId: string,
+	hostAndPort: URL,
+) {
+	let { url } = params;
+
+	let goToUrlRes = await fetch(new URL(`/session/${sessionId}/url`, url), {
+		method: "POST",
+		headers,
+		body: JSON.stringify({ url: hostAndPort }),
+		signal,
+	});
+
+	if (200 !== goToUrlRes.status) throw new Error("go-to-url request failed");
 }
 
 function sleep(timeMs: number): Promise<void> {
