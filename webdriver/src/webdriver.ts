@@ -91,61 +91,23 @@ class WebdriverSession {
 	async run() {
 		if (this.#process) return;
 
-		let { command, jrId, timeoutMs } = this.#params;
+		let { jrId } = this.#params;
 
 		this.#eventbus.dispatchAction({
 			id: jrId,
 			type: "session_start",
 		});
 
-		this.#signal = AbortSignal.any([
+		this.#signal = setupSignal(
+			this.#params,
+			this.#eventbus,
 			this.#abortController.signal,
-			AbortSignal.timeout(timeoutMs),
-		]);
-		this.#signal.addEventListener("abort", () => {
-			this.#eventbus.dispatchAction({
-				type: "session_closed",
-				id: jrId,
-			});
-		});
-
-		this.#process = exec(
-			command,
-			{ signal: this.#signal },
-			(error, _stdout, stderr) => {
-				// session_stdout
-				// session_stderr
-
-				if (error && stderr) {
-				}
-				// this.#eventbus.dispatchAction({
-				// 	id: jrId,
-				//  title,
-				// 	type: "stderr",
-				// 	error: stderr,
-				// });
-			},
 		);
-		this.#process.addListener("error", (error) => {
-			this.#eventbus.dispatchAction({
-				id: jrId,
-				type: "session_error",
-				error: error.toString(),
-			});
-		});
-		this.#process.addListener("exit", (statusCode) => {
-			if (statusCode) {
-				this.#eventbus.dispatchAction({
-					type: "session_error",
-					id: this.#params.jrId,
-					error: `Process returned status code: ${statusCode}`,
-				});
-			}
-			this.#eventbus.dispatchAction({
-				type: "session_closed",
-				id: this.#params.jrId,
-			});
-		});
+		this.#process = setupProcess(
+			this.#params,
+			this.#eventbus,
+			this.#abortController.signal,
+		);
 
 		try {
 			await untilWebdriverReady(this.#params, this.#signal);
@@ -204,6 +166,75 @@ class WebdriverSession {
 		this.#process.kill("SIGKILL");
 		this.#process = undefined;
 	}
+}
+
+function setupSignal(
+	params: WebdriverParams,
+	eventbus: EventBus,
+	externalSignal: AbortSignal,
+): AbortSignal {
+	let { jrId, timeoutMs } = params;
+
+	let signal = AbortSignal.any([
+		externalSignal,
+		AbortSignal.timeout(timeoutMs),
+	]);
+	signal.addEventListener("abort", function () {
+		eventbus.dispatchAction({
+			type: "session_closed",
+			id: jrId,
+		});
+	});
+
+	return signal;
+}
+
+function setupProcess(
+	params: WebdriverParams,
+	eventbus: EventBus,
+	externalSignal: AbortSignal,
+): ChildProcess {
+	let { command, jrId } = params;
+
+	let process = exec(
+		command,
+		{ signal: externalSignal },
+		(error, _stdout, stderr) => {
+			// session_stdout
+			// session_stderr
+
+			if (error && stderr) {
+			}
+			// this.#eventbus.dispatchAction({
+			// 	id: jrId,
+			//  title,
+			// 	type: "stderr",
+			// 	error: stderr,
+			// });
+		},
+	);
+	process.addListener("error", (error) => {
+		eventbus.dispatchAction({
+			id: jrId,
+			type: "session_error",
+			error: error.toString(),
+		});
+	});
+	process.addListener("exit", (statusCode) => {
+		if (statusCode) {
+			eventbus.dispatchAction({
+				type: "session_error",
+				id: jrId,
+				error: `Process returned status code: ${statusCode}`,
+			});
+		}
+		eventbus.dispatchAction({
+			type: "session_closed",
+			id: jrId,
+		});
+	});
+
+	return process;
 }
 
 async function untilWebdriverReady(
