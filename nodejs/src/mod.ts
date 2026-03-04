@@ -33,5 +33,5 @@ logger.log({
 	time: performance.now(),
 });
 
-console.log(logger.resultsAsStr);
+console.log(logger.results);
 logger.failed || logger.errored ? process.exit(1) : process.exit(0);

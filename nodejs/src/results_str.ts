@@ -1,28 +1,64 @@
-import type {
-	SessionResults,
-	RunResults,
-	CollectionResults,
-	ModuleResults,
-	TestResults,
-} from "./results.js";
+import type { LoggerAction } from "../../core/dist/mod.js";
+
+export interface TestResults {
+	loggerStartAction: LoggerAction;
+	loggerEndAction: LoggerAction | undefined;
+}
+
+export interface ModuleResults {
+	loggerAction: LoggerAction;
+	fails: number;
+	errors: number;
+	expectedTests: number;
+	completedTests: number;
+	errorLogs: LoggerAction[];
+	testResults: (TestResults | undefined)[];
+}
+
+export interface CollectionResults {
+	loggerAction: LoggerAction;
+	fails: number;
+	errors: number;
+	expectedTests: number;
+	completedTests: number;
+	expectedModules: number;
+	completedModules: number;
+	errorLogs: LoggerAction[];
+	modules: (ModuleResults | undefined)[];
+}
+
+export interface RunResults {
+	fails: number;
+	errors: number;
+	startTime: number;
+	endTime: number;
+	testTime: number;
+	expectedTests: number;
+	completedTests: number;
+	expectedModules: number;
+	completedModules: number;
+	expectedCollections: number;
+	completedCollections: number;
+	errorLogs: LoggerAction[];
+	collections: (CollectionResults | undefined)[];
+}
 
 const SPACE = "  ";
 
-export function getResultsAsString(sessionResults: SessionResults): string {
+export function getResultsAsString(runResults: RunResults): string {
 	const output: string[] = [];
 
-	for (let errorAction of sessionResults.errorLogs) {
-		if ("session_error" !== errorAction.type) continue;
+	for (let errorAction of runResults.errorLogs) {
+		if ("run_error" !== errorAction.type) continue;
 		output.push(`${SPACE}[session_error]\n${errorAction.error}`);
 	}
 
 	// Lots of nested loops because results a nested structure.
 	// I'd rather see composition nested in one function
 	// than have for loops spread across each function.
-	for (let [, result] of sessionResults.runs) {
-		if (logRunResults(output, result)) continue;
 
-		for (const collection of result.collections) {
+	if (!logRunResults(output, runResults))
+		for (const collection of runResults.collections) {
 			if (logCollectionResult(output, collection)) continue;
 
 			if (collection)
@@ -35,17 +71,13 @@ export function getResultsAsString(sessionResults: SessionResults): string {
 						}
 				}
 		}
-	}
 
-	logSummary(output, sessionResults);
+	logSummary(output, runResults);
 
 	return output.join("\n");
 }
 
 function logRunResults(output: string[], result: RunResults): boolean {
-	output.push(`
-${result.webdriverParams.title}`);
-
 	// When everything goes right :3
 	if (
 		!result.fails &&
@@ -54,15 +86,15 @@ ${result.webdriverParams.title}`);
 		result.expectedModules === result.completedModules &&
 		result.expectedCollections === result.completedCollections
 	) {
-		output.push(`${SPACE}${result.completedTests} tests
-${SPACE}${result.completedModules} modules
-${SPACE}${result.completedCollections} collections`);
+		output.push(`${result.completedTests} tests
+${result.completedModules} modules
+${result.completedCollections} collections`);
 		return true;
 	}
 
 	for (let errorAction of result.errorLogs) {
 		if ("run_error" !== errorAction.type) continue;
-		output.push(`${SPACE}[run_error] ${errorAction.error}`);
+		output.push(`[run_error] ${errorAction.error}`);
 	}
 
 	return false;
@@ -87,8 +119,8 @@ function logCollectionResult(
 		collection.expectedModules === collection.completedModules
 	) {
 		output.push(
-			`${SPACE.repeat(2)}${collection.expectedTests} tests
-${SPACE.repeat(2)}${loggerAction.expected_module_count} modules`,
+			`${collection.expectedTests} tests
+${loggerAction.expected_module_count} modules`,
 		);
 
 		return true;
@@ -96,7 +128,7 @@ ${SPACE.repeat(2)}${loggerAction.expected_module_count} modules`,
 
 	for (let errorAction of collection.errorLogs) {
 		if ("collection_error" !== errorAction.type) continue;
-		output.push(`${SPACE.repeat(2)}[collection_error] ${errorAction.error}`);
+		output.push(`[collection_error] ${errorAction.error}`);
 	}
 
 	return false;
@@ -111,7 +143,7 @@ function logModuleResult(
 	let { loggerAction } = module;
 	if ("start_module" !== loggerAction.type) return true;
 
-	output.push(`${SPACE.repeat(2)}${loggerAction.module_name}`);
+	output.push(`${SPACE}${loggerAction.module_name}`);
 
 	// when everything in the module goes right
 	if (
@@ -119,13 +151,13 @@ function logModuleResult(
 		!module.errors &&
 		module.expectedTests === module.completedTests
 	) {
-		output.push(`${SPACE.repeat(3)}${module.expectedTests} tests`);
+		output.push(`${SPACE.repeat(2)}${module.expectedTests} tests`);
 		return true;
 	}
 
 	for (let errorAction of module.errorLogs) {
 		if ("collection_error" !== errorAction.type) continue;
-		output.push(`${SPACE.repeat(2)}[module_error] ${errorAction.error}`);
+		output.push(`${SPACE}[module_error] ${errorAction.error}`);
 	}
 
 	return false;
@@ -140,8 +172,8 @@ function logTest(output: string[], test: TestResults | undefined) {
 	if ("test_error" === loggerEndAction?.type) {
 		let { test_name } = loggerStartAction;
 		output.push(
-			`${SPACE.repeat(3)}${test_name}
-${SPACE.repeat(4)}[error] ${loggerEndAction.error}`,
+			`${SPACE.repeat(2)}${test_name}
+${SPACE.repeat(3)}[error] ${loggerEndAction.error}`,
 		);
 	}
 
@@ -155,40 +187,34 @@ ${SPACE.repeat(4)}[error] ${loggerEndAction.error}`,
 
 		if (isAssertion || isAssertionArray) {
 			let { test_name } = loggerStartAction;
-			output.push(`${SPACE.repeat(3)}${test_name}`);
+			output.push(`${SPACE.repeat(2)}${test_name}`);
 		}
 
 		if (isAssertion) {
-			output.push(`${SPACE.repeat(4)}- ${assertions}`);
+			output.push(`${SPACE.repeat(3)}- ${assertions}`);
 		}
 
 		if (isAssertionArray) {
 			for (const assertion of assertions) {
-				output.push(`${SPACE.repeat(4)}- ${assertion}`);
+				output.push(`${SPACE.repeat(3)}- ${assertion}`);
 			}
 		}
 	}
 }
 
-function logSummary(output: string[], sessionResults: SessionResults) {
-	let status_with_color = sessionResults.fails
+function logSummary(output: string[], runResults: RunResults) {
+	let status_with_color = runResults.fails
 		? yellow("\u{2717} failed")
 		: blue("\u{2714} passed");
 
-	if (sessionResults.errors) {
+	if (runResults.errors) {
 		status_with_color = gray("\u{2717} errored");
 	}
 
-	let totalTime = 0;
-	let testTime = 0;
-	for (let [, run] of sessionResults.runs) {
-		totalTime += run.endTime - run.startTime;
-		testTime += run.testTime;
-	}
-
+	let totalTime = runResults.endTime - runResults.startTime;
 	output.push(`
 ${status_with_color}
-duration: ${testTime.toFixed(4)} mS
+duration: ${runResults.testTime.toFixed(4)} mS
 total: ${totalTime.toFixed(4)} mS
 `);
 }
