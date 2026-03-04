@@ -180,17 +180,13 @@ function setupProcess(
 		command,
 		{ signal: externalSignal },
 		(error, _stdout, stderr) => {
-			// session_stdout
-			// session_stderr
-
-			if (error && stderr) {
+			if (stderr) {
+				eventbus.dispatchAction({
+					id: jrId,
+					type: "stderr",
+					output: stderr,
+				});
 			}
-			// this.#eventbus.dispatchAction({
-			// 	id: jrId,
-			//  title,
-			// 	type: "stderr",
-			// 	error: stderr,
-			// });
 		},
 	);
 	process.addListener("error", (error) => {

@@ -1,11 +1,11 @@
 import type { IncomingMessage, ServerResponse } from "http";
+import type { EventBus } from "./eventbus.js";
+import type { LoggerAction } from "../../core/dist/jackrabbit_types.js";
+
 import * as fs from "fs";
 import * as path from "path";
 import { testHanger } from "./test_hangar.js";
 import { ConfigInterface } from "./config.js";
-
-import { LoggerAction } from "../../core/dist/jackrabbit_types.js";
-import type { EventBus } from "./eventbus.js";
 
 let cwd = process.cwd();
 

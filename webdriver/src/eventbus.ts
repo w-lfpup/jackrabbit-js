@@ -26,26 +26,40 @@ export interface WebdriverLogAction extends WebdriverSessionAction {
 	loggerAction: LoggerAction;
 }
 
+export interface WebdriverCliOutpuAction extends WebdriverSessionAction {
+	type: "stdout";
+	output: string;
+}
+
+export interface WebdriverCliErrorOutpuAction extends WebdriverSessionAction {
+	type: "stderr";
+	output: string;
+}
+
 export interface WebdriverEndAction {
 	type: "end";
 }
 
 export interface WebdriverActionMap {
-	session_start: WebdriverSessionStartAction;
-	session_error: WebdriverSessionErrorAction;
-	session_closed: WebdriverSessionClosedAction;
-	run_complete: WebdriverRunCompleteAction;
-	log: WebdriverLogAction;
 	end: WebdriverEndAction;
+	log: WebdriverLogAction;
+	run_complete: WebdriverRunCompleteAction;
+	session_closed: WebdriverSessionClosedAction;
+	session_error: WebdriverSessionErrorAction;
+	session_start: WebdriverSessionStartAction;
+	stderr: WebdriverCliErrorOutpuAction;
+	stdout: WebdriverCliOutpuAction;
 }
 
 export type WebdriverActions =
-	| WebdriverSessionStartAction
+	| WebdriverCliErrorOutpuAction
+	| WebdriverCliOutpuAction
+	| WebdriverEndAction
+	| WebdriverLogAction
+	| WebdriverRunCompleteAction
 	| WebdriverSessionClosedAction
 	| WebdriverSessionErrorAction
-	| WebdriverRunCompleteAction
-	| WebdriverEndAction
-	| WebdriverLogAction;
+	| WebdriverSessionStartAction;
 
 interface TypedEventBusListener<
 	K extends keyof WebdriverActionMap = keyof WebdriverActionMap,
