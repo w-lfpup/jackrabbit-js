@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 
 import * as http from "http";
-
 import { createConfig } from "./config.js";
 import { Logger } from "./logger.js";
 import { Router } from "./routes.js";

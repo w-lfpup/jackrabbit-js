@@ -4,8 +4,7 @@ interface TestHangerParams {
 }
 
 export function testHanger(params: TestHangerParams) {
-	return `
-<!DOCTYPE html>
+	return `<!DOCTYPE html>
 <html>
 	<head>
 		<script type="jackrabbit_config">

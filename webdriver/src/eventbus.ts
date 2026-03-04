@@ -1,4 +1,4 @@
-import { LoggerAction } from "../../core/dist/jackrabbit_types.js";
+import type { LoggerAction } from "../../core/dist/jackrabbit_types.js";
 
 export interface WebdriverSessionAction {
 	id: string;

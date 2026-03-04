@@ -1,10 +1,11 @@
+import type { EndTest } from "../../core/dist/jackrabbit_types.js";
 import type { ConfigInterface } from "./config.js";
 import type {
 	EventBus,
 	WebdriverLogAction,
 	WebdriverSessionErrorAction,
 } from "./eventbus.js";
-import type { SessionResults } from "./results.js";
+import type { SessionResults, RunResults } from "./results.js";
 
 import { getResultsAsString } from "./results_str.js";
 
@@ -95,15 +96,15 @@ export class Logger {
 
 		if ("start_collection" === loggerAction.type) {
 			runResults.collections[loggerAction.collection_id] = {
-				loggerAction,
-				modules: [],
+				completedModules: 0,
+				completedTests: 0,
 				errorLogs: [],
-				fails: 0,
 				errors: 0,
 				expectedModules: loggerAction.expected_module_count,
-				completedModules: 0,
 				expectedTests: 0,
-				completedTests: 0,
+				fails: 0,
+				loggerAction,
+				modules: [],
 			};
 
 			runResults.expectedModules += loggerAction.expected_module_count;
@@ -132,13 +133,13 @@ export class Logger {
 			if (!collection) return;
 
 			collection.modules[loggerAction.module_id] = {
+				completedTests: 0,
+				errorLogs: [],
+				errors: 0,
+				expectedTests: loggerAction.expected_test_count,
+				fails: 0,
 				loggerAction,
 				testResults: [],
-				errorLogs: [],
-				fails: 0,
-				expectedTests: loggerAction.expected_test_count,
-				errors: 0,
-				completedTests: 0,
 			};
 
 			collection.expectedTests += loggerAction.expected_test_count;
@@ -184,38 +185,7 @@ export class Logger {
 		}
 
 		if ("end_test" === loggerAction.type) {
-			let collection = runResults.collections[loggerAction.collection_id];
-			if (!collection) return;
-
-			let module = collection.modules[loggerAction.module_id];
-			if (!module) return;
-
-			let testResult = module.testResults[loggerAction.test_id];
-			if (!testResult) return;
-
-			testResult.loggerEndAction = loggerAction;
-			runResults.completedTests += 1;
-			collection.completedTests += 1;
-			module.completedTests += 1;
-
-			let { assertions } = loggerAction;
-			const isAssertionArray = Array.isArray(assertions) && assertions.length;
-			// might be worth just sticking with language standard "none" like "" or 0 or false
-			const isAssertion =
-				!Array.isArray(assertions) &&
-				undefined !== assertions &&
-				null !== assertions;
-			if (isAssertion || isAssertionArray) {
-				this.#sessionResults.fails += 1;
-				runResults.fails += 1;
-				collection.fails += 1;
-				module.fails += 1;
-			}
-
-			runResults.testTime += Math.max(
-				0,
-				loggerAction.end_time - loggerAction.start_time,
-			);
+			endTest(this.#sessionResults, runResults, loggerAction);
 		}
 
 		if ("test_error" === loggerAction.type) {
@@ -235,4 +205,40 @@ export class Logger {
 			module.errors += 1;
 		}
 	}
+}
+
+function endTest(
+	sessionResults: SessionResults,
+	runResults: RunResults,
+	loggerAction: EndTest,
+) {
+	let collection = runResults.collections[loggerAction.collection_id];
+	if (!collection) return;
+
+	let module = collection.modules[loggerAction.module_id];
+	if (!module) return;
+
+	let testResult = module.testResults[loggerAction.test_id];
+	if (!testResult) return;
+
+	testResult.loggerEndAction = loggerAction;
+	runResults.completedTests += 1;
+	collection.completedTests += 1;
+	module.completedTests += 1;
+
+	let { assertions } = loggerAction;
+	const isAssertionArray = Array.isArray(assertions) && assertions.length;
+	// might be worth just sticking with language standard "none" like "" or 0 or false
+	const isAssertion = !Array.isArray(assertions) && undefined !== assertions;
+	if (isAssertion || isAssertionArray) {
+		sessionResults.fails += 1;
+		runResults.fails += 1;
+		collection.fails += 1;
+		module.fails += 1;
+	}
+
+	runResults.testTime += Math.max(
+		0,
+		loggerAction.end_time - loggerAction.start_time,
+	);
 }
