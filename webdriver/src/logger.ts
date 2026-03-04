@@ -66,7 +66,7 @@ const SPACE = "  ";
 export class Logger {
 	#eventbus: EventBus;
 
-	#results: SessionResults = {
+	#sessionResults: SessionResults = {
 		fails: 0,
 		errors: 0,
 		errorLogs: [],
@@ -79,7 +79,7 @@ export class Logger {
 		this.#eventbus.addListener("session_error", this.#boundError);
 
 		for (let webdriverParams of config.webdrivers) {
-			this.#results.runs.set(webdriverParams.jrId, {
+			this.#sessionResults.runs.set(webdriverParams.jrId, {
 				startTime: 0,
 				fails: 0,
 				errors: 0,
@@ -99,17 +99,17 @@ export class Logger {
 	}
 
 	get failed() {
-		return this.#results.fails !== 0;
+		return this.#sessionResults.fails !== 0;
 	}
 
 	get errored() {
-		return this.#results.errors !== 0;
+		return this.#sessionResults.errors !== 0;
 	}
 
 	// get completed() {}
 
 	get results(): string {
-		return getResultsAsString(this.#results);
+		return getResultsAsString(this.#sessionResults);
 	}
 
 	// get output
@@ -117,25 +117,25 @@ export class Logger {
 	#boundError = this.#onError.bind(this);
 	#onError(action: WebdriverSessionErrorAction) {
 		if ("session_error" === action.type) {
-			this.#results.errors += 1;
-			this.#results.errorLogs.push(action);
+			this.#sessionResults.errors += 1;
+			this.#sessionResults.errorLogs.push(action);
 		}
 	}
 
 	#boundLog = this.#onLog.bind(this);
 	#onLog(action: WebdriverLogAction) {
-		let results = this.#results.runs.get(action.id);
-		if (!results) return;
-
 		let { loggerAction, id } = action;
 
+		let runResults = this.#sessionResults.runs.get(id);
+		if (!runResults) return;
+
 		if ("start_run" === loggerAction.type) {
-			results.startTime = loggerAction.time;
-			results.expectedCollections = loggerAction.expected_collection_count;
+			runResults.startTime = loggerAction.time;
+			runResults.expectedCollections = loggerAction.expected_collection_count;
 		}
 
 		if ("end_run" === loggerAction.type) {
-			results.endTime = loggerAction.time;
+			runResults.endTime = loggerAction.time;
 			this.#eventbus.dispatchAction({
 				type: "run_complete",
 				id,
@@ -143,13 +143,13 @@ export class Logger {
 		}
 
 		if ("run_error" === loggerAction.type) {
-			this.#results.errors += 1;
-			results.errors += 1;
-			results.errorLogs.push(loggerAction);
+			this.#sessionResults.errors += 1;
+			runResults.errors += 1;
+			runResults.errorLogs.push(loggerAction);
 		}
 
 		if ("start_collection" === loggerAction.type) {
-			results.collections[loggerAction.collection_id] = {
+			runResults.collections[loggerAction.collection_id] = {
 				loggerAction,
 				modules: [],
 				errorLogs: [],
@@ -161,29 +161,29 @@ export class Logger {
 				completedTests: 0,
 			};
 
-			results.expectedModules += loggerAction.expected_module_count;
+			runResults.expectedModules += loggerAction.expected_module_count;
 		}
 
 		if ("end_collection" === loggerAction.type) {
-			let collection = results.collections[loggerAction.collection_id];
+			let collection = runResults.collections[loggerAction.collection_id];
 			if (!collection) return;
 
-			results.completedCollections += 1;
+			runResults.completedCollections += 1;
 		}
 
 		if ("collection_error" === loggerAction.type) {
-			let collection = results.collections[loggerAction.collection_id];
+			let collection = runResults.collections[loggerAction.collection_id];
 			if (!collection) return;
 
-			this.#results.errors += 1;
-			results.errors += 1;
+			this.#sessionResults.errors += 1;
+			runResults.errors += 1;
 			collection.errors += 1;
 
 			collection.errorLogs.push(loggerAction);
 		}
 
 		if ("start_module" === loggerAction.type) {
-			let collection = results.collections[loggerAction.collection_id];
+			let collection = runResults.collections[loggerAction.collection_id];
 			if (!collection) return;
 
 			collection.modules[loggerAction.module_id] = {
@@ -197,36 +197,36 @@ export class Logger {
 			};
 
 			collection.expectedTests += loggerAction.expected_test_count;
-			results.expectedTests += loggerAction.expected_test_count;
+			runResults.expectedTests += loggerAction.expected_test_count;
 		}
 
 		if ("end_module" === loggerAction.type) {
-			let collection = results.collections[loggerAction.collection_id];
+			let collection = runResults.collections[loggerAction.collection_id];
 			if (!collection) return;
 
 			let module = collection.modules[loggerAction.module_id];
 			if (!module) return;
 
-			results.completedModules += 1;
+			runResults.completedModules += 1;
 			collection.completedModules += 1;
 		}
 
 		if ("module_error" === loggerAction.type) {
-			let collection = results.collections[loggerAction.collection_id];
+			let collection = runResults.collections[loggerAction.collection_id];
 			if (!collection) return;
 
 			let module = collection.modules[loggerAction.module_id];
 			if (!module) return;
 
-			this.#results.errors += 1;
-			results.errors += 1;
+			this.#sessionResults.errors += 1;
+			runResults.errors += 1;
 			collection.errors += 1;
 			module.errors += 1;
 			module.errorLogs.push(loggerAction);
 		}
 
 		if ("start_test" === loggerAction.type) {
-			let collection = results.collections[loggerAction.collection_id];
+			let collection = runResults.collections[loggerAction.collection_id];
 			if (!collection) return;
 
 			let module = collection.modules[loggerAction.module_id];
@@ -239,7 +239,7 @@ export class Logger {
 		}
 
 		if ("end_test" === loggerAction.type) {
-			let collection = results.collections[loggerAction.collection_id];
+			let collection = runResults.collections[loggerAction.collection_id];
 			if (!collection) return;
 
 			let module = collection.modules[loggerAction.module_id];
@@ -249,7 +249,7 @@ export class Logger {
 			if (!testResult) return;
 
 			testResult.loggerEndAction = loggerAction;
-			results.completedTests += 1;
+			runResults.completedTests += 1;
 			collection.completedTests += 1;
 			module.completedTests += 1;
 
@@ -261,20 +261,20 @@ export class Logger {
 				undefined !== assertions &&
 				null !== assertions;
 			if (isAssertion || isAssertionArray) {
-				this.#results.fails += 1;
-				results.fails += 1;
+				this.#sessionResults.fails += 1;
+				runResults.fails += 1;
 				collection.fails += 1;
 				module.fails += 1;
 			}
 
-			results.testTime += Math.max(
+			runResults.testTime += Math.max(
 				0,
 				loggerAction.end_time - loggerAction.start_time,
 			);
 		}
 
 		if ("test_error" === loggerAction.type) {
-			let collection = results.collections[loggerAction.collection_id];
+			let collection = runResults.collections[loggerAction.collection_id];
 			if (!collection) return;
 
 			let module = collection.modules[loggerAction.module_id];
@@ -284,8 +284,8 @@ export class Logger {
 			if (!testResult) return;
 
 			testResult.loggerEndAction = loggerAction;
-			this.#results.errors += 1;
-			results.errors += 1;
+			this.#sessionResults.errors += 1;
+			runResults.errors += 1;
 			collection.errors += 1;
 			module.errors += 1;
 		}
