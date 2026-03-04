@@ -300,9 +300,9 @@ function getResultsAsString(sessionResults: SessionResults): string {
 		output.push(`${SPACE}[session_error]\n${errorAction.error}`);
 	}
 
-	// Lots of nested logs because it's a nested structure.
-	// I'd rather see it nested in one function than have for loops
-	// spread across each function.
+	// Lots of nested loops because results a nested structure.
+	// I'd rather see composition nested in one function
+	// than have for loops spread across each function.
 	for (let [, result] of sessionResults.runs) {
 		if (logSessionResult(output, result)) continue;
 
