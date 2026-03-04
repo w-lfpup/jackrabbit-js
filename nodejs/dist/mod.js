@@ -27,4 +27,5 @@ logger.log({
     type: "end_run",
     time: performance.now(),
 });
+console.log(logger.results);
 logger.failed || logger.errored ? process.exit(1) : process.exit(0);

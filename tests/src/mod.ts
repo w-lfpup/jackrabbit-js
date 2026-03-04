@@ -5,12 +5,6 @@ import * as ErrorTests from "./test_error.test.js";
 import { runCollection } from "../../core/dist/mod.js";
 import { TestLogger } from "./test_logger.js";
 
-// Test pass and fail behavior
-
-const failTestModules = [FailTests];
-const passTestModules = [PassTests];
-const errorTestModules = [ErrorTests];
-
 // jackrabbit test run won't pass failing tests
 async function testsFail() {
 	let logger = new TestLogger();

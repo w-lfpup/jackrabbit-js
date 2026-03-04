@@ -1,4 +1,4 @@
-import { LoggerAction } from "../../core/dist/jackrabbit_types.js";
+import type { LoggerAction } from "../../core/dist/jackrabbit_types.js";
 
 export interface WebdriverSessionAction {
 	id: string;
@@ -23,8 +23,17 @@ export interface WebdriverRunCompleteAction extends WebdriverSessionAction {
 
 export interface WebdriverLogAction extends WebdriverSessionAction {
 	type: "log";
-	urlStr: string | undefined;
 	loggerAction: LoggerAction;
+}
+
+export interface WebdriverCliOutpuAction extends WebdriverSessionAction {
+	type: "stdout";
+	output: string;
+}
+
+export interface WebdriverCliErrorOutpuAction extends WebdriverSessionAction {
+	type: "stderr";
+	output: string;
 }
 
 export interface WebdriverEndAction {
@@ -32,45 +41,60 @@ export interface WebdriverEndAction {
 }
 
 export interface WebdriverActionMap {
-	session_start: WebdriverSessionStartAction;
-	session_error: WebdriverSessionClosedAction;
-	session_closed: WebdriverSessionErrorAction;
-	run_complete: WebdriverRunCompleteAction;
-	log: WebdriverLogAction;
 	end: WebdriverEndAction;
+	log: WebdriverLogAction;
+	run_complete: WebdriverRunCompleteAction;
+	session_closed: WebdriverSessionClosedAction;
+	session_error: WebdriverSessionErrorAction;
+	session_start: WebdriverSessionStartAction;
+	stderr: WebdriverCliErrorOutpuAction;
+	stdout: WebdriverCliOutpuAction;
 }
 
 export type WebdriverActions =
-	| WebdriverSessionStartAction
+	| WebdriverCliErrorOutpuAction
+	| WebdriverCliOutpuAction
+	| WebdriverEndAction
+	| WebdriverLogAction
+	| WebdriverRunCompleteAction
 	| WebdriverSessionClosedAction
 	| WebdriverSessionErrorAction
-	| WebdriverRunCompleteAction
-	| WebdriverEndAction
-	| WebdriverLogAction;
+	| WebdriverSessionStartAction;
 
-interface EventBusListener {
+interface TypedEventBusListener<
+	K extends keyof WebdriverActionMap = keyof WebdriverActionMap,
+> {
+	(action: WebdriverActionMap[K]): void;
+}
+
+interface EventBusListener extends TypedEventBusListener {
 	(action: WebdriverActions): void;
 }
 
 export interface EventBusInterface {
-	addListener(type: string, listener: EventBusListener): void;
+	addListener<K extends keyof WebdriverActionMap>(
+		type: K,
+		listener: TypedEventBusListener<K>,
+	): void;
 	dispatchAction(action: WebdriverActions): void;
 }
 
 export class EventBus implements EventBusInterface {
 	#eventMap: Map<string, EventBusListener[]> = new Map();
 
-	addListener(type: string, cb: EventBusListener) {
+	addListener<K extends keyof WebdriverActionMap>(
+		type: K,
+		cb: TypedEventBusListener<K>,
+	) {
 		let listeners = this.#eventMap.get(type);
 		if (!listeners) {
 			listeners = [];
 			this.#eventMap.set(type, listeners);
 		}
-		listeners.push(cb);
+		listeners.push(cb as EventBusListener);
 	}
 
 	dispatchAction(action: WebdriverActions) {
-		console.log(action);
 		let listeners = this.#eventMap.get(action.type);
 		if (listeners)
 			for (const listener of listeners) {

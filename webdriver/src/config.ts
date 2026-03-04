@@ -14,6 +14,7 @@ export interface WebdriverParams extends WebdriverConfig {
 
 export interface ConfigInterface {
 	hostAndPort: URL;
+	runAsynchronously?: boolean;
 	webdrivers: WebdriverParams[];
 }
 
@@ -30,6 +31,15 @@ export async function createConfig(
 		if (!hostAndPort)
 			throw new Error(`config: invalid host_and_port json property`);
 
+		let { run_asynchronously: runAsynchronously } = json;
+		if (
+			typeof runAsynchronously !== "boolean" &&
+			undefined !== runAsynchronously
+		)
+			throw new Error(
+				"Config: the property runAsynchronously is not a boolean or undefined",
+			);
+
 		let webdrivers: WebdriverParams[] = [];
 		if (Array.isArray(json.webdrivers))
 			for (const [index, webdriverParams] of json.webdrivers.entries()) {
@@ -43,6 +53,7 @@ export async function createConfig(
 			}
 		return {
 			hostAndPort,
+			runAsynchronously,
 			webdrivers,
 		};
 	} catch (e) {

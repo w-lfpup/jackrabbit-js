@@ -1,11 +1,11 @@
 import type { IncomingMessage, ServerResponse } from "http";
+import type { EventBus } from "./eventbus.js";
+import type { LoggerAction } from "../../core/dist/jackrabbit_types.js";
+
 import * as fs from "fs";
 import * as path from "path";
 import { testHanger } from "./test_hangar.js";
 import { ConfigInterface } from "./config.js";
-
-import { LoggerAction } from "../../core/dist/jackrabbit_types.js";
-import type { EventBus } from "./eventbus.js";
 
 let cwd = process.cwd();
 
@@ -43,95 +43,138 @@ export class Router {
 
 	#boundRoute = this.#route.bind(this);
 	async #route(req: IncomingMessage, res: ServerResponse) {
-		let { url, method } = req;
+		if (serveBadRequest(req, res)) return;
+		if (servePing(req, res)) return;
+		if (serveTestPage(req, res, this.#config)) return;
+		if (logAction(req, res, this.#eventbus)) return;
 
-		if (!url) {
-			res.setHeader("Content-Type", "text/html");
-			res.writeHead(400);
-			return res.end();
+		await serveFile(req, res);
+	}
+}
+
+function serveBadRequest(req: IncomingMessage, res: ServerResponse): boolean {
+	let { url } = req;
+	if (url) return false;
+
+	res.setHeader("Content-Type", "text/html");
+	res.writeHead(400);
+	res.end();
+
+	return true;
+}
+
+function servePing(req: IncomingMessage, res: ServerResponse): boolean {
+	let { url, method } = req;
+	if (url !== "/ping" || "GET" !== method) return false;
+
+	res.setHeader("Content-Type", "text/html");
+	res.writeHead(200);
+	res.end("The cookie train has arrived!");
+
+	return true;
+}
+
+function serveTestPage(
+	req: IncomingMessage,
+	res: ServerResponse,
+	config: ConfigInterface,
+): boolean {
+	let { url, method } = req;
+	if (url !== "/" || "GET" !== method) return false;
+
+	let hangar = testHanger({
+		jackrabbit_url: config.hostAndPort,
+		test_collections: process.argv.slice(3),
+	});
+
+	res.setHeader("Content-Type", "text/html");
+	res.writeHead(200);
+	res.end(hangar);
+
+	return true;
+}
+
+function logAction(
+	req: IncomingMessage,
+	res: ServerResponse,
+	eventbus: EventBus,
+): boolean {
+	let { url, method } = req;
+	if (!url?.startsWith("/log/") || "POST" !== method) return false;
+
+	let id: string | undefined;
+	let cookies = req.headers.cookie?.split(";") ?? [];
+	for (const cookieLine of cookies) {
+		if (cookieLine.startsWith("jackrabbit=")) {
+			let [_name, value] = cookieLine.split("=");
+			id = value;
 		}
+	}
 
-		if (url === "/ping" && "GET" === method) {
-			res.setHeader("Content-Type", "text/html");
-			res.writeHead(200);
-			return res.end("The cookie train has arrived!");
-		}
-
-		// "test" home page
-		if (url === "/" && "GET" === method) {
-			let hangar = testHanger({
-				jackrabbit_url: this.#config.hostAndPort,
-				test_collections: process.argv.slice(3),
-			});
-
-			res.setHeader("Content-Type", "text/html");
-			res.writeHead(200);
-			return res.end(hangar);
-		}
-
-		// log test actions
-		if (url.startsWith("/log/") && "POST" === method) {
-			console.log("log has a cookie?", req.headers.cookie);
-
-			let id: string | undefined;
-			let cookies = req.headers.cookie?.split(";") ?? [];
-			for (const cookieLine of cookies) {
-				console.log(cookieLine);
-				if (cookieLine.startsWith("jackrabbit=")) {
-					let [_name, value] = cookieLine.split("=");
-					id = value;
-				}
-			}
-
-			if (id) {
-				let loggerAction = await getLoggerActionFromRequestBody(req);
-				this.#eventbus.dispatchAction({
+	if (id) {
+		getLoggerActionFromRequestBody(req)
+			.then(function (loggerAction: LoggerAction) {
+				eventbus.dispatchAction({
 					type: "log",
-					urlStr: req.url,
 					loggerAction,
 					id,
 				});
-				res.writeHead(200);
-			} else {
-				res.writeHead(403);
-			}
+				res.writeHead(201);
+			})
+			.catch(function () {
+				res.writeHead(401);
+			})
+			.finally(function () {
+				res.end();
+			});
+	} else {
+		res.writeHead(401);
+		res.end();
+	}
 
-			return res.end();
-		}
+	return true;
+}
 
-		// this assumes http 1.1
-		//
-		// only serve core and browser packages
-		let ext = "";
-		if (url.endsWith("/")) ext = "index.html";
-		let urlNoPrefix = url;
-		if (url.startsWith("/jackrabbit")) urlNoPrefix = url.substring(11);
-		let filePath = path.join(cwd, urlNoPrefix, ext);
+async function serveFile(req: IncomingMessage, res: ServerResponse) {
+	let { url, method } = req;
 
-		let stream: fs.ReadStream | undefined;
-		if (url.startsWith("/jackrabbit/core/") && "GET" === method) {
-			stream = await getDirectoryScopedFile(filePath, corePath);
-		}
-		if (url.startsWith("/jackrabbit/browser/") && "GET" === method) {
-			stream = await getDirectoryScopedFile(filePath, browserPath);
-		}
+	if (!url) {
+		res.setHeader("Content-Type", MIME_TYPES["html"]);
+		res.writeHead(400);
+		res.end();
+		return;
+	}
 
-		if (!url.startsWith("/jackrabbit") && "GET" === method) {
-			stream = await getDirectoryScopedFile(filePath, cwd);
-		}
+	let ext = "";
+	if (url.endsWith("/")) ext = "index.html";
+	let urlNoPrefix = url;
+	if (url.startsWith("/jackrabbit")) urlNoPrefix = url.substring(11);
+	let filePath = path.join(cwd, urlNoPrefix, ext);
 
-		if (stream) {
-			// throwing errors and stuff
-			const ext = path.extname(filePath).substring(1).toLowerCase();
-			let mimeType = MIME_TYPES[ext] ?? MIME_TYPES["octet"];
-			res.setHeader("Content-Type", mimeType);
-			res.writeHead(200);
-			stream.pipe(res);
-		} else {
-			res.setHeader("Content-Type", MIME_TYPES["html"]);
-			res.writeHead(404);
-			res.end();
-		}
+	let stream: fs.ReadStream | undefined;
+	if (url.startsWith("/jackrabbit/core/") && "GET" === method) {
+		stream = await getDirectoryScopedFile(filePath, corePath);
+	}
+	if (url.startsWith("/jackrabbit/browser/") && "GET" === method) {
+		stream = await getDirectoryScopedFile(filePath, browserPath);
+	}
+
+	if (!url.startsWith("/jackrabbit") && "GET" === method) {
+		stream = await getDirectoryScopedFile(filePath, cwd);
+	}
+
+	if (stream) {
+		// throws errors if not a string
+		// filepath is always a string
+		const ext = path.extname(filePath).substring(1).toLowerCase();
+		let mimeType = MIME_TYPES[ext] ?? MIME_TYPES["octet"];
+		res.setHeader("Content-Type", mimeType);
+		res.writeHead(200);
+		stream.pipe(res);
+	} else {
+		res.setHeader("Content-Type", MIME_TYPES["html"]);
+		res.writeHead(404);
+		res.end();
 	}
 }
 
