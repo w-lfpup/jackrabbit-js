@@ -3,10 +3,10 @@
 	"runAsynchronusly": false,
 	"webdrivers": [
 		{
-			"command": "$GECKOWEBDRIVER/geckodriver -p 4005",
+			"command": "$GECKOWEBDRIVER/geckodriver -p 4001",
 			"title": "Firefox",
 			"timeout_ms": 20000,
-			"url": "http://localhost:4005",
+			"url": "http://localhost:4001",
 			"capabilities": {
 				"alwaysMatch": {
 					"moz:firefoxOptions": {
@@ -16,10 +16,17 @@
 			}
 		},
 		{
-			"title": "Edge",
 			"command": "$EDGEWEBDRIVER/msedgedriver --port=4010",
+			"title": "Edge",
 			"timeout_ms": 20000,
-			"url": "http://localhost:4010"
+			"url": "http://localhost:4010",
+			"capabilities": {
+				"alwaysMatch": {
+					"ms:edgeOptions": {
+						"args": ["--headless", "--disable-gpu", "--disable-dev-shm-usage"]
+					}
+				}
+			}
 		}
 	]
 }
