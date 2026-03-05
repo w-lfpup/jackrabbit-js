@@ -18,12 +18,12 @@
 		{
 			"command": "$EDGEWEBDRIVER/msedgedriver --port=4004",
 			"title": "Edge",
-			"timeout_ms": 40000,
+			"timeout_ms": 20000,
 			"url": "http://localhost:4004",
 			"capabilities": {
 				"alwaysMatch": {
 					"ms:edgeOptions": {
-						"args": ["--headless"]
+						"args": ["--headless", "--disable-gpu"]
 					}
 				}
 			}
