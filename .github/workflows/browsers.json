@@ -16,10 +16,10 @@
 			}
 		},
 		{
-			"command": "$CHROMEWEBDRIVER/chromedriver --port=4002",
-			"title": "Chrome",
+			"command": "$EDGEWEBDRIVER/msedgedriver --port=4004",
+			"title": "Edge",
 			"timeout_ms": 20000,
-			"url": "http://localhost:4002",
+			"url": "http://localhost:4004",
 			"capabilities": {
 				"alwaysMatch": {
 					"goog:chromeOptions": {
@@ -29,10 +29,10 @@
 			}
 		},
 		{
-			"command": "$EDGEWEBDRIVER/msedgedriver --port=4004",
-			"title": "Edge",
+			"command": "$CHROMEWEBDRIVER/chromedriver --port=4002",
+			"title": "Chrome",
 			"timeout_ms": 20000,
-			"url": "http://localhost:4004",
+			"url": "http://localhost:4002",
 			"capabilities": {
 				"alwaysMatch": {
 					"goog:chromeOptions": {
