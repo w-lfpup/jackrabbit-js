@@ -168,6 +168,8 @@ ${SPACE.repeat(2)}${loggerAction.expected_module_count} modules`,
 		output.push(`${SPACE.repeat(2)}[collection_error] ${errorAction.error}`);
 	}
 
+	if (collection.errorLogs.length) output.push("");
+
 	return false;
 }
 
@@ -192,10 +194,17 @@ function logModuleResult(
 		return true;
 	}
 
+	output.push(
+		`${SPACE.repeat(3)}${module.completedTests - module.fails}/${module.expectedTests} tests`,
+	);
+
+	output.push("");
 	for (let errorAction of module.errorLogs) {
-		if ("collection_error" !== errorAction.type) continue;
-		output.push(`${SPACE.repeat(2)}[module_error] ${errorAction.error}`);
+		if ("module_error" !== errorAction.type) continue;
+		output.push(`${SPACE.repeat(3)}[module_error] ${errorAction.error}`);
 	}
+
+	if (module.errorLogs.length) output.push("");
 
 	return false;
 }
@@ -236,6 +245,10 @@ ${SPACE.repeat(4)}[error] ${loggerEndAction.error}`,
 				output.push(`${SPACE.repeat(4)}- ${assertion}`);
 			}
 		}
+	}
+
+	if (undefined === loggerEndAction) {
+		output.push(`${SPACE.repeat(4)}[incomplete]`);
 	}
 }
 
