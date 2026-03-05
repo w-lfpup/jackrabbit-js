@@ -64,6 +64,9 @@ ${result.webdriverParams.title}`);
 		}
 	}
 
+	if (!result.expectedTests) {
+		output.push(`No tests were run.`)
+	}
 	// When everything goes right :3
 	if (
 		!result.fails &&
