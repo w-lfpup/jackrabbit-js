@@ -23,7 +23,7 @@
 			"capabilities": {
 				"alwaysMatch": {
 					"goog:chromeOptions": {
-						"args": ["--headless", "--disbale-gpu", "--disable-dev-shm-usage"]
+						"args": ["--headless", "--disable-dev-shm-usage"]
 					}
 				}
 			}
