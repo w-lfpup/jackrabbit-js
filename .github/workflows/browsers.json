@@ -10,7 +10,7 @@
 			"capabilities": {
 				"alwaysMatch": {
 					"goog:chromeOptions": {
-						"args": ["--headless"]
+						"args": ["--headless", "--disbale-gpu", "--no-sandbox", "--disable-dev-shm-usage"]
 					}
 				}
 			}
