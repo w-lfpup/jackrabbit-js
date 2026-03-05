@@ -39,4 +39,4 @@ jobs:
       # - name: Test
       #   run: npm run test
       - name: Test browsers
-        run: dir $GECKOWEBDRIVER
+        run: dir $Env:GECKOWEBDRIVER
