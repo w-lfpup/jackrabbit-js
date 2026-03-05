@@ -56,6 +56,14 @@ function logRunResults(output: string[], result: RunResults): boolean {
 	output.push(`
 ${result.webdriverParams.title}`);
 
+	for (let errorAction of result.errorLogs) {
+		if ("log" === errorAction.type) {
+			if ("run_error" === errorAction.loggerAction.type) {
+				output.push(`${SPACE}[run_error] ${errorAction.loggerAction.error}`);
+			}
+		}
+	}
+
 	// When everything goes right :3
 	if (
 		!result.fails &&
@@ -68,14 +76,6 @@ ${result.webdriverParams.title}`);
 ${SPACE}${result.completedModules} modules
 ${SPACE}${result.completedCollections} collections`);
 		return true;
-	}
-
-	for (let errorAction of result.errorLogs) {
-		if ("log" === errorAction.type) {
-			if ("run_error" === errorAction.loggerAction.type) {
-				output.push(`${SPACE}[run_error] ${errorAction.loggerAction.error}`);
-			}
-		}
 	}
 
 	return false;
