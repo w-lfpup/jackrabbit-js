@@ -42,7 +42,7 @@ export interface RunResults {
 	completedModules: number;
 	expectedCollections: number;
 	completedCollections: number;
-	errorLogs: LoggerAction[];
+	errorLogs: WebdriverActions[];
 	webdriverParams: WebdriverParams;
 	collections: (CollectionResults | undefined)[];
 }
@@ -52,6 +52,5 @@ export interface RunResults {
 export interface SessionResults {
 	fails: number;
 	errors: number;
-	errorLogs: WebdriverActions[];
 	runs: Map<string, RunResults>;
 }

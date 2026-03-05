@@ -15,7 +15,6 @@ export class Logger {
 	#sessionResults: SessionResults = {
 		fails: 0,
 		errors: 0,
-		errorLogs: [],
 		runs: new Map(),
 	};
 
@@ -62,8 +61,11 @@ export class Logger {
 	// output being a array of a string
 	#boundError = this.#onError.bind(this);
 	#onError(action: WebdriverSessionErrorAction) {
-		this.#sessionResults.errors += 1;
-		this.#sessionResults.errorLogs.push(action);
+		let runResults = this.#sessionResults.runs.get(action.id);
+		if (runResults) {
+			runResults.errors += 1;
+			runResults.errorLogs.push(action);
+		}
 	}
 
 	#boundLog = this.#onLog.bind(this);
@@ -89,7 +91,7 @@ export class Logger {
 		if ("run_error" === loggerAction.type) {
 			this.#sessionResults.errors += 1;
 			runResults.errors += 1;
-			runResults.errorLogs.push(loggerAction);
+			runResults.errorLogs.push(action);
 		}
 
 		if ("start_collection" === loggerAction.type) {
