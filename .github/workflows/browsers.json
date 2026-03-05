@@ -5,7 +5,7 @@
 		{
 			"command": "$GECKOWEBDRIVER/geckodriver -p 4001",
 			"title": "Firefox",
-			"timeout_ms": 20000,
+			"timeout_ms": 30000,
 			"url": "http://localhost:4001",
 			"capabilities": {
 				"alwaysMatch": {
@@ -18,7 +18,7 @@
 		{
 			"command": "$CHROMEWEBDRIVER/chromedriver --port=4005",
 			"title": "Chrome",
-			"timeout_ms": 20000,
+			"timeout_ms": 30000,
 			"url": "http://localhost:4005",
 			"capabilities": {
 				"alwaysMatch": {
@@ -31,7 +31,7 @@
 		{
 			"command": "$EDGEWEBDRIVER/msedgedriver --port=4010",
 			"title": "Edge",
-			"timeout_ms": 20000,
+			"timeout_ms": 30000,
 			"url": "http://localhost:4010",
 			"capabilities": {
 				"alwaysMatch": {
