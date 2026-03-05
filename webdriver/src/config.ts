@@ -22,7 +22,7 @@ export async function createConfig(
 	args: string[],
 ): Promise<ConfigInterface | Error> {
 	let configFilepath = args[0];
-	let relPath = path.join("file://", process.cwd(), configFilepath);
+	let relPath = path.join(process.cwd(), configFilepath);
 
 	try {
 		// windows might need a "file://<relPath>" situation
