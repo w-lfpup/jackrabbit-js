@@ -65,7 +65,7 @@ ${result.webdriverParams.title}`);
 	}
 
 	if (!result.expectedTests) {
-		output.push(`  No teset runs occured.`)
+		output.push(`  No test runs occured.`)
 	}
 	// When everything goes right :3
 	if (
