@@ -26,24 +26,26 @@
 						"args": [
 							"--headless",
 							"--window-size=1920,1080",
-							"--disable-dev-shm-usage"
+							"--disable-dev-shm-usage",
+							"--remote-debugging-port=4003"
 						]
 					}
 				}
 			}
 		},
 		{
-			"command": "$EDGEWEBDRIVER/msedgedriver --port=4003",
+			"command": "$EDGEWEBDRIVER/msedgedriver --port=4004",
 			"title": "Edge",
 			"timeout_ms": 20000,
-			"url": "http://localhost:4003",
+			"url": "http://localhost:4004",
 			"capabilities": {
 				"alwaysMatch": {
 					"goog:chromeOptions": {
 						"args": [
 							"--headless",
 							"--window-size=1920,1080",
-							"--disable-dev-shm-usage"
+							"--disable-dev-shm-usage",
+							"--remote-debugging-port=4005"
 						]
 					}
 				}
