@@ -34,7 +34,7 @@ export class Logger implements LoggerInterface {
 
 	get completed(): boolean {
 		return (
-			0 !== this.#results.expectedTests &&
+			0 < this.#results.expectedTests &&
 			this.#results.expectedTests === this.#results.completedTests
 		);
 	}
