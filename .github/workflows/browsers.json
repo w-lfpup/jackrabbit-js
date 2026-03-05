@@ -16,23 +16,23 @@
 			}
 		},
 		{
-			"command": "$CHROMEWEBDRIVER/chromedriver --port=4010",
+			"command": "$CHROMEWEBDRIVER/chromedriver --port=4005",
 			"title": "Chrome",
 			"timeout_ms": 20000,
-			"url": "http://localhost:4010",
+			"url": "http://localhost:4005",
 			"capabilities": {
 				"alwaysMatch": {
 					"goog:chromeOptions": {
-						"args": ["--headless"]
+						"args": ["--headless", "--disable-gpu", "--disable-dev-shm-usage"]
 					}
 				}
 			}
 		},
 		{
-			"command": "$EDGEWEBDRIVER/msedgedriver --port=4005",
+			"command": "$EDGEWEBDRIVER/msedgedriver --port=4010",
 			"title": "Edge",
 			"timeout_ms": 20000,
-			"url": "http://localhost:4005",
+			"url": "http://localhost:4010",
 			"capabilities": {
 				"alwaysMatch": {
 					"ms:edgeOptions": {
