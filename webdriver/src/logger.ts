@@ -51,7 +51,9 @@ export class Logger {
 		return this.#sessionResults.errors !== 0;
 	}
 
-	// get completed() {}
+	get compeleted() {
+		return false;
+	}
 
 	get results(): string {
 		return getResultsAsString(this.#sessionResults);
