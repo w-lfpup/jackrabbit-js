@@ -147,6 +147,30 @@ To run multiple test collections, add more filepaths as commandline arguments:
 npx jackrabbit_webdriver ./config.json ./mod.tests.ts ./another_mod.tests.ts
 ```
 
+An example `jackrabbit_webdriver` config is as follows:
+
+```JSON
+{
+	"host_and_port": "http://localhost:4000",
+	"run_asynchronously": false,
+	"webdrivers": [
+		{
+			"title": "Firefox",
+			"command": "geckodriver -p 4001",
+			"timeout_ms": 20000,
+			"url": "http://localhost:4001",
+			"capabilities": {
+				"alwaysMatch": {
+					"moz:firefoxOptions": {
+						"args": ["-headless"]
+					}
+				}
+			}
+		}
+	]
+}
+```
+
 ## License
 
 `Jackrabbit-js` is released under the BSD 3-Clause License.

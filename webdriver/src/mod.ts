@@ -28,6 +28,7 @@ server.addListener("close", function () {
 	logger.errored || logger.failed ? process.exit(1) : process.exit(0);
 });
 eventbus.addListener("end", function () {
+	server.closeAllConnections();
 	server.close();
 });
 

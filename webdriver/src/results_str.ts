@@ -11,14 +11,12 @@ const SPACE = "  ";
 export function getResultsAsString(sessionResults: SessionResults): string {
 	const output: string[] = [];
 
-	for (let errorAction of sessionResults.errorLogs) {
-		if ("session_error" !== errorAction.type) continue;
-		output.push(`${SPACE}[session_error]\n${errorAction.error}`);
-	}
-
 	// Lots of nested loops because results a nested structure.
 	// I'd rather see composition nested in one function
 	// than have for loops spread across each function.
+
+	logSessionErrors(output, sessionResults);
+
 	for (let [, result] of sessionResults.runs) {
 		if (logRunResults(output, result)) continue;
 
@@ -42,10 +40,33 @@ export function getResultsAsString(sessionResults: SessionResults): string {
 	return output.join("\n");
 }
 
+function logSessionErrors(output: string[], sessionResults: SessionResults) {
+	for (let [, result] of sessionResults.runs) {
+		for (let errorAction of result.errorLogs) {
+			if ("session_error" === errorAction.type) {
+				output.push(
+					`\n[${result.webdriverParams.title}:session_error] ${errorAction.error}`,
+				);
+			}
+		}
+	}
+}
+
 function logRunResults(output: string[], result: RunResults): boolean {
 	output.push(`
 ${result.webdriverParams.title}`);
 
+	for (let errorAction of result.errorLogs) {
+		if ("log" === errorAction.type) {
+			if ("run_error" === errorAction.loggerAction.type) {
+				output.push(`${SPACE}[run_error] ${errorAction.loggerAction.error}`);
+			}
+		}
+	}
+
+	if (!result.expectedTests) {
+		output.push(`  No test runs occured.`);
+	}
 	// When everything goes right :3
 	if (
 		!result.fails &&
@@ -58,11 +79,6 @@ ${result.webdriverParams.title}`);
 ${SPACE}${result.completedModules} modules
 ${SPACE}${result.completedCollections} collections`);
 		return true;
-	}
-
-	for (let errorAction of result.errorLogs) {
-		if ("run_error" !== errorAction.type) continue;
-		output.push(`${SPACE}[run_error] ${errorAction.error}`);
 	}
 
 	return false;
@@ -171,13 +187,11 @@ ${SPACE.repeat(4)}[error] ${loggerEndAction.error}`,
 }
 
 function logSummary(output: string[], sessionResults: SessionResults) {
-	let status_with_color = sessionResults.fails
-		? yellow("\u{2717} failed")
-		: blue("\u{2714} passed");
+	let status_with_color = blue("\u{2714} passed");
+	if (sessionResults.fails) status_with_color = yellow("\u{2717} failed");
+	if (sessionResults.errors) status_with_color = gray("\u{2717} errored");
 
-	if (sessionResults.errors) {
-		status_with_color = gray("\u{2717} errored");
-	}
+	// expected tests
 
 	let totalTime = 0;
 	let testTime = 0;

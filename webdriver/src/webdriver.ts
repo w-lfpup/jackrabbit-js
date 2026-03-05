@@ -1,6 +1,7 @@
 import type { ChildProcess } from "child_process";
 import type { ConfigInterface, WebdriverParams } from "./config.js";
 import type { EventBus } from "./eventbus.js";
+
 import { exec } from "child_process";
 
 let headers = new Headers([["Content-Type", "application/json"]]);
@@ -83,8 +84,7 @@ class WebdriverSession {
 		this.#abortController = new AbortController();
 
 		this.#eventbus.addListener("run_complete", (action) => {
-			if ("run_complete" === action.type && action.id === this.#params.jrId)
-				this.#down();
+			if (action.id === this.#params.jrId) this.#down();
 		});
 	}
 
@@ -126,10 +126,16 @@ class WebdriverSession {
 				this.#hostAndPort,
 			);
 		} catch (e) {
+			let errOutput;
+			if (e instanceof Error) {
+				errOutput = e.name + "\n" + e.message + (e.cause ? "\n" + e.cause : "");
+			}
+			if (!errOutput) errOutput = e?.toString();
+
 			this.#eventbus.dispatchAction({
 				type: "session_error",
 				id: this.#params.jrId,
-				error: e?.toString() ?? "Unknown error creating browser session",
+				error: errOutput ?? "Unknown error creating browser session",
 			});
 			this.#abortController.abort();
 		}
@@ -143,7 +149,7 @@ class WebdriverSession {
 			this.#eventbus,
 			this.#sessionId,
 		);
-		this.#process.kill("SIGKILL");
+		this.#process.kill();
 		this.#process = undefined;
 	}
 }
@@ -252,7 +258,6 @@ async function getSession(params: WebdriverParams, signal: AbortSignal) {
 	});
 	if (200 !== res.status) {
 		let cause = await res.text();
-		console.log(cause);
 		throw new Error("Failed to create a session", { cause });
 	}
 
