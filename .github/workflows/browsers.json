@@ -15,7 +15,7 @@
 				}
 			}
 		},
-				{
+		{
 			"command": "$CHROMEWEBDRIVER/chromedriver --port=4010",
 			"title": "Chrome",
 			"timeout_ms": 20000,
