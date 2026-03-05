@@ -3,8 +3,8 @@
 	"runAsynchronusly": false,
 	"webdrivers": [
 		{
-			"command": "$GECKOWEBDRIVER/geckodriver -p 4001",
 			"title": "Firefox",
+			"command": "$GECKOWEBDRIVER/geckodriver -p 4001",
 			"timeout_ms": 20000,
 			"url": "http://localhost:4001",
 			"capabilities": {
@@ -16,27 +16,27 @@
 			}
 		},
 		{
-			"command": "$CHROMEWEBDRIVER/chromedriver --port=4005",
-			"title": "Chrome",
+			"title": "Edge",
+			"command": "$EDGEWEBDRIVER/msedgedriver --port=4005",
 			"timeout_ms": 20000,
 			"url": "http://localhost:4005",
 			"capabilities": {
 				"alwaysMatch": {
-					"goog:chromeOptions": {
+					"ms:edgeOptions": {
 						"args": ["--headless", "--disable-gpu", "--disable-dev-shm-usage"]
 					}
 				}
 			}
 		},
 		{
-			"command": "$EDGEWEBDRIVER/msedgedriver --port=4010",
-			"title": "Edge",
+			"title": "Chrome",
+			"command": "$CHROMEWEBDRIVER/chromedriver --port=4010",
 			"timeout_ms": 20000,
 			"url": "http://localhost:4010",
 			"capabilities": {
 				"alwaysMatch": {
-					"ms:edgeOptions": {
-						"args": ["--headless", "--disable-gpu", "--disable-dev-shm-usage"]
+					"goog:chromeOptions": {
+						"args": ["--headless"]
 					}
 				}
 			}
