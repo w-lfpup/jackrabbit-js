@@ -150,6 +150,7 @@ class WebdriverSession {
 		);
 		this.#process.kill("SIGKILL");
 		this.#process = undefined;
+		await sleep(500);
 	}
 }
 
