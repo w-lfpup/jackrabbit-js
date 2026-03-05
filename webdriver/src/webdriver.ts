@@ -1,6 +1,7 @@
 import type { ChildProcess } from "child_process";
 import type { ConfigInterface, WebdriverParams } from "./config.js";
 import type { EventBus } from "./eventbus.js";
+
 import { exec } from "child_process";
 
 let headers = new Headers([["Content-Type", "application/json"]]);
