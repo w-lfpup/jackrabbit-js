@@ -187,13 +187,11 @@ ${SPACE.repeat(4)}[error] ${loggerEndAction.error}`,
 }
 
 function logSummary(output: string[], sessionResults: SessionResults) {
-	let status_with_color = sessionResults.fails
-		? yellow("\u{2717} failed")
-		: blue("\u{2714} passed");
+	let status_with_color = blue("\u{2714} passed");
+	if (sessionResults.fails) status_with_color = yellow("\u{2717} failed");
+	if (sessionResults.errors) status_with_color = gray("\u{2717} errored");
 
-	if (sessionResults.errors) {
-		status_with_color = gray("\u{2717} errored");
-	}
+	// expected tests
 
 	let totalTime = 0;
 	let testTime = 0;
