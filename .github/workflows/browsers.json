@@ -36,7 +36,7 @@
 			"capabilities": {
 				"alwaysMatch": {
 					"ms:edgeOptions": {
-						"args": ["--headless", "--disable-gpu", "--disable-dev-shm-usage"]
+						"args": ["--headless", "--disable-dev-shm-usage"]
 					}
 				}
 			}
