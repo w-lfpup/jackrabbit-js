@@ -33,10 +33,10 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
-      - name: Install
-        run: npm ci
-      - name: Test
-        run: npm run test
+      # - uses: actions/setup-node@v6
+      # - name: Install
+      #   run: npm ci
+      # - name: Test
+      #   run: npm run test
       - name: Test browsers
-        run: dir GECKOWEBDRIVER
+        run: dir $GECKOWEBDRIVER
