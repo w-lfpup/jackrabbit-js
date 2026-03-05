@@ -18,10 +18,23 @@
 			}
 		},
 		{
-			"command": "$EDGEWEBDRIVER/msedgedriver --port=4001",
+			"command": "$GECKOWEBDRIVER/geckodriver -p 4001",
+			"title": "Firefox",
+			"timeout_ms": 20000,
+			"url": "http://127.0.0.1:4001",
+			"capabilities": {
+				"alwaysMatch": {
+					"moz:firefoxOptions": {
+						"args": ["-headless"]
+					}
+				}
+			}
+		},
+		{
+			"command": "$EDGEWEBDRIVER/msedgedriver --port=4003",
 			"title": "Edge",
 			"timeout_ms": 20000,
-			"url": "http://localhost:4001",
+			"url": "http://localhost:4003",
 			"capabilities": {
 				"alwaysMatch": {
 					"ms:edgeOptions": {
