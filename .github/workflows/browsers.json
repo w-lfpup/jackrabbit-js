@@ -28,8 +28,7 @@
 							"--no-sandbox",
 							"--disable-dev-shm-usage",
 							"--disable-gpu",
-							"--disable-extendsions",
-							"--start-maximizezd"
+							"--window-size=1920,1200"
 						]
 					}
 				}
@@ -48,8 +47,7 @@
 							"--no-sandbox",
 							"--disable-dev-shm-usage",
 							"--disable-gpu",
-							"--disable-extendsions",
-							"--start-maximizezd"
+							"--window-size=1920,1200"
 						]
 					}
 				}
