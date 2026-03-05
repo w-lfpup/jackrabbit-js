@@ -19,19 +19,7 @@
 			"title": "Edge",
 			"command": "$EDGEWEBDRIVER/msedgedriver --port=4010",
 			"timeout_ms": 20000,
-			"url": "http://localhost:4010",
-			"capabilities": {
-				"alwaysMatch": {
-					"ms:edgeOptions": {
-						"args": [
-							"--headless",
-							"--disable-gpu",
-							"--no-sandbox",
-							"--disable-dev-shm-usage"
-						]
-					}
-				}
-			}
+			"url": "http://localhost:4010"
 		}
 	]
 }
