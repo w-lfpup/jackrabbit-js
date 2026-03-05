@@ -107,17 +107,16 @@ function logRunResults(output: string[], result: RunResults): boolean {
 	output.push(`\n${result.webdriverParams.title}`);
 
 	for (let errorAction of result.errorLogs) {
-		if ("log" === errorAction.type) {
-			if ("run_error" === errorAction.loggerAction.type) {
-				output.push(
-					`${SPACE.repeat(2)}[run_error] ${errorAction.loggerAction.error}`,
-				);
-			}
-		}
+		if ("log" !== errorAction.type) continue;
+		if ("run_error" !== errorAction.loggerAction.type) continue;
+
+		output.push(
+			`${SPACE.repeat(2)}[run_error] ${errorAction.loggerAction.error}`,
+		);
 	}
 	if (result.errorLogs.length) output.push("");
 
-	if (!result.expectedTests) {
+	if (!result.collections && !result.expectedTests) {
 		output.push(`${SPACE}No tests were run.`);
 		return true;
 	}
@@ -260,11 +259,10 @@ ${SPACE.repeat(4)}[incomplete]`);
 function logSummary(output: string[], sessionResults: SessionResults) {
 	let status_with_color = blue("\u{2714} passed");
 
-	// if (!sessionResults.completed) status_with_color = gray("\u{2717} incomplete");
+	if (!isComplete(sessionResults))
+		status_with_color = gray("\u{2717} incomplete");
 	if (sessionResults.fails) status_with_color = yellow("\u{2717} failed");
 	if (sessionResults.errors) status_with_color = gray("\u{2717} errored");
-
-	// expected tests
 
 	let totalTime = 0;
 	let testTime = 0;
@@ -278,6 +276,25 @@ ${status_with_color}
 duration: ${testTime.toFixed(4)} mS
 total: ${totalTime.toFixed(4)} mS
 `);
+}
+
+export function isComplete(sessionResults: SessionResults): boolean {
+	for (const [, result] of sessionResults.runs) {
+		if (
+			!result.expectedTests ||
+			!result.expectedModules ||
+			!result.expectedCollections
+		)
+			return false;
+		if (
+			result.expectedTests !== result.completedTests ||
+			result.expectedModules !== result.completedModules ||
+			result.expectedCollections !== result.completedCollections
+		)
+			return false;
+	}
+
+	return true;
 }
 
 // 39 - default foreground color

@@ -7,7 +7,7 @@ import type {
 } from "./eventbus.js";
 import type { SessionResults, RunResults } from "./results.js";
 
-import { getResultsAsString } from "./results.js";
+import { getResultsAsString, isComplete } from "./results.js";
 
 export class Logger {
 	#eventbus: EventBus;
@@ -52,18 +52,7 @@ export class Logger {
 	}
 
 	get completed() {
-		if (!this.#sessionResults.runs.size) return false;
-
-		for (const [, result] of this.#sessionResults.runs) {
-			if (
-				result.expectedTests &&
-				result.expectedTests === result.completedTests
-			)
-				continue;
-			return false;
-		}
-
-		return true;
+		return isComplete(this.#sessionResults);
 	}
 
 	get results(): string {
