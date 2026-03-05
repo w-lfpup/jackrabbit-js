@@ -33,6 +33,19 @@
 					}
 				}
 			}
+		},
+		{
+			"command": "$EDGEWEBDRIVER/edgedriver --port=4001",
+			"title": "Edge",
+			"timeout_ms": 20000,
+			"url": "http://localhost:4001",
+			"capabilities": {
+				"alwaysMatch": {
+					"ms:edgeOptions": {
+						"args": ["--headless"]
+					}
+				}
+			}
 		}
 	]
 }
