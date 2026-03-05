@@ -7,17 +7,17 @@ on:
     branches: ["main"]
 
 jobs:
-  build_and_test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
-      - name: Install
-        run: npm ci
-      - name: Test
-        run: npm run test
-      - name: Test browsers
-        run: npx jackrabbit_webdriver .github/workflows/browsers.json ./tests/dist/mod.js
+  # build_and_test:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v6
+  #     - uses: actions/setup-node@v6
+  #     - name: Install
+  #       run: npm ci
+  #     - name: Test
+  #       run: npm run test
+  #     - name: Test browsers
+  #       run: npx jackrabbit_webdriver .github/workflows/browsers.json ./tests/dist/mod.js
   # build_and_test_macos:
   #   runs-on: macos-latest
   #   steps:
@@ -29,14 +29,14 @@ jobs:
   #       run: npm run test
   #     - name: Test browsers
   #       run: npx jackrabbit_webdriver .github/workflows/browsers.macos.json ./tests/dist/mod.js
-  # build_and_test_windows:
-  #   runs-on: windows-latest
-  #   steps:
-  #     - uses: actions/checkout@v6
-  #     - uses: actions/setup-node@v6
-  #     - name: Install
-  #       run: npm ci
-  #     - name: Test
-  #       run: npm run test
-  #     - name: Test browsers
-  #       run: npx jackrabbit_webdriver .github\workflows\browsers.json ./tests/dist/mod.js
+  build_and_test_windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+      - name: Install
+        run: npm ci
+      - name: Test
+        run: npm run test
+      - name: Test browsers
+        run: npx jackrabbit_webdriver .github\workflows\browsers.json ./tests/dist/mod.js

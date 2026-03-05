@@ -22,11 +22,11 @@ export async function createConfig(
 	args: string[],
 ): Promise<ConfigInterface | Error> {
 	let configFilepath = args[0];
-	let relPath = path.join(process.cwd(), configFilepath);
+	let relPath = path.resolve(process.cwd(), configFilepath);
 
 	try {
 		// windows might need a "file://<relPath>" situation
-		let { default: json } = await import(relPath, { with: { type: "json" } });
+		let { default: json } = await import(`file://${relPath}`, { with: { type: "json" } });
 
 		let hostAndPort: URL | null = URL.parse(json.host_and_port);
 		if (!hostAndPort)
