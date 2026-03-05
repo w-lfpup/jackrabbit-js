@@ -16,10 +16,10 @@
 			}
 		},
 		{
-			"command": "$CHROMEWEBDRIVER/chromedriver --port=4001",
+			"command": "$CHROMEWEBDRIVER/chromedriver --port=4002",
 			"title": "Chrome",
 			"timeout_ms": 20000,
-			"url": "http://localhost:4001",
+			"url": "http://localhost:4002",
 			"capabilities": {
 				"alwaysMatch": {
 					"goog:chromeOptions": {
