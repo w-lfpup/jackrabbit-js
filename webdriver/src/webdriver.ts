@@ -125,10 +125,16 @@ class WebdriverSession {
 				this.#hostAndPort,
 			);
 		} catch (e) {
+			let errOutput;
+			if (e instanceof Error) {
+				errOutput = e.name + "\n" + e.message + (e.cause ? "\n" + e.cause : "");
+			}
+			if (!errOutput) errOutput = e?.toString();
+
 			this.#eventbus.dispatchAction({
 				type: "session_error",
 				id: this.#params.jrId,
-				error: e?.toString() ?? "Unknown error creating browser session",
+				error: errOutput ?? "Unknown error creating browser session",
 			});
 			this.#abortController.abort();
 		}
