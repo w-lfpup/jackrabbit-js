@@ -117,7 +117,7 @@ ${result.webdriverParams.title}`);
 
 	if (!result.expectedTests) {
 		output.push(`  No tests were run.`);
-		// return true;
+		return true;
 	}
 
 	// When everything goes right :3
