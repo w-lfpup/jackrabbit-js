@@ -19,13 +19,41 @@
 			"command": "$CHROMEWEBDRIVER/chromedriver --port=4001",
 			"title": "Chrome",
 			"timeout_ms": 20000,
-			"url": "http://localhost:4001"
+			"url": "http://localhost:4001",
+			"capabilities": {
+				"alwaysMatch": {
+					"goog:chromeOptions": {
+						"args": [
+							"--headless",
+							"--no-sandbox",
+							"--disable-dev-shm-usage",
+							"--disable-gpu",
+							"--disable-extendsions",
+							"--start-maximizezd"
+						]
+					}
+				}
+			}
 		},
 		{
 			"command": "$EDGEWEBDRIVER/msedgedriver --port=4001",
 			"title": "Edge",
 			"timeout_ms": 20000,
-			"url": "http://localhost:4001"
+			"url": "http://localhost:4001",
+			"capabilities": {
+				"alwaysMatch": {
+					"ms:edgeOptions": {
+						"args": [
+							"--headless",
+							"--no-sandbox",
+							"--disable-dev-shm-usage",
+							"--disable-gpu",
+							"--disable-extendsions",
+							"--start-maximizezd"
+						]
+					}
+				}
+			}
 		}
 	]
 }
