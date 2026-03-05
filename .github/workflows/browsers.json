@@ -3,10 +3,10 @@
 	"runAsynchronusly": false,
 	"webdrivers": [
 		{
-			"command": "$EDGEWEBDRIVER/msedgedriver --port=4003",
+			"command": "$EDGEWEBDRIVER/msedgedriver --port=4001",
 			"title": "Edge",
 			"timeout_ms": 20000,
-			"url": "http://localhost:4003",
+			"url": "http://localhost:4001",
 			"capabilities": {
 				"alwaysMatch": {
 					"ms:edgeOptions": {
