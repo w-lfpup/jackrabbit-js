@@ -15,28 +15,28 @@
 				}
 			}
 		},
-		{
-			"command": "$EDGEWEBDRIVER/msedgedriver --port=4002",
-			"title": "Edge",
+				{
+			"command": "$CHROMEWEBDRIVER/chromedriver --port=4010",
+			"title": "Chrome",
 			"timeout_ms": 20000,
-			"url": "http://localhost:4002",
+			"url": "http://localhost:4010",
 			"capabilities": {
 				"alwaysMatch": {
-					"ms:edgeOptions": {
-						"args": ["--headless", "--disable-gpu", "--disable-dev-shm-usage"]
+					"goog:chromeOptions": {
+						"args": ["--headless"]
 					}
 				}
 			}
 		},
 		{
-			"command": "$CHROMEWEBDRIVER/chromedriver --port=4003",
-			"title": "Chrome",
+			"command": "$EDGEWEBDRIVER/msedgedriver --port=4005",
+			"title": "Edge",
 			"timeout_ms": 20000,
-			"url": "http://localhost:4003",
+			"url": "http://localhost:4005",
 			"capabilities": {
 				"alwaysMatch": {
-					"goog:chromeOptions": {
-						"args": ["--headless"]
+					"ms:edgeOptions": {
+						"args": ["--headless", "--disable-gpu", "--disable-dev-shm-usage"]
 					}
 				}
 			}
