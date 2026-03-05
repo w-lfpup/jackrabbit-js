@@ -83,7 +83,7 @@ class WebdriverSession {
 		this.#abortController = new AbortController();
 
 		this.#eventbus.addListener("run_complete", (action) => {
-			if ("run_complete" === action.type && action.id === this.#params.jrId)
+			if (action.id === this.#params.jrId)
 				this.#down();
 		});
 	}

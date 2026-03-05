@@ -62,10 +62,8 @@ export class Logger {
 	// output being a array of a string
 	#boundError = this.#onError.bind(this);
 	#onError(action: WebdriverSessionErrorAction) {
-		if ("session_error" === action.type) {
-			this.#sessionResults.errors += 1;
-			this.#sessionResults.errorLogs.push(action);
-		}
+		this.#sessionResults.errors += 1;
+		this.#sessionResults.errorLogs.push(action);
 	}
 
 	#boundLog = this.#onLog.bind(this);
