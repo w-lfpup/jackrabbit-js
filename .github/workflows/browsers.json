@@ -16,6 +16,19 @@
 			}
 		},
 		{
+			"command": "$CHROMEWEBDRIVER/chromedriver --port=4005",
+			"title": "Chrome",
+			"timeout_ms": 20000,
+			"url": "http://localhost:4005",
+			"capabilities": {
+				"alwaysMatch": {
+					"goog:chromeOptions": {
+						"args": ["--headless", "--disable-dev-shm-usage"]
+					}
+				}
+			}
+		},
+		{
 			"command": "$EDGEWEBDRIVER/msedgedriver --port=4010",
 			"title": "Edge",
 			"timeout_ms": 20000,
