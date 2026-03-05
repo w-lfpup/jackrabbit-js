@@ -90,30 +90,32 @@ export function getResultsAsString(sessionResults: SessionResults): string {
 }
 
 function logSessionErrors(output: string[], sessionResults: SessionResults) {
-	if (!sessionResults.runs.size) output.push(`\nNo webdrivers were run.`);
+	if (!sessionResults.runs.size) output.push("\nNo webdrivers were run.");
 
 	for (let [, result] of sessionResults.runs) {
+		if (result.errorLogs.length)
+			output.push(`\n${result.webdriverParams.title}`);
 		for (let errorAction of result.errorLogs) {
 			if ("session_error" === errorAction.type) {
-				output.push(
-					`\n[${result.webdriverParams.title}:session_error] ${errorAction.error}`,
-				);
+				output.push(`${SPACE}[session_error] ${errorAction.error}`);
 			}
 		}
 	}
 }
 
 function logRunResults(output: string[], result: RunResults): boolean {
-	output.push(`
-${result.webdriverParams.title}`);
+	output.push(`\n${result.webdriverParams.title}`);
 
 	for (let errorAction of result.errorLogs) {
 		if ("log" === errorAction.type) {
 			if ("run_error" === errorAction.loggerAction.type) {
-				output.push(`${SPACE}[run_error] ${errorAction.loggerAction.error}`);
+				output.push(
+					`${SPACE.repeat(2)}[run_error] ${errorAction.loggerAction.error}`,
+				);
 			}
 		}
 	}
+	if (result.errorLogs.length) output.push("");
 
 	if (!result.expectedTests) {
 		output.push(`${SPACE}No tests were run.`);
@@ -248,12 +250,17 @@ ${SPACE.repeat(4)}[error] ${loggerEndAction.error}`,
 	}
 
 	if (undefined === loggerEndAction) {
-		output.push(`${SPACE.repeat(4)}[incomplete]`);
+		let { test_name } = loggerStartAction;
+
+		output.push(`${SPACE.repeat(3)}${test_name}
+${SPACE.repeat(4)}[incomplete]`);
 	}
 }
 
 function logSummary(output: string[], sessionResults: SessionResults) {
 	let status_with_color = blue("\u{2714} passed");
+
+	// if (!sessionResults.completed) status_with_color = gray("\u{2717} incomplete");
 	if (sessionResults.fails) status_with_color = yellow("\u{2717} failed");
 	if (sessionResults.errors) status_with_color = gray("\u{2717} errored");
 
