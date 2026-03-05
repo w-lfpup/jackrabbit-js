@@ -10,9 +10,7 @@
 			"capabilities": {
 				"alwaysMatch": {
 					"ms:edgeOptions": {
-						"args": [
-							"--headless"
-						]
+						"args": ["--headless"]
 					}
 				}
 			}
@@ -25,9 +23,7 @@
 			"capabilities": {
 				"alwaysMatch": {
 					"goog:chromeOptions": {
-						"args": [
-							"--headless"
-						]
+						"args": ["--headless"]
 					}
 				}
 			}
@@ -45,6 +41,5 @@
 				}
 			}
 		}
-
 	]
 }

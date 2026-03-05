@@ -11,7 +11,6 @@ const SPACE = "  ";
 export function getResultsAsString(sessionResults: SessionResults): string {
 	const output: string[] = [];
 
-
 	// Lots of nested loops because results a nested structure.
 	// I'd rather see composition nested in one function
 	// than have for loops spread across each function.
@@ -59,12 +58,12 @@ ${SPACE}${result.completedCollections} collections`);
 	for (let errorAction of result.errorLogs) {
 		if ("session_error" === errorAction.type) {
 			output.push(`${SPACE}[session_error] ${errorAction.error}`);
-		};
+		}
 		if ("log" === errorAction.type) {
 			if ("run_error" === errorAction.loggerAction.type) {
 				output.push(`${SPACE}[run_error] ${errorAction.loggerAction.error}`);
 			}
-		};
+		}
 	}
 
 	return false;

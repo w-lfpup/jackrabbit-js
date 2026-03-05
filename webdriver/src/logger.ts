@@ -63,6 +63,7 @@ export class Logger {
 	#onError(action: WebdriverSessionErrorAction) {
 		let runResults = this.#sessionResults.runs.get(action.id);
 		if (runResults) {
+			this.#sessionResults.errors += 1;
 			runResults.errors += 1;
 			runResults.errorLogs.push(action);
 		}
