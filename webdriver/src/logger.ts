@@ -51,8 +51,19 @@ export class Logger {
 		return this.#sessionResults.errors !== 0;
 	}
 
-	get compeleted() {
-		return false;
+	get completed() {
+		if (!this.#sessionResults.runs.size) return false;
+
+		for (const [, result] of this.#sessionResults.runs) {
+			if (
+				result.expectedTests &&
+				result.expectedTests === result.completedTests
+			)
+				continue;
+			return false;
+		}
+
+		return true;
 	}
 
 	get results(): string {

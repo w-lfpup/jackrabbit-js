@@ -90,6 +90,8 @@ export function getResultsAsString(sessionResults: SessionResults): string {
 }
 
 function logSessionErrors(output: string[], sessionResults: SessionResults) {
+	if (!sessionResults.runs.size) output.push(`\nNo webdrivers were run.`);
+
 	for (let [, result] of sessionResults.runs) {
 		for (let errorAction of result.errorLogs) {
 			if ("session_error" === errorAction.type) {
@@ -114,8 +116,10 @@ ${result.webdriverParams.title}`);
 	}
 
 	if (!result.expectedTests) {
-		output.push(`  No test runs occured.`);
+		output.push(`  No tests were run.`);
+		return true;
 	}
+
 	// When everything goes right :3
 	if (
 		!result.fails &&
