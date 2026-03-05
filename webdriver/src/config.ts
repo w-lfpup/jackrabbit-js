@@ -26,7 +26,9 @@ export async function createConfig(
 
 	try {
 		// windows might need a "file://<relPath>" situation
-		let { default: json } = await import(`file://${relPath}`, { with: { type: "json" } });
+		let { default: json } = await import(`file://${relPath}`, {
+			with: { type: "json" },
+		});
 
 		let hostAndPort: URL | null = URL.parse(json.host_and_port);
 		if (!hostAndPort)
