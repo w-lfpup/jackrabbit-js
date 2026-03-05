@@ -3,9 +3,9 @@ import type {
 	LoggerInterface,
 	EndTest,
 } from "../../core/dist/mod.js";
-import type { RunResults } from "./results_str.js";
+import type { RunResults } from "./results.js";
 
-import { getResultsAsString } from "./results_str.js";
+import { getResultsAsString } from "./results.js";
 
 export class Logger implements LoggerInterface {
 	#results: RunResults = {

@@ -7,7 +7,7 @@ import type {
 } from "./eventbus.js";
 import type { SessionResults, RunResults } from "./results.js";
 
-import { getResultsAsString } from "./results_str.js";
+import { getResultsAsString } from "./results.js";
 
 export class Logger {
 	#eventbus: EventBus;
