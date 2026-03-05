@@ -23,20 +23,28 @@
 			"capabilities": {
 				"alwaysMatch": {
 					"goog:chromeOptions": {
-						"args": ["--headless", "--window-size=1920,1080", "--disable-dev-shm-usage"]
+						"args": [
+							"--headless",
+							"--window-size=1920,1080",
+							"--disable-dev-shm-usage"
+						]
 					}
 				}
 			}
 		},
 		{
 			"command": "$EDGEWEBDRIVER/msedgedriver --port=4003",
-			"title": "Chrome",
+			"title": "Edge",
 			"timeout_ms": 20000,
 			"url": "http://localhost:4003",
 			"capabilities": {
 				"alwaysMatch": {
 					"goog:chromeOptions": {
-						"args": ["--headless", "--window-size=1920,1080", "--disable-dev-shm-usage"]
+						"args": [
+							"--headless",
+							"--window-size=1920,1080",
+							"--disable-dev-shm-usage"
+						]
 					}
 				}
 			}

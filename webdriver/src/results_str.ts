@@ -44,7 +44,9 @@ function logSessionErrors(output: string[], sessionResults: SessionResults) {
 	for (let [, result] of sessionResults.runs) {
 		for (let errorAction of result.errorLogs) {
 			if ("session_error" === errorAction.type) {
-				output.push(`\n[${result.webdriverParams.title}:session_error] ${errorAction.error}`);
+				output.push(
+					`\n[${result.webdriverParams.title}:session_error] ${errorAction.error}`,
+				);
 			}
 		}
 	}
