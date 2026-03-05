@@ -16,19 +16,6 @@
 			}
 		},
 		{
-			"command": "$EDGEWEBDRIVER/msedgedriver --port=4002",
-			"title": "Edge",
-			"timeout_ms": 20000,
-			"url": "http://localhost:4002",
-			"capabilities": {
-				"alwaysMatch": {
-					"ms:edgeOptions": {
-						"args": ["--headless", "--disable-gpu", "--disable-dev-shm-usage"]
-					}
-				}
-			}
-		},
-		{
 			"command": "$CHROMEWEBDRIVER/chromedriver --port=4003",
 			"title": "Chrome",
 			"timeout_ms": 20000,
@@ -37,6 +24,19 @@
 				"alwaysMatch": {
 					"goog:chromeOptions": {
 						"args": ["--headless"]
+					}
+				}
+			}
+		},
+		{
+			"command": "$EDGEWEBDRIVER/msedgedriver --port=4002",
+			"title": "Edge",
+			"timeout_ms": 20000,
+			"url": "http://localhost:4002",
+			"capabilities": {
+				"alwaysMatch": {
+					"ms:edgeOptions": {
+						"args": ["--headless", "--disable-gpu", "--disable-dev-shm-usage"]
 					}
 				}
 			}
