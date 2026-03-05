@@ -11,7 +11,7 @@
 				"alwaysMatch": {
 					"goog:chromeOptions": {
 						"args": [
-							"--headless",
+							"--headless"
 						]
 					}
 				}
