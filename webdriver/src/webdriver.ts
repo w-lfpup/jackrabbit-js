@@ -148,9 +148,8 @@ class WebdriverSession {
 			this.#eventbus,
 			this.#sessionId,
 		);
-		this.#process.kill("SIGKILL");
+		this.#process.kill();
 		this.#process = undefined;
-		await sleep(500);
 	}
 }
 

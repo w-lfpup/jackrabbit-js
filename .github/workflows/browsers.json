@@ -10,7 +10,7 @@
 			"capabilities": {
 				"alwaysMatch": {
 					"goog:chromeOptions": {
-						"args": ["--headless", "--disbale-gpu", "--no-sandbox", "--disable-dev-shm-usage"]
+						"args": ["--headless", "--window-size=1920,1080", "--disable-dev-shm-usage"]
 					}
 				}
 			}
@@ -23,7 +23,7 @@
 			"capabilities": {
 				"alwaysMatch": {
 					"ms:edgeOptions": {
-						"args": ["--headless", "--disbale-gpu", "--no-sandbox", "--disable-dev-shm-usage"]
+						"args": ["--headless", "--window-size=1920,1080", "--disable-dev-shm-usage"]
 					}
 				}
 			}
