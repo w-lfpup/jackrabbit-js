@@ -7,7 +7,6 @@ export interface TestResults {
 	loggerEndAction: LoggerAction | undefined;
 }
 
-// remove logger actions
 export interface ModuleResults {
 	loggerAction: LoggerAction;
 	fails: number;
@@ -47,8 +46,6 @@ export interface RunResults {
 	collections: (CollectionResults | undefined)[];
 }
 
-// track if session started or not
-// if browser never launched
 export interface SessionResults {
 	fails: number;
 	errors: number;
@@ -57,12 +54,14 @@ export interface SessionResults {
 
 const SPACE = "  ";
 
+/*
+	Lots of nested loops because results a nested structure.
+	I'd rather see composition nested in one function
+	than have for loops spread across each function.
+*/
+
 export function getResultsAsString(sessionResults: SessionResults): string {
 	const output: string[] = [];
-
-	// Lots of nested loops because results a nested structure.
-	// I'd rather see composition nested in one function
-	// than have for loops spread across each function.
 
 	logSessionErrors(output, sessionResults);
 
