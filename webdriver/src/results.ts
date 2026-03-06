@@ -7,7 +7,6 @@ export interface TestResults {
 	loggerEndAction: LoggerAction | undefined;
 }
 
-// remove logger actions
 export interface ModuleResults {
 	loggerAction: LoggerAction;
 	fails: number;
@@ -47,8 +46,6 @@ export interface RunResults {
 	collections: (CollectionResults | undefined)[];
 }
 
-// track if session started or not
-// if browser never launched
 export interface SessionResults {
 	fails: number;
 	errors: number;

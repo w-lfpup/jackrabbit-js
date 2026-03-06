@@ -109,7 +109,7 @@ function logCollectionResult(
 	let { loggerAction } = collection;
 	if ("start_collection" !== loggerAction.type) return true;
 
-	output.push(`${SPACE}${loggerAction.collection_url}`);
+	output.push(`${loggerAction.collection_url}`);
 
 	// when everything in the collection goes right
 	if (
@@ -119,8 +119,8 @@ function logCollectionResult(
 		collection.expectedModules === collection.completedModules
 	) {
 		output.push(
-			`${collection.expectedTests} tests
-${loggerAction.expected_module_count} modules`,
+			`${SPACE}${collection.expectedTests} tests
+${SPACE}${loggerAction.expected_module_count} modules`,
 		);
 
 		return true;
@@ -128,7 +128,7 @@ ${loggerAction.expected_module_count} modules`,
 
 	for (let errorAction of collection.errorLogs) {
 		if ("collection_error" !== errorAction.type) continue;
-		output.push(`[collection_error] ${errorAction.error}`);
+		output.push(`${SPACE}[collection_error] ${errorAction.error}`);
 	}
 
 	return false;
@@ -157,7 +157,7 @@ function logModuleResult(
 
 	for (let errorAction of module.errorLogs) {
 		if ("collection_error" !== errorAction.type) continue;
-		output.push(`${SPACE}[module_error] ${errorAction.error}`);
+		output.push(`${SPACE.repeat(2)}[module_error] ${errorAction.error}`);
 	}
 
 	return false;

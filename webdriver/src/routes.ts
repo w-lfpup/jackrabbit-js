@@ -7,14 +7,8 @@ import * as path from "path";
 import { testHanger } from "./test_hangar.js";
 import { ConfigInterface } from "./config.js";
 
-let cwd = process.cwd();
-
-// better done with URL? feels weird
-let corePath = path.join(import.meta.url.substring(5), "../../../core/dist/");
-let browserPath = path.join(
-	import.meta.url.substring(5),
-	"../../../browser/dist/",
-);
+const cwd = process.cwd();
+const parentPath = path.join(import.meta.url.substring(5), "../../../");
 
 const MIME_TYPES: Record<string, string> = {
 	octet: "application/octet-stream",
@@ -138,35 +132,34 @@ function logAction(
 async function serveFile(req: IncomingMessage, res: ServerResponse) {
 	let { url, method } = req;
 
-	if (!url) {
+	if (!url || "GET" !== method) {
 		res.setHeader("Content-Type", MIME_TYPES["html"]);
 		res.writeHead(400);
 		res.end();
 		return;
 	}
 
-	let ext = "";
-	if (url.endsWith("/")) ext = "index.html";
+	let extStr = "";
+	if (url.endsWith("/")) extStr = "index.html";
 	let urlNoPrefix = url;
-	if (url.startsWith("/jackrabbit")) urlNoPrefix = url.substring(11);
-	let filePath = path.join(cwd, urlNoPrefix, ext);
+	
+	// assume http 1.1
+	let urlFilePath = path.join(url);
 
-	let stream: fs.ReadStream | undefined;
-	if (url.startsWith("/jackrabbit/core/") && "GET" === method) {
-		stream = await getDirectoryScopedFile(filePath, corePath);
-	}
-	if (url.startsWith("/jackrabbit/browser/") && "GET" === method) {
-		stream = await getDirectoryScopedFile(filePath, browserPath);
+	if (urlFilePath.startsWith("/jackrabbit")) {
+		let strippedUrl = urlFilePath.substring("/jackrabbit".length);
+		urlFilePath = path.join(parentPath, strippedUrl, extStr);
+	} else {
+		urlFilePath = path.join(cwd, urlNoPrefix, extStr);
 	}
 
-	if (!url.startsWith("/jackrabbit") && "GET" === method) {
-		stream = await getDirectoryScopedFile(filePath, cwd);
-	}
+	let stream: fs.ReadStream | undefined =
+		await getFile(urlFilePath);
 
 	if (stream) {
 		// throws errors if not a string
 		// filepath is always a string
-		const ext = path.extname(filePath).substring(1).toLowerCase();
+		const ext = path.extname(urlFilePath).substring(1).toLowerCase();
 		let mimeType = MIME_TYPES[ext] ?? MIME_TYPES["octet"];
 		res.setHeader("Content-Type", mimeType);
 		res.writeHead(200);
@@ -198,12 +191,9 @@ function getLoggerActionFromRequestBody(
 	});
 }
 
-async function getDirectoryScopedFile(
+async function getFile(
 	filePath: string,
-	basePath: string,
 ): Promise<fs.ReadStream | undefined> {
-	if (!filePath.startsWith(basePath)) return;
-
 	try {
 		await fs.promises.access(filePath);
 		return fs.createReadStream(filePath);

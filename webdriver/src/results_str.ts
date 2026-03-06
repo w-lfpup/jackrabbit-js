@@ -8,12 +8,16 @@ import type {
 
 const SPACE = "  ";
 
+/*
+	Lots of nested loops because results a nested structure.
+	
+	I'd rather see composition nested in one function
+	than have for loops spread across each function.
+*/
 export function getResultsAsString(sessionResults: SessionResults): string {
 	const output: string[] = [];
 
-	// Lots of nested loops because results a nested structure.
-	// I'd rather see composition nested in one function
-	// than have for loops spread across each function.
+
 
 	logSessionErrors(output, sessionResults);
 
