@@ -4,6 +4,7 @@
 		"module": "nodenext",
 		"target": "esnext",
 		"strict": true,
-		"declaration": true
+		"declaration": true,
+		"removeComments": true
 	}
 }

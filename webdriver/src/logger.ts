@@ -7,7 +7,7 @@ import type {
 } from "./eventbus.js";
 import type { SessionResults, RunResults } from "./results.js";
 
-import { getResultsAsString } from "./results_str.js";
+import { getResultsAsString, isComplete } from "./results.js";
 
 export class Logger {
 	#eventbus: EventBus;
@@ -51,8 +51,8 @@ export class Logger {
 		return this.#sessionResults.errors !== 0;
 	}
 
-	get compeleted() {
-		return false;
+	get completed() {
+		return isComplete(this.#sessionResults);
 	}
 
 	get results(): string {

@@ -3,9 +3,9 @@ import type {
 	LoggerInterface,
 	EndTest,
 } from "../../core/dist/mod.js";
-import type { RunResults } from "./results_str.js";
+import type { RunResults } from "./results.js";
 
-import { getResultsAsString } from "./results_str.js";
+import { getResultsAsString } from "./results.js";
 
 export class Logger implements LoggerInterface {
 	#results: RunResults = {
@@ -24,12 +24,19 @@ export class Logger implements LoggerInterface {
 		collections: [],
 	};
 
-	get failed() {
+	get failed(): boolean {
 		return this.#results.fails !== 0;
 	}
 
-	get errored() {
+	get errored(): boolean {
 		return this.#results.errors !== 0;
+	}
+
+	get completed(): boolean {
+		return (
+			0 < this.#results.expectedTests &&
+			this.#results.expectedTests === this.#results.completedTests
+		);
 	}
 
 	get results(): string {

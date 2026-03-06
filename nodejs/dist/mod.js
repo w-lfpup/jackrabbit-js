@@ -28,4 +28,6 @@ logger.log({
     time: performance.now(),
 });
 console.log(logger.results);
-logger.failed || logger.errored ? process.exit(1) : process.exit(0);
+logger.failed || logger.errored || !logger.completed
+    ? process.exit(1)
+    : process.exit(0);

@@ -149,6 +149,7 @@ class WebdriverSession {
 			this.#eventbus,
 			this.#sessionId,
 		);
+
 		this.#process.kill();
 		this.#process = undefined;
 	}
