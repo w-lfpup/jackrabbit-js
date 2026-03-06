@@ -153,7 +153,7 @@ class WebdriverSession {
 		// this.#process.kill();
 
 		let {pid} = this.#process;
-		if (pid) pid = -pid;
+		// if (pid) pid = -pid;
 		
 		if (pid) {
 			process.kill(pid);
