@@ -150,10 +150,7 @@ class WebdriverSession {
 			this.#sessionId,
 		);
 
-		this.#process.pid
-			? this.#process.kill(-this.#process.pid)
-			: this.#process.kill("SIGHUP");
-
+		this.#process.kill();
 		this.#process = undefined;
 	}
 }
