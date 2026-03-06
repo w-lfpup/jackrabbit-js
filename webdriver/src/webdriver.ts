@@ -150,7 +150,16 @@ class WebdriverSession {
 			this.#sessionId,
 		);
 
-		this.#process.kill();
+		// this.#process.kill();
+
+		let {pid} = this.#process;
+		if (pid) pid = -pid;
+		
+		if (pid) {
+			process.kill(pid);
+		} else {
+			this.#process.kill();
+		}
 		this.#process = undefined;
 	}
 }
