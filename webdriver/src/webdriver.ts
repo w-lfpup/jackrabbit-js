@@ -196,14 +196,14 @@ function setupProcess(
 			}
 		},
 	);
-	process.addListener("error", (error) => {
+	process.addListener("error", function (error) {
 		eventbus.dispatchAction({
 			id: jrId,
 			type: "session_error",
 			error: error.toString(),
 		});
 	});
-	process.addListener("exit", (statusCode) => {
+	process.addListener("exit", function (statusCode) {
 		if (statusCode) {
 			eventbus.dispatchAction({
 				type: "session_error",

@@ -23,7 +23,7 @@
 			"capabilities": {
 				"alwaysMatch": {
 					"goog:chromeOptions": {
-						"args": ["--headless", "--disbale-gpu", "--disable-dev-shm-usage"]
+						"args": ["--headless", "--disbale-gpu", "--disable-dev-shm-usage", "--start-maximized"]
 					}
 				}
 			}
@@ -36,7 +36,7 @@
 			"capabilities": {
 				"alwaysMatch": {
 					"ms:edgeOptions": {
-						"args": ["--headless", "--disbale-gpu", "--disable-dev-shm-usage"]
+						"args": ["--headless", "--disbale-gpu", "--disable-dev-shm-usage", "--start-maximized"]
 					}
 				}
 			}
