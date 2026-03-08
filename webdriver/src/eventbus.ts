@@ -95,6 +95,7 @@ export class EventBus implements EventBusInterface {
 	}
 
 	dispatchAction(action: WebdriverActions) {
+		console.log(action);
 		let listeners = this.#eventMap.get(action.type);
 		if (listeners)
 			for (const listener of listeners) {

@@ -1,5 +1,5 @@
 import type { IncomingMessage, ServerResponse } from "http";
-import type { EventBus } from "./eventbus.js";
+import type { EventBusInterface } from "./eventbus.js";
 import type { LoggerAction } from "../../core/dist/jackrabbit_types.js";
 
 import * as fs from "fs";
@@ -24,9 +24,9 @@ const MIME_TYPES: Record<string, string> = {
 
 export class Router {
 	#config: ConfigInterface;
-	#eventbus: EventBus;
+	#eventbus: EventBusInterface;
 
-	constructor(config: ConfigInterface, eventbus: EventBus) {
+	constructor(config: ConfigInterface, eventbus: EventBusInterface) {
 		this.#config = config;
 		this.#eventbus = eventbus;
 	}
@@ -91,7 +91,7 @@ function serveTestPage(
 function logAction(
 	req: IncomingMessage,
 	res: ServerResponse,
-	eventbus: EventBus,
+	eventbus: EventBusInterface,
 ): boolean {
 	let { url, method } = req;
 	if (!url?.startsWith("/log/") || "POST" !== method) return false;
@@ -143,31 +143,30 @@ async function serveFile(req: IncomingMessage, res: ServerResponse) {
 	let urlFilePath = path.join(url);
 
 	let extStr = "";
-	if (url.endsWith("/")) extStr = "index.html";
-	let urlNoPrefix = url;
+	if (urlFilePath.endsWith("/")) extStr = "index.html";
 
 	if (urlFilePath.startsWith("/jackrabbit")) {
 		let strippedUrl = urlFilePath.substring("/jackrabbit".length);
 		urlFilePath = path.join(parentPath, strippedUrl, extStr);
 	} else {
-		urlFilePath = path.join(cwd, urlNoPrefix, extStr);
+		urlFilePath = path.join(cwd, urlFilePath, extStr);
 	}
 
 	let stream = await getFile(urlFilePath);
-
-	if (stream) {
-		// throws errors if not a string
-		// filepath is always a string
-		const ext = path.extname(urlFilePath).substring(1).toLowerCase();
-		let mimeType = MIME_TYPES[ext] ?? MIME_TYPES["octet"];
-		res.setHeader("Content-Type", mimeType);
-		res.writeHead(200);
-		stream.pipe(res);
-	} else {
+	if (!stream) {
 		res.setHeader("Content-Type", MIME_TYPES["html"]);
 		res.writeHead(404);
 		res.end();
+		return;
 	}
+
+	// throws errors if not a string
+	// filepath is always a string
+	const ext = path.extname(urlFilePath).substring(1).toLowerCase();
+	let mimeType = MIME_TYPES[ext] ?? MIME_TYPES["octet"];
+	res.setHeader("Content-Type", mimeType);
+	res.writeHead(200);
+	stream.pipe(res);
 }
 
 function getLoggerActionFromRequestBody(

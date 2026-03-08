@@ -1,7 +1,7 @@
 import type { EndTest } from "../../core/dist/jackrabbit_types.js";
 import type { ConfigInterface } from "./config.js";
 import type {
-	EventBus,
+	EventBusInterface,
 	WebdriverLogAction,
 	WebdriverSessionErrorAction,
 } from "./eventbus.js";
@@ -10,7 +10,7 @@ import type { SessionResults, RunResults } from "./results.js";
 import { getResultsAsString, isComplete } from "./results.js";
 
 export class Logger {
-	#eventbus: EventBus;
+	#eventbus: EventBusInterface;
 
 	#sessionResults: SessionResults = {
 		fails: 0,
@@ -18,7 +18,7 @@ export class Logger {
 		runs: new Map(),
 	};
 
-	constructor(config: ConfigInterface, eventbus: EventBus) {
+	constructor(config: ConfigInterface, eventbus: EventBusInterface) {
 		this.#eventbus = eventbus;
 		this.#eventbus.addListener("log", this.#boundLog);
 		this.#eventbus.addListener("session_error", this.#boundError);

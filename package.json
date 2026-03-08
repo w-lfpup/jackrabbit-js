@@ -8,7 +8,8 @@
 		"tests",
 		"nodejs",
 		"browser",
-		"webdriver"
+		"webdriver",
+		"dom_test_utils"
 	],
 	"bin": {
 		"jackrabbit": "nodejs/dist/mod.js",
