@@ -42,6 +42,9 @@ export class Router {
 		if (serveTestPage(req, res, this.#config)) return;
 		if (logAction(req, res, this.#eventbus)) return;
 
+		// async woes don't await if not correct
+		// if (webdriverAction(req, res, this.#config, this.#eventbus))
+
 		await serveFile(req, res);
 	}
 }

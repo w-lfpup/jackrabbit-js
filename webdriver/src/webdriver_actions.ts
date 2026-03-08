@@ -155,6 +155,8 @@ function sleep(timeMs: number): Promise<void> {
 	});
 }
 
+// BELOW ARE ACTIONS FROM TESTS THEMSELVES
+
 // need event bus to send errors to error log
 export async function getElement(
 	params: WebdriverParams,
@@ -232,3 +234,114 @@ export async function getElements(
 
 	return queryResults;
 }
+
+export async function getScreenshot(
+	params: WebdriverParams,
+	signal: AbortSignal | undefined,
+	sessionId: string,
+	elementId: string,
+): Promise<string | undefined> {
+	let { url } = params;
+
+	let res = await fetch(
+		new URL(new URL(`/session/${sessionId}/screenshot`, url)),
+		{
+			method: "GET",
+			headers,
+			body: undefined,
+			signal,
+		},
+	);
+
+
+	if (200 === res.status) {
+		let json = await res.json();
+		if ("string" !== typeof json.value)
+			throw new Error("getScreenshot return value is not a string");
+
+		return json.value;
+	}
+}
+
+export async function getScreenshotOfElementAsBase64EncodedPng(
+	params: WebdriverParams,
+	signal: AbortSignal | undefined,
+	sessionId: string,
+	elementId: string,
+): Promise<string | undefined> {
+	let { url } = params;
+
+	let res = await fetch(
+		new URL(new URL(`/session/${sessionId}/element/${elementId}/screenshot
+`, url)),
+		{
+			method: "GET",
+			headers,
+			body: undefined,
+			signal,
+		},
+	);
+
+
+	if (200 === res.status) {
+		let json = await res.json();
+		if ("string" !== typeof json.value)
+			throw new Error("getElementScreenshot return value is not a string");
+
+		return json.value;
+	}
+}
+
+// [200, string]
+// [400, Error]
+
+// /session/{session id}/actions POST
+// keyboard
+//  {
+//    "actions": [
+//      {
+//        "type": "key",
+//        "id": "keyboard",
+//        "actions": [
+//          {"type": "keyDown", "value": "\uE009"},
+//          {"type": "keyDown", "value": "s"},
+//          {"type": "keyUp", "value": "\uE009"},
+//          {"type": "keyUp", "value": "s"}
+//        ]
+//      }
+//    ]
+//  }
+
+// /session/{session id}/actions POST
+// pointers
+//  {
+//    "actions": [
+//      {
+//        "type": "pointer",
+//        "id": "finger1",
+//        "parameters": {"pointerType": "touch"},
+//        "actions": [
+//          {"type": "pointerMove", "duration": 0, "x": 100, "y": 100},
+//          {"type": "pointerDown", "button": 0},
+//          {"type": "pause", "duration": 500},
+//          {"type": "pointerMove", "duration": 1000, "origin": "pointer", "x": -50, "y": 0},
+//          {"type": "pointerUp", "button": 0}
+//        ]
+//      }, {
+//        "type": "pointer",
+//        "id": "finger2",
+//        "parameters": {"pointerType": "touch"},
+//        "actions": [
+//          {"type": "pointerMove", "duration": 0, "x": 100, "y": 100},
+//          {"type": "pointerDown", "button": 0},
+//          {"type": "pause", "duration": 500},
+//          {"type": "pointerMove", "duration": 1000, "origin": "pointer", "x": 50, "y": 0},
+//          {"type": "pointerUp", "button": 0}
+//        ]
+//      }
+//    ]
+//  }
+
+
+// Release all actions
+// /session/{session id}/actions DELETE
