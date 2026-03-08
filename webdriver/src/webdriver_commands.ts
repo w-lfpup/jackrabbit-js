@@ -178,8 +178,8 @@ export async function getElement(
 
 	if (200 === res.status) {
 		let json = await res.json();
-		if ("object" === typeof json?.value)
-			throw new Error("getElements return value is not an object");
+		if ("object" !== typeof json?.value) return;
+		// throw new Error("getElements return value is not an object");
 
 		for (let [key, value] of json?.value.entries()) {
 			if (
@@ -192,105 +192,103 @@ export async function getElement(
 	}
 }
 
-export async function getElements(
-	params: WebdriverParams,
-	signal: AbortSignal | undefined,
-	sessionId: string,
-	cssSelector: string,
-): Promise<string[]> {
-	let { url } = params;
+// export async function getElements(
+// 	params: WebdriverParams,
+// 	signal: AbortSignal | undefined,
+// 	sessionId: string,
+// 	cssSelector: string,
+// ): Promise<string[]> {
+// 	let { url } = params;
 
-	let res = await fetch(
-		new URL(new URL(`/session/${sessionId}/elements`, url)),
-		{
-			method: "GET",
-			headers,
-			body: JSON.stringify({ using: "css selector", value: cssSelector }),
-			signal,
-		},
-	);
+// 	let res = await fetch(
+// 		new URL(new URL(`/session/${sessionId}/elements`, url)),
+// 		{
+// 			method: "GET",
+// 			headers,
+// 			body: JSON.stringify({ using: "css selector", value: cssSelector }),
+// 			signal,
+// 		},
+// 	);
 
-	let queryResults: string[] = [];
+// 	let queryResults: string[] = [];
 
-	if (200 === res.status) {
-		let json = await res.json();
-		if (!Array.isArray(json.value))
-			throw new Error("getElements return value is not an array");
+// 	if (200 === res.status) {
+// 		let json = await res.json();
+// 		if (!Array.isArray(json.value))
+// 			throw new Error("getElements return value is not an array");
 
-		let queryResults: string[] = [];
-		for (let val of json.value) {
-			if (typeof val === "object") {
-				for (let [key, value] of val.entries()) {
-					if (
-						"string" === typeof key &&
-						"string" === typeof value &&
-						key.startsWith("element-")
-					)
-						queryResults.push(value);
-				}
-			}
-		}
-	}
+// 		let queryResults: string[] = [];
+// 		for (let val of json.value) {
+// 			if (typeof val === "object") {
+// 				for (let [key, value] of val.entries()) {
+// 					if (
+// 						"string" === typeof key &&
+// 						"string" === typeof value &&
+// 						key.startsWith("element-")
+// 					)
+// 						queryResults.push(value);
+// 				}
+// 			}
+// 		}
+// 	}
 
-	return queryResults;
-}
+// 	return queryResults;
+// }
 
-export async function getScreenshot(
-	params: WebdriverParams,
-	signal: AbortSignal | undefined,
-	sessionId: string,
-	elementId: string,
-): Promise<string | undefined> {
-	let { url } = params;
+// export async function getScreenshot(
+// 	params: WebdriverParams,
+// 	signal: AbortSignal | undefined,
+// 	sessionId: string,
+// 	elementId: string,
+// ): Promise<string | undefined> {
+// 	let { url } = params;
 
-	let res = await fetch(
-		new URL(new URL(`/session/${sessionId}/screenshot`, url)),
-		{
-			method: "GET",
-			headers,
-			body: undefined,
-			signal,
-		},
-	);
+// 	let res = await fetch(
+// 		new URL(new URL(`/session/${sessionId}/screenshot`, url)),
+// 		{
+// 			method: "GET",
+// 			headers,
+// 			body: undefined,
+// 			signal,
+// 		},
+// 	);
 
+// 	if (200 === res.status) {
+// 		let json = await res.json();
+// 		if ("string" !== typeof json.value)
+// 			throw new Error("getScreenshot return value is not a string");
 
-	if (200 === res.status) {
-		let json = await res.json();
-		if ("string" !== typeof json.value)
-			throw new Error("getScreenshot return value is not a string");
+// 		return json.value;
+// 	}
+// }
 
-		return json.value;
-	}
-}
+// export async function getScreenshotOfElementAsBase64EncodedPng(
+// 	params: WebdriverParams,
+// 	signal: AbortSignal | undefined,
+// 	sessionId: string,
+// 	elementId: string,
+// ): Promise<string | undefined> {
+// 	let { url } = params;
 
-export async function getScreenshotOfElementAsBase64EncodedPng(
-	params: WebdriverParams,
-	signal: AbortSignal | undefined,
-	sessionId: string,
-	elementId: string,
-): Promise<string | undefined> {
-	let { url } = params;
+// 	let res = await fetch(
+// 		new URL(new URL(`/session/${sessionId}/element/${elementId}/screenshot
+// `, url)),
+// 		{
+// 			method: "GET",
+// 			headers,
+// 			body: undefined,
+// 			signal,
+// 		},
+// 	);
 
-	let res = await fetch(
-		new URL(new URL(`/session/${sessionId}/element/${elementId}/screenshot
-`, url)),
-		{
-			method: "GET",
-			headers,
-			body: undefined,
-			signal,
-		},
-	);
+// 	if (200 === res.status) {
+// 		let json = await res.json();
+// 		if ("string" !== typeof json.value)
+// 			throw new Error("getElementScreenshot return value is not a string");
 
-
-	if (200 === res.status) {
-		let json = await res.json();
-		if ("string" !== typeof json.value)
-			throw new Error("getElementScreenshot return value is not a string");
-
-		return json.value;
-	}
-}
+// 		return json.value;
+// 	}
+// }
 
 // [200, string]
 // [400, Error]
@@ -341,7 +339,6 @@ export async function getScreenshotOfElementAsBase64EncodedPng(
 //      }
 //    ]
 //  }
-
 
 // Release all actions
 // /session/{session id}/actions DELETE

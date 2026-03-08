@@ -6,6 +6,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { testHanger } from "./test_hangar.js";
 import { ConfigInterface } from "./config.js";
+import { getElement } from "./webdriver_commands.js";
 
 let cwd = process.cwd();
 const parentPath = path.join(import.meta.url.substring(5), "../../../");
@@ -41,6 +42,7 @@ export class Router {
 		if (servePing(req, res)) return;
 		if (serveTestPage(req, res, this.#config)) return;
 		if (logAction(req, res, this.#eventbus)) return;
+		// if (webdriverCommand(req, res, this.#eventbus)) return;
 
 		// async woes don't await if not correct
 		// if (webdriverAction(req, res, this.#config, this.#eventbus))
@@ -109,7 +111,7 @@ function logAction(
 	}
 
 	if (id) {
-		getLoggerActionFromRequestBody(req)
+		getJsonFromRequestBody(req)
 			.then(function (loggerAction: LoggerAction) {
 				eventbus.dispatchAction({
 					type: "log",
@@ -131,6 +133,43 @@ function logAction(
 
 	return true;
 }
+
+// function webdriverCommand(
+// 	req: IncomingMessage,
+// 	res: ServerResponse,
+// 	eventbus: EventBusInterface,
+// ): boolean {
+// 	let { url, method } = req;
+// 	if (!url?.startsWith("/cmd/")) return false;
+
+// 	let id: string | undefined;
+// 	let cookies = req.headers.cookie?.split(";") ?? [];
+// 	for (const cookieLine of cookies) {
+// 		if (cookieLine.startsWith("jackrabbit=")) {
+// 			let [_name, value] = cookieLine.split("=");
+// 			id = value;
+// 		}
+// 	}
+
+// 	if (id) {
+// 		getStringFromRequestBody(req)
+// 			.then(function (cssSelector: string) {
+// 				return getElement(cssSelector);
+// 				res.writeHead(201);
+// 			})
+// 			.catch(function () {
+// 				res.writeHead(401);
+// 			})
+// 			.finally(function () {
+// 				res.end();
+// 			});
+// 	} else {
+// 		res.writeHead(401);
+// 		res.end();
+// 	}
+
+// 	return true;
+// }
 
 async function serveFile(req: IncomingMessage, res: ServerResponse) {
 	let { url, method } = req;
@@ -172,9 +211,7 @@ async function serveFile(req: IncomingMessage, res: ServerResponse) {
 	stream.pipe(res);
 }
 
-function getLoggerActionFromRequestBody(
-	req: IncomingMessage,
-): Promise<LoggerAction> {
+function getJsonFromRequestBody(req: IncomingMessage): Promise<any> {
 	return new Promise(function (resolve, reject) {
 		let data: Uint8Array[] = [];
 		req.addListener("data", function (chunk) {
@@ -182,9 +219,26 @@ function getLoggerActionFromRequestBody(
 		});
 		req.addListener("end", function () {
 			let actionStr = Buffer.concat(data).toString();
-			let action = JSON.parse(actionStr) as LoggerAction;
+			let action = JSON.parse(actionStr);
 
 			resolve(action);
+		});
+		req.addListener("error", function (err: Error) {
+			reject(err);
+		});
+	});
+}
+
+function getStringFromRequestBody(req: IncomingMessage): Promise<string> {
+	return new Promise(function (resolve, reject) {
+		let data: Uint8Array[] = [];
+		req.addListener("data", function (chunk) {
+			data.push(chunk);
+		});
+		req.addListener("end", function () {
+			let actionStr = Buffer.concat(data).toString();
+
+			resolve(actionStr);
 		});
 		req.addListener("error", function (err: Error) {
 			reject(err);

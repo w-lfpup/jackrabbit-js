@@ -2,7 +2,7 @@ import type {
 	LoggerAction,
 	LoggerInterface,
 	TestModule,
-} from "../../core/dist/mod.ts";
+} from "../../core/dist/mod.js";
 
 class TestLogger implements LoggerInterface {
 	cancelled: boolean = false;

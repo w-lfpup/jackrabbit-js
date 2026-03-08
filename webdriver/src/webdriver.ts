@@ -10,7 +10,7 @@ import {
 	goToTestPage,
 	setCookie,
 	deleteSession,
-} from "./webdriver_actions.js";
+} from "./webdriver_commands.js";
 
 export class WebDrivers {
 	#config: ConfigInterface;
