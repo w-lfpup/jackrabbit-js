@@ -1,0 +1,19 @@
+{
+	"host_and_port": "http://127.0.0.1:4000",
+	"runAsynchronusly": false,
+	"webdrivers": [
+		{
+			"title": "Firefox",
+			"command": "$GECKOWEBDRIVER/geckodriver -p 4001",
+			"timeout_ms": 30000,
+			"url": "http://localhost:4001",
+			"capabilities": {
+				"alwaysMatch": {
+					"moz:firefoxOptions": {
+						"args": ["-headless"]
+					}
+				}
+			}
+		}
+	]
+}

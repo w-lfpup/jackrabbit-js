@@ -13,7 +13,7 @@ export function testHanger(params: TestHangerParams) {
 		<script type="importmap">
 			{
 				"imports": {
-					"jackrabbit/core/": "/jackrabbit/core/"
+					"jackrabbit/": "/jackrabbit/"
 				}
 			}
 		</script>

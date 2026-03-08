@@ -154,3 +154,81 @@ function sleep(timeMs: number): Promise<void> {
 		}, timeMs);
 	});
 }
+
+// need event bus to send errors to error log
+export async function getElement(
+	params: WebdriverParams,
+	signal: AbortSignal | undefined,
+	sessionId: string,
+	cssSelector: string,
+): Promise<string | undefined> {
+	let { url } = params;
+
+	let res = await fetch(
+		new URL(new URL(`/session/${sessionId}/element`, url)),
+		{
+			method: "GET",
+			headers,
+			body: JSON.stringify({ using: "css selector", value: cssSelector }),
+			signal,
+		},
+	);
+
+	if (200 === res.status) {
+		let json = await res.json();
+		if ("object" === typeof json?.value)
+			throw new Error("getElements return value is not an object");
+
+		for (let [key, value] of json?.value.entries()) {
+			if (
+				"string" === typeof key &&
+				"string" === typeof value &&
+				key.startsWith("element-")
+			)
+				return value;
+		}
+	}
+}
+
+export async function getElements(
+	params: WebdriverParams,
+	signal: AbortSignal | undefined,
+	sessionId: string,
+	cssSelector: string,
+): Promise<string[]> {
+	let { url } = params;
+
+	let res = await fetch(
+		new URL(new URL(`/session/${sessionId}/elements`, url)),
+		{
+			method: "GET",
+			headers,
+			body: JSON.stringify({ using: "css selector", value: cssSelector }),
+			signal,
+		},
+	);
+
+	let queryResults: string[] = [];
+
+	if (200 === res.status) {
+		let json = await res.json();
+		if (!Array.isArray(json.value))
+			throw new Error("getElements return value is not an array");
+
+		let queryResults: string[] = [];
+		for (let val of json.value) {
+			if (typeof val === "object") {
+				for (let [key, value] of val.entries()) {
+					if (
+						"string" === typeof key &&
+						"string" === typeof value &&
+						key.startsWith("element-")
+					)
+						queryResults.push(value);
+				}
+			}
+		}
+	}
+
+	return queryResults;
+}
