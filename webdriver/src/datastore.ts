@@ -1,4 +1,3 @@
-import type { EndTest } from "../../core/dist/jackrabbit_types.js";
 import type { ConfigInterface, WebdriverParams } from "./config.js";
 import type {
 	EventBusInterface,
@@ -71,7 +70,7 @@ export class Datastore {
 		this.#eventbus.addListener("log", this.#boundDispatch);
 
 		for (let webdriverParams of config.webdrivers) {
-			this.#sessionResults.runs.set(webdriverParams.jrId, {
+			this.#sessionResults.runs.set(webdriverParams.jackrabbitId, {
 				sessionId: undefined,
 				startTime: 0,
 				fails: 0,
@@ -97,9 +96,9 @@ export class Datastore {
 
 	#boundDispatch = this.#dispatch.bind(this);
 	#dispatch(action: WebdriverLogAction) {
-		let { loggerAction, id } = action;
+		let { loggerAction, jackrabbitId } = action;
 
-		let runResults = this.#sessionResults.runs.get(id);
+		let runResults = this.#sessionResults.runs.get(jackrabbitId);
 		if (!runResults) return;
 
 		if ("session_synced" === loggerAction.type) {
@@ -119,7 +118,7 @@ export class Datastore {
 			runResults.endTime = loggerAction.time;
 			this.#eventbus.dispatchAction({
 				type: "run_complete",
-				id,
+				jackrabbitId,
 			});
 		}
 

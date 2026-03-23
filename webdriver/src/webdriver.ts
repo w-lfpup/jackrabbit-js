@@ -10,7 +10,7 @@ import {
 	goToTestPage,
 	setCookie,
 	deleteSession,
-} from "./commands.js";
+} from "./operations.js";
 
 export class WebDrivers {
 	#config: ConfigInterface;
@@ -31,7 +31,10 @@ export class WebDrivers {
 
 	run() {
 		this.#eventbus.addListener("session_closed", (action) => {
-			if (action.id !== this.#config.webdrivers[this.#currentIndex]?.jrId)
+			if (
+				action.jackrabbitId !==
+				this.#config.webdrivers[this.#currentIndex]?.jackrabbitId
+			)
 				return;
 
 			this.#currentIndex += 1;
@@ -53,11 +56,11 @@ export class WebDrivers {
 
 	runAll() {
 		this.#eventbus.addListener("session_closed", (action) => {
-			let { id } = action;
-			let [indexStr] = id.split(":");
+			let { jackrabbitId } = action;
+			let [indexStr] = jackrabbitId.split(":");
 			let index = parseInt(indexStr);
 			if (this.#webdrivers[index]) {
-				if (id === this.#config.webdrivers[index]?.jrId)
+				if (jackrabbitId === this.#config.webdrivers[index]?.jackrabbitId)
 					this.#currentIndex += 1;
 			}
 
@@ -94,17 +97,17 @@ class WebdriverSession {
 		this.#abortController = new AbortController();
 
 		this.#eventbus.addListener("run_complete", (action) => {
-			if (action.id === this.#params.jrId) this.#down();
+			if (action.jackrabbitId === this.#params.jackrabbitId) this.#down();
 		});
 	}
 
 	async run() {
 		if (this.#process) return;
 
-		let { jrId } = this.#params;
+		let { jackrabbitId } = this.#params;
 
 		this.#eventbus.dispatchAction({
-			id: jrId,
+			jackrabbitId,
 			type: "session_start",
 		});
 
@@ -123,7 +126,7 @@ class WebdriverSession {
 			await untilWebdriverReady(this.#params, this.#signal);
 			this.#sessionId = await getSession(this.#params, this.#signal);
 			this.#eventbus.dispatchAction({
-				id: jrId,
+				jackrabbitId,
 				type: "log",
 				loggerAction: {
 					type: "session_synced",
@@ -153,7 +156,7 @@ class WebdriverSession {
 
 			this.#eventbus.dispatchAction({
 				type: "log",
-				id: this.#params.jrId,
+				jackrabbitId: this.#params.jackrabbitId,
 				loggerAction: {
 					type: "session_error",
 					error: errOutput ?? "Unknown error creating browser session",
@@ -182,7 +185,7 @@ function setupSignal(
 	eventbus: EventBusInterface,
 	externalSignal: AbortSignal,
 ): AbortSignal {
-	let { jrId, timeoutMs } = params;
+	let { jackrabbitId, timeoutMs } = params;
 
 	let signal = AbortSignal.any([
 		externalSignal,
@@ -191,7 +194,7 @@ function setupSignal(
 	signal.addEventListener("abort", function () {
 		eventbus.dispatchAction({
 			type: "session_closed",
-			id: jrId,
+			jackrabbitId,
 		});
 	});
 
@@ -203,15 +206,15 @@ function setupProcess(
 	eventbus: EventBusInterface,
 	externalSignal: AbortSignal,
 ): ChildProcess {
-	let { command, jrId } = params;
+	let { command, jackrabbitId } = params;
 
 	let process = exec(
 		command,
 		{ signal: externalSignal },
-		(error, _stdout, stderr) => {
+		(_error, _stdout, stderr) => {
 			if (stderr) {
 				eventbus.dispatchAction({
-					id: jrId,
+					jackrabbitId,
 					type: "stderr",
 					output: stderr,
 				});
@@ -221,7 +224,7 @@ function setupProcess(
 	process.addListener("error", function (error) {
 		eventbus.dispatchAction({
 			type: "log",
-			id: jrId,
+			jackrabbitId,
 			loggerAction: {
 				type: "session_error",
 				error: error.toString(),
@@ -232,7 +235,7 @@ function setupProcess(
 		if (statusCode) {
 			eventbus.dispatchAction({
 				type: "log",
-				id: jrId,
+				jackrabbitId,
 				loggerAction: {
 					type: "session_error",
 					error: `Process returned status code: ${statusCode}`,
@@ -241,7 +244,7 @@ function setupProcess(
 		}
 		eventbus.dispatchAction({
 			type: "session_closed",
-			id: jrId,
+			jackrabbitId,
 		});
 	});
 

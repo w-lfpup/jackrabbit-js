@@ -16,7 +16,7 @@ export type LogActions =
 	| SessionErrorAction;
 
 export interface WebdriverSessionAction {
-	id: string;
+	jackrabbitId: string;
 }
 
 export interface WebdriverSessionStartAction extends WebdriverSessionAction {

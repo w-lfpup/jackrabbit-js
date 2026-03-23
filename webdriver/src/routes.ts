@@ -47,26 +47,26 @@ export class Router {
 
 	#boundRoute = this.#route.bind(this);
 	async #route(req: IncomingMessage, res: ServerResponse) {
-		if (serveBadRequest(req, res)) return;
+		// if (serveBadRequest(req, res)) return;
 		if (servePing(req, res)) return;
 		if (serveTestPage(req, res, this.#config)) return;
 		if (logAction(req, res, this.#eventbus)) return;
-		if (webdriverCommand(req, res, this.#datastore)) return;
+		if (webdriverCommand(req, res, this.#config, this.#datastore)) return;
 
 		await serveFile(req, res);
 	}
 }
 
-function serveBadRequest(req: IncomingMessage, res: ServerResponse): boolean {
-	let { url } = req;
-	if (url) return false;
+// function serveBadRequest(req: IncomingMessage, res: ServerResponse): boolean {
+// 	let { url } = req;
+// 	if (url) return false;
 
-	res.setHeader("Content-Type", "text/html");
-	res.writeHead(400);
-	res.end();
+// 	res.setHeader("Content-Type", "text/html");
+// 	res.writeHead(400);
+// 	res.end();
 
-	return true;
-}
+// 	return true;
+// }
 
 function servePing(req: IncomingMessage, res: ServerResponse): boolean {
 	let { url, method } = req;
@@ -107,15 +107,15 @@ function logAction(
 	let { url, method } = req;
 	if (!url?.startsWith("/log/") || "POST" !== method) return false;
 
-	let id: string | undefined;
+	let jackrabbitId: string | undefined;
 	let cookies = req.headers.cookie?.split(";") ?? [];
 	for (const cookieLine of cookies) {
 		if (cookieLine.startsWith("jackrabbit=")) {
 			let [_name, value] = cookieLine.split("=");
-			id = value;
+			jackrabbitId = value;
 		}
 	}
-	if (!id) {
+	if (!jackrabbitId) {
 		res.writeHead(401);
 		res.end();
 		return true;
@@ -126,7 +126,7 @@ function logAction(
 			eventbus.dispatchAction({
 				type: "log",
 				loggerAction,
-				id,
+				jackrabbitId,
 			});
 			res.writeHead(201);
 		})
@@ -145,6 +145,7 @@ function getCookie() {}
 function webdriverCommand(
 	req: IncomingMessage,
 	res: ServerResponse,
+	config: ConfigInterface,
 	datastore: Datastore,
 ): boolean {
 	let { url, method } = req;
@@ -167,15 +168,16 @@ function webdriverCommand(
 	}
 
 	let session = datastore.getState().runs.get(id);
-	let sessionId = { session };
-	if (!sessionId) {
+	if (!session) {
 		res.writeHead(401);
 		res.end();
 		return true;
 	}
 
+	let { sessionId, webdriverParams } = session;
+
 	// send commands here
-	webdriverCommands()
+	webdriverCommands(webdriverParams)
 		.catch(function () {
 			res.writeHead(401);
 		})
