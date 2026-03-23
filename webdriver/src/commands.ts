@@ -140,9 +140,12 @@ export async function deleteSession(
 		}
 	} catch (e) {
 		eventbus.dispatchAction({
-			type: "session_error",
+			type: "log",
 			id: params.jrId,
-			error: e?.toString() ?? "failed to delete browser session error",
+			loggerAction: {
+				type: "session_error",
+				error: e?.toString() ?? "failed to delete browser session error",
+			},
 		});
 	}
 }
@@ -159,9 +162,9 @@ function sleep(timeMs: number): Promise<void> {
 
 // need event bus to send errors to error log
 export async function getElement(
-	params: WebdriverParams,
-	signal: AbortSignal | undefined,
-	sessionId: string,
+	params: WebdriverParams, // driver defined state
+	signal: AbortSignal | undefined, // driver defined state
+	sessionId: string, // derived state associated with driver
 	cssSelector: string,
 ): Promise<string | undefined> {
 	let { url } = params;

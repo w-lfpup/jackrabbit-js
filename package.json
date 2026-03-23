@@ -1,7 +1,7 @@
 {
 	"name": "@w-lfpup/jackrabbit",
 	"description": "A test runner without dependencies",
-	"version": "0.3.1",
+	"version": "0.3.2",
 	"license": "BSD-3-Clause",
 	"workspaces": [
 		"core",
@@ -10,7 +10,7 @@
 		"webdriver",
 		"dom_test_utils",
 		"tests",
-		"command_tests"
+		"commands"
 	],
 	"bin": {
 		"jackrabbit": "nodejs/dist/mod.js",

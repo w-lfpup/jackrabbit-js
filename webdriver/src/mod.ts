@@ -2,10 +2,11 @@
 
 import * as http from "http";
 import { createConfig } from "./config.js";
-import { Logger } from "./logger.js";
 import { Router } from "./routes.js";
 import { WebDrivers } from "./webdriver.js";
 import { EventBus } from "./eventbus.js";
+import { Datastore } from "./datastore.js";
+import { getResultsAsString, isComplete } from "./results.js";
 
 let args = process.argv.slice(2);
 
@@ -16,21 +17,23 @@ if (config instanceof Error) {
 }
 
 let eventbus = new EventBus();
-let logger = new Logger(config, eventbus);
-let router = new Router(config, eventbus);
+let datastore = new Datastore(config, eventbus);
+let router = new Router(config, eventbus, datastore);
 let webdrivers = new WebDrivers(config, eventbus);
 
 // setup server
 let server = http.createServer();
 server.addListener("request", router.route);
 server.addListener("close", function () {
-	console.log(logger.results);
-	logger.errored || logger.failed || !logger.completed
+	let state = datastore.getState();
+
+	console.log(getResultsAsString(state));
+	state.errors || state.fails || !isComplete(state)
 		? process.exit(1)
 		: process.exit(0);
 });
 eventbus.addListener("end", function () {
-	server.closeAllConnections();
+	// server.closeAllConnections();
 	server.close();
 });
 

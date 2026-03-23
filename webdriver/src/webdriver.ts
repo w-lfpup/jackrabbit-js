@@ -10,7 +10,7 @@ import {
 	goToTestPage,
 	setCookie,
 	deleteSession,
-} from "./webdriver_commands.js";
+} from "./commands.js";
 
 export class WebDrivers {
 	#config: ConfigInterface;
@@ -122,6 +122,15 @@ class WebdriverSession {
 		try {
 			await untilWebdriverReady(this.#params, this.#signal);
 			this.#sessionId = await getSession(this.#params, this.#signal);
+			this.#eventbus.dispatchAction({
+				id: jrId,
+				type: "log",
+				loggerAction: {
+					type: "session_synced",
+					sessionId: this.#sessionId,
+				},
+			});
+			// session needs to be stored in state
 			await goToPing(
 				this.#params,
 				this.#signal,
@@ -143,9 +152,12 @@ class WebdriverSession {
 			if (!errOutput) errOutput = e?.toString();
 
 			this.#eventbus.dispatchAction({
-				type: "session_error",
+				type: "log",
 				id: this.#params.jrId,
-				error: errOutput ?? "Unknown error creating browser session",
+				loggerAction: {
+					type: "session_error",
+					error: errOutput ?? "Unknown error creating browser session",
+				},
 			});
 			this.#abortController.abort();
 		}
@@ -208,17 +220,23 @@ function setupProcess(
 	);
 	process.addListener("error", function (error) {
 		eventbus.dispatchAction({
+			type: "log",
 			id: jrId,
-			type: "session_error",
-			error: error.toString(),
+			loggerAction: {
+				type: "session_error",
+				error: error.toString(),
+			},
 		});
 	});
 	process.addListener("exit", function (statusCode) {
 		if (statusCode) {
 			eventbus.dispatchAction({
-				type: "session_error",
+				type: "log",
 				id: jrId,
-				error: `Process returned status code: ${statusCode}`,
+				loggerAction: {
+					type: "session_error",
+					error: `Process returned status code: ${statusCode}`,
+				},
 			});
 		}
 		eventbus.dispatchAction({

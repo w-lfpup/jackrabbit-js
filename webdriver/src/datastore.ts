@@ -1,15 +1,10 @@
 import type { EndTest } from "../../core/dist/jackrabbit_types.js";
 import type { ConfigInterface } from "./config.js";
-import type {
-	EventBusInterface,
-	WebdriverLogAction,
-	WebdriverSessionErrorAction,
-} from "./eventbus.js";
+import type { EventBusInterface, WebdriverLogAction } from "./eventbus.js";
 import type { SessionResults, RunResults } from "./results.js";
 
-import { getResultsAsString, isComplete } from "./results.js";
-
-export class Logger {
+// Data store
+export class Datastore {
 	#eventbus: EventBusInterface;
 
 	#sessionResults: SessionResults = {
@@ -20,11 +15,11 @@ export class Logger {
 
 	constructor(config: ConfigInterface, eventbus: EventBusInterface) {
 		this.#eventbus = eventbus;
-		this.#eventbus.addListener("log", this.#boundLog);
-		this.#eventbus.addListener("session_error", this.#boundError);
+		this.#eventbus.addListener("log", this.#boundDispatch);
 
 		for (let webdriverParams of config.webdrivers) {
 			this.#sessionResults.runs.set(webdriverParams.jrId, {
+				sessionId: undefined,
 				startTime: 0,
 				fails: 0,
 				errors: 0,
@@ -43,40 +38,24 @@ export class Logger {
 		}
 	}
 
-	get failed() {
-		return this.#sessionResults.fails !== 0;
+	getState() {
+		return this.#sessionResults;
 	}
 
-	get errored() {
-		return this.#sessionResults.errors !== 0;
-	}
-
-	get completed() {
-		return isComplete(this.#sessionResults);
-	}
-
-	get results(): string {
-		return getResultsAsString(this.#sessionResults);
-	}
-
-	// get output
-	// output being a array of a string
-	#boundError = this.#onError.bind(this);
-	#onError(action: WebdriverSessionErrorAction) {
-		let runResults = this.#sessionResults.runs.get(action.id);
-		if (runResults) {
-			this.#sessionResults.errors += 1;
-			runResults.errors += 1;
-			runResults.errorLogs.push(action);
-		}
-	}
-
-	#boundLog = this.#onLog.bind(this);
-	#onLog(action: WebdriverLogAction) {
+	#boundDispatch = this.#dispatch.bind(this);
+	#dispatch(action: WebdriverLogAction) {
 		let { loggerAction, id } = action;
 
 		let runResults = this.#sessionResults.runs.get(id);
 		if (!runResults) return;
+
+		if ("session_synced" === loggerAction.type) {
+			runResults.sessionId = loggerAction.sessionId;
+		}
+
+		if ("session_error" === loggerAction.type) {
+			runResults.sessionId = loggerAction.error;
+		}
 
 		if ("start_run" === loggerAction.type) {
 			runResults.startTime = loggerAction.time;
@@ -94,7 +73,7 @@ export class Logger {
 		if ("run_error" === loggerAction.type) {
 			this.#sessionResults.errors += 1;
 			runResults.errors += 1;
-			runResults.errorLogs.push(action);
+			runResults.errorLogs.push(loggerAction);
 		}
 
 		if ("start_collection" === loggerAction.type) {
@@ -245,3 +224,13 @@ function endTest(
 		loggerAction.end_time - loggerAction.start_time,
 	);
 }
+
+// #boundError = this.#onError.bind(this);
+// #onError(action: WebdriverSessionErrorAction) {
+// 	let runResults = this.#sessionResults.runs.get(action.id);
+// 	if (runResults) {
+// 		this.#sessionResults.errors += 1;
+// 		runResults.errors += 1;
+// 		runResults.errorLogs.push(action);
+// 	}
+// }

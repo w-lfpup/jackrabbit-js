@@ -1,35 +1,37 @@
 import type { LoggerAction } from "../../core/dist/jackrabbit_types.js";
 import type { WebdriverParams } from "./config.js";
 import type { WebdriverActions } from "./eventbus.js";
+import type { LogActions } from "./eventbus.js";
 
 export interface TestResults {
-	loggerStartAction: LoggerAction;
-	loggerEndAction: LoggerAction | undefined;
+	loggerStartAction: LogActions;
+	loggerEndAction: LogActions | undefined;
 }
 
 export interface ModuleResults {
-	loggerAction: LoggerAction;
+	loggerAction: LogActions;
 	fails: number;
 	errors: number;
 	expectedTests: number;
 	completedTests: number;
-	errorLogs: LoggerAction[];
+	errorLogs: LogActions[];
 	testResults: (TestResults | undefined)[];
 }
 
 export interface CollectionResults {
-	loggerAction: LoggerAction;
+	loggerAction: LogActions;
 	fails: number;
 	errors: number;
 	expectedTests: number;
 	completedTests: number;
 	expectedModules: number;
 	completedModules: number;
-	errorLogs: LoggerAction[];
+	errorLogs: LogActions[];
 	modules: (ModuleResults | undefined)[];
 }
 
 export interface RunResults {
+	sessionId: string | undefined;
 	fails: number;
 	errors: number;
 	startTime: number;
@@ -41,7 +43,7 @@ export interface RunResults {
 	completedModules: number;
 	expectedCollections: number;
 	completedCollections: number;
-	errorLogs: WebdriverActions[];
+	errorLogs: LogActions[];
 	webdriverParams: WebdriverParams;
 	collections: (CollectionResults | undefined)[];
 }
@@ -105,13 +107,10 @@ function logSessionErrors(output: string[], sessionResults: SessionResults) {
 function logRunResults(output: string[], result: RunResults): boolean {
 	output.push(`\n${result.webdriverParams.title}`);
 
-	for (let errorAction of result.errorLogs) {
-		if ("log" !== errorAction.type) continue;
-		if ("run_error" !== errorAction.loggerAction.type) continue;
+	for (let logAction of result.errorLogs) {
+		if ("run_error" !== logAction.type) continue;
 
-		output.push(
-			`${SPACE.repeat(2)}[run_error] ${errorAction.loggerAction.error}`,
-		);
+		output.push(`${SPACE.repeat(2)}[run_error] ${logAction.error}`);
 	}
 	if (result.errorLogs.length) output.push("");
 

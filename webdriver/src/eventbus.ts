@@ -1,5 +1,20 @@
 import type { LoggerAction } from "../../core/dist/jackrabbit_types.js";
 
+interface SessionSyncedAction {
+	type: "session_synced";
+	sessionId: string;
+}
+
+interface SessionErrorAction {
+	type: "session_error";
+	error: string;
+}
+
+export type LogActions =
+	| LoggerAction
+	| SessionSyncedAction
+	| SessionErrorAction;
+
 export interface WebdriverSessionAction {
 	id: string;
 }
@@ -8,10 +23,10 @@ export interface WebdriverSessionStartAction extends WebdriverSessionAction {
 	type: "session_start";
 }
 
-export interface WebdriverSessionErrorAction extends WebdriverSessionAction {
-	type: "session_error";
-	error: string;
-}
+// export interface WebdriverSessionErrorAction extends WebdriverSessionAction {
+// 	type: "session_error";
+// 	error: string;
+// }
 
 export interface WebdriverSessionClosedAction extends WebdriverSessionAction {
 	type: "session_closed";
@@ -23,7 +38,7 @@ export interface WebdriverRunCompleteAction extends WebdriverSessionAction {
 
 export interface WebdriverLogAction extends WebdriverSessionAction {
 	type: "log";
-	loggerAction: LoggerAction;
+	loggerAction: LogActions;
 }
 
 export interface WebdriverCliOutpuAction extends WebdriverSessionAction {
@@ -45,7 +60,7 @@ export interface WebdriverActionMap {
 	log: WebdriverLogAction;
 	run_complete: WebdriverRunCompleteAction;
 	session_closed: WebdriverSessionClosedAction;
-	session_error: WebdriverSessionErrorAction;
+	// session_error: WebdriverSessionErrorAction;
 	session_start: WebdriverSessionStartAction;
 	stderr: WebdriverCliErrorOutpuAction;
 	stdout: WebdriverCliOutpuAction;
@@ -58,7 +73,7 @@ export type WebdriverActions =
 	| WebdriverLogAction
 	| WebdriverRunCompleteAction
 	| WebdriverSessionClosedAction
-	| WebdriverSessionErrorAction
+	// | WebdriverSessionErrorAction
 	| WebdriverSessionStartAction;
 
 interface TypedEventBusListener<
