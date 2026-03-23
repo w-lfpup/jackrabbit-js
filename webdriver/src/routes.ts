@@ -51,7 +51,7 @@ export class Router {
 		if (servePing(req, res)) return;
 		if (serveTestPage(req, res, this.#config)) return;
 		if (logAction(req, res, this.#eventbus)) return;
-		if (webdriverCommand(req, res, this.#eventbus, this.#datastore)) return;
+		if (webdriverCommand(req, res, this.#datastore)) return;
 
 		await serveFile(req, res);
 	}
@@ -145,7 +145,6 @@ function getCookie() {}
 function webdriverCommand(
 	req: IncomingMessage,
 	res: ServerResponse,
-	eventbus: EventBusInterface,
 	datastore: Datastore,
 ): boolean {
 	let { url, method } = req;
@@ -164,7 +163,7 @@ function webdriverCommand(
 	if (!id) {
 		res.writeHead(401);
 		res.end();
-		return false;
+		return true;
 	}
 
 	let session = datastore.getState().runs.get(id);
@@ -172,7 +171,7 @@ function webdriverCommand(
 	if (!sessionId) {
 		res.writeHead(401);
 		res.end();
-		return false;
+		return true;
 	}
 
 	// send commands here

@@ -1,56 +1,10 @@
-import type { WebdriverParams } from "./config.js";
-import type { LogActions } from "./eventbus.js";
-
-export interface TestResults {
-	loggerStartAction: LogActions;
-	loggerEndAction: LogActions | undefined;
-}
-
-export interface ModuleResults {
-	loggerAction: LogActions;
-	fails: number;
-	errors: number;
-	expectedTests: number;
-	completedTests: number;
-	errorLogs: LogActions[];
-	testResults: (TestResults | undefined)[];
-}
-
-export interface CollectionResults {
-	loggerAction: LogActions;
-	fails: number;
-	errors: number;
-	expectedTests: number;
-	completedTests: number;
-	expectedModules: number;
-	completedModules: number;
-	errorLogs: LogActions[];
-	modules: (ModuleResults | undefined)[];
-}
-
-export interface RunResults {
-	sessionId: string | undefined;
-	fails: number;
-	errors: number;
-	startTime: number;
-	endTime: number;
-	testTime: number;
-	expectedTests: number;
-	completedTests: number;
-	expectedModules: number;
-	completedModules: number;
-	expectedCollections: number;
-	completedCollections: number;
-	errorLogs: LogActions[];
-	webdriverParams: WebdriverParams;
-	collections: (CollectionResults | undefined)[];
-}
-
-export interface SessionResults {
-	fails: number;
-	errors: number;
-	runs: Map<string, RunResults>;
-}
+import type {
+	SessionResults,
+	RunResults,
+	CollectionResults,
+	ModuleResults,
+	TestResults,
+} from "./datastore.js";
 
 const SPACE = "  ";
 

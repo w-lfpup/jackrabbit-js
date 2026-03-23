@@ -1,7 +1,61 @@
 import type { EndTest } from "../../core/dist/jackrabbit_types.js";
-import type { ConfigInterface } from "./config.js";
-import type { EventBusInterface, WebdriverLogAction } from "./eventbus.js";
-import type { SessionResults, RunResults } from "./results.js";
+import type { ConfigInterface, WebdriverParams } from "./config.js";
+import type {
+	EventBusInterface,
+	WebdriverLogAction,
+	LogActions,
+} from "./eventbus.js";
+
+export interface TestResults {
+	loggerStartAction: LogActions;
+	loggerEndAction: LogActions | undefined;
+}
+
+export interface ModuleResults {
+	loggerAction: LogActions;
+	fails: number;
+	errors: number;
+	expectedTests: number;
+	completedTests: number;
+	errorLogs: LogActions[];
+	testResults: (TestResults | undefined)[];
+}
+
+export interface CollectionResults {
+	loggerAction: LogActions;
+	fails: number;
+	errors: number;
+	expectedTests: number;
+	completedTests: number;
+	expectedModules: number;
+	completedModules: number;
+	errorLogs: LogActions[];
+	modules: (ModuleResults | undefined)[];
+}
+
+export interface RunResults {
+	sessionId: string | undefined;
+	fails: number;
+	errors: number;
+	startTime: number;
+	endTime: number;
+	testTime: number;
+	expectedTests: number;
+	completedTests: number;
+	expectedModules: number;
+	completedModules: number;
+	expectedCollections: number;
+	completedCollections: number;
+	errorLogs: LogActions[];
+	webdriverParams: WebdriverParams;
+	collections: (CollectionResults | undefined)[];
+}
+
+export interface SessionResults {
+	fails: number;
+	errors: number;
+	runs: Map<string, RunResults>;
+}
 
 export class Datastore {
 	#eventbus: EventBusInterface;
@@ -165,9 +219,7 @@ export class Datastore {
 			};
 		}
 
-		if ("end_test" === loggerAction.type) {
-			endTest(this.#sessionResults, runResults, loggerAction);
-		}
+		if (endTest(this.#sessionResults, runResults, loggerAction)) return;
 
 		if ("test_error" === loggerAction.type) {
 			let collection = runResults.collections[loggerAction.collection_id];
@@ -191,16 +243,18 @@ export class Datastore {
 function endTest(
 	sessionResults: SessionResults,
 	runResults: RunResults,
-	loggerAction: EndTest,
-) {
+	loggerAction: LogActions,
+): boolean {
+	if ("end_test" !== loggerAction.type) return false;
+
 	let collection = runResults.collections[loggerAction.collection_id];
-	if (!collection) return;
+	if (!collection) return true;
 
 	let module = collection.modules[loggerAction.module_id];
-	if (!module) return;
+	if (!module) return true;
 
 	let testResult = module.testResults[loggerAction.test_id];
-	if (!testResult) return;
+	if (!testResult) return true;
 
 	testResult.loggerEndAction = loggerAction;
 	runResults.completedTests += 1;
@@ -222,4 +276,6 @@ function endTest(
 		0,
 		loggerAction.end_time - loggerAction.start_time,
 	);
+
+	return true;
 }
