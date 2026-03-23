@@ -161,9 +161,9 @@ function sleep(timeMs: number): Promise<void> {
 // BELOW ARE ACTIONS FROM TESTS THEMSELVES
 
 export async function webdriverCommands() {
-	if (url === "/cmd/get_element") {
-		// getElement()
-	}
+	// if (url === "/cmd/get_element") {
+	// 	// getElement()
+	// }
 }
 
 // need event bus to send errors to error log
