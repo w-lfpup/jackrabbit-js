@@ -23,11 +23,6 @@ export interface WebdriverSessionStartAction extends WebdriverSessionAction {
 	type: "session_start";
 }
 
-// export interface WebdriverSessionErrorAction extends WebdriverSessionAction {
-// 	type: "session_error";
-// 	error: string;
-// }
-
 export interface WebdriverSessionClosedAction extends WebdriverSessionAction {
 	type: "session_closed";
 }
@@ -60,7 +55,6 @@ export interface WebdriverActionMap {
 	log: WebdriverLogAction;
 	run_complete: WebdriverRunCompleteAction;
 	session_closed: WebdriverSessionClosedAction;
-	// session_error: WebdriverSessionErrorAction;
 	session_start: WebdriverSessionStartAction;
 	stderr: WebdriverCliErrorOutpuAction;
 	stdout: WebdriverCliOutpuAction;
@@ -73,7 +67,6 @@ export type WebdriverActions =
 	| WebdriverLogAction
 	| WebdriverRunCompleteAction
 	| WebdriverSessionClosedAction
-	// | WebdriverSessionErrorAction
 	| WebdriverSessionStartAction;
 
 interface TypedEventBusListener<

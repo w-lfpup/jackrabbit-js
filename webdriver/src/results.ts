@@ -1,6 +1,4 @@
-import type { LoggerAction } from "../../core/dist/jackrabbit_types.js";
 import type { WebdriverParams } from "./config.js";
-import type { WebdriverActions } from "./eventbus.js";
 import type { LogActions } from "./eventbus.js";
 
 export interface TestResults {
@@ -57,7 +55,7 @@ export interface SessionResults {
 const SPACE = "  ";
 
 /*
-	Lots of nested loops because results a nested structure.
+	Lots of nested loops because results is a nested structure.
 	I'd rather see composition nested in one function
 	than have for loops spread across each function.
 */

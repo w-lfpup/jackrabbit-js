@@ -1,12 +1,12 @@
 import type { IncomingMessage, ServerResponse } from "http";
 import type { EventBusInterface } from "./eventbus.js";
-import type { LoggerAction } from "../../core/dist/jackrabbit_types.js";
+import type { LogActions } from "./eventbus.js";
+import type { ConfigInterface } from "./config.js";
 
 import * as fs from "fs";
 import * as path from "path";
 import { testHanger } from "./test_hangar.js";
-import { ConfigInterface } from "./config.js";
-import { getElement } from "./commands.js";
+import { webdriverCommands } from "./commands.js";
 import { Datastore } from "./datastore.js";
 
 let cwd = process.cwd();
@@ -52,9 +52,6 @@ export class Router {
 		if (serveTestPage(req, res, this.#config)) return;
 		if (logAction(req, res, this.#eventbus)) return;
 		if (webdriverCommand(req, res, this.#eventbus, this.#datastore)) return;
-
-		// async woes don't await if not correct
-		// if (webdriverAction(req, res, this.#config, this.#eventbus))
 
 		await serveFile(req, res);
 	}
@@ -121,7 +118,7 @@ function logAction(
 
 	if (id) {
 		getJsonFromRequestBody(req)
-			.then(function (loggerAction: LoggerAction) {
+			.then(function (loggerAction: LogActions) {
 				eventbus.dispatchAction({
 					type: "log",
 					loggerAction,
@@ -164,30 +161,26 @@ function webdriverCommand(
 		}
 	}
 
+	if (!id) {
+		res.writeHead(401);
+		res.end();
+		return false;
+	}
+
+	let session = datastore.getState().runs.get(id);
+	let sessionId = { session };
+	if (!sessionId) {
+		res.writeHead(401);
+		res.end();
+		return false;
+	}
+
 	// cookie somewhat validates the response is real
 	// use cookie (jrId) to get session
 	// if session exists
 
-	// -> needs to be a session
-	if (id) {
-		// whats the url ?
-		//
-		//
-		// getStringFromRequestBody(req)
-		// 	.then(function (cssSelector: string) {
-		// 		return getElement(cssSelector);
-		// 		res.writeHead(201);
-		// 	})
-		// 	.catch(function () {
-		// 		res.writeHead(401);
-		// 	})
-		// 	.finally(function () {
-		// 		res.end();
-		// 	});
-	} else {
-		res.writeHead(401);
-		res.end();
-	}
+	// send commands here
+	webdriverCommands();
 
 	return true;
 }

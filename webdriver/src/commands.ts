@@ -160,6 +160,12 @@ function sleep(timeMs: number): Promise<void> {
 
 // BELOW ARE ACTIONS FROM TESTS THEMSELVES
 
+export async function webdriverCommands() {
+	if (url === "/cmd/get_element") {
+		// getElement()
+	}
+}
+
 // need event bus to send errors to error log
 export async function getElement(
 	params: WebdriverParams, // driver defined state
@@ -181,8 +187,8 @@ export async function getElement(
 
 	if (200 === res.status) {
 		let json = await res.json();
-		if ("object" !== typeof json?.value) return;
-		// throw new Error("getElements return value is not an object");
+		if ("object" !== typeof json?.value)
+			throw new Error("getElements return value is not an object");
 
 		for (let [key, value] of json?.value.entries()) {
 			if (

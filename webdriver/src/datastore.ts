@@ -3,7 +3,6 @@ import type { ConfigInterface } from "./config.js";
 import type { EventBusInterface, WebdriverLogAction } from "./eventbus.js";
 import type { SessionResults, RunResults } from "./results.js";
 
-// Data store
 export class Datastore {
 	#eventbus: EventBusInterface;
 
@@ -224,13 +223,3 @@ function endTest(
 		loggerAction.end_time - loggerAction.start_time,
 	);
 }
-
-// #boundError = this.#onError.bind(this);
-// #onError(action: WebdriverSessionErrorAction) {
-// 	let runResults = this.#sessionResults.runs.get(action.id);
-// 	if (runResults) {
-// 		this.#sessionResults.errors += 1;
-// 		runResults.errors += 1;
-// 		runResults.errorLogs.push(action);
-// 	}
-// }
