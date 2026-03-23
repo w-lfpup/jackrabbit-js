@@ -115,27 +115,27 @@ function logAction(
 			id = value;
 		}
 	}
-
-	if (id) {
-		getJsonFromRequestBody(req)
-			.then(function (loggerAction: LogActions) {
-				eventbus.dispatchAction({
-					type: "log",
-					loggerAction,
-					id,
-				});
-				res.writeHead(201);
-			})
-			.catch(function () {
-				res.writeHead(401);
-			})
-			.finally(function () {
-				res.end();
-			});
-	} else {
+	if (!id) {
 		res.writeHead(401);
 		res.end();
+		return true;
 	}
+
+	getJsonFromRequestBody(req)
+		.then(function (loggerAction: LogActions) {
+			eventbus.dispatchAction({
+				type: "log",
+				loggerAction,
+				id,
+			});
+			res.writeHead(201);
+		})
+		.catch(function () {
+			res.writeHead(401);
+		})
+		.finally(function () {
+			res.end();
+		});
 
 	return true;
 }
@@ -175,12 +175,14 @@ function webdriverCommand(
 		return false;
 	}
 
-	// cookie somewhat validates the response is real
-	// use cookie (jrId) to get session
-	// if session exists
-
 	// send commands here
-	webdriverCommands();
+	webdriverCommands()
+		.catch(function () {
+			res.writeHead(401);
+		})
+		.finally(function () {
+			res.end();
+		});
 
 	return true;
 }

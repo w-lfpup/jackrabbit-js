@@ -33,7 +33,6 @@ server.addListener("close", function () {
 		: process.exit(0);
 });
 eventbus.addListener("end", function () {
-	// server.closeAllConnections();
 	server.close();
 });
 
