@@ -151,10 +151,7 @@ export async function findElementRequest(
 ): Promise<string | undefined> {
 	let { url } = params;
 
-	console.log("find element request");
-
 	let bodyJson = await getFindElementBody(req);
-	console.log("body json", bodyJson);
 	if (!bodyJson)
 		throw new Error("Failed to deserialize FindElement body.");
 
@@ -176,7 +173,6 @@ export async function findElementRequest(
 	let json = await findElementRes.json();
 	if ("object" !== typeof json?.value)
 		throw new Error("getElements return value is not an object");
-	console.log("json response", json);
 
 	if (json.value instanceof Object) {
 		for (let key of Object.keys(json.value)) {
@@ -190,8 +186,6 @@ export async function findElementRequest(
 }
 
 async function getFindElementBody(req: IncomingMessage): Promise<FindElementParams | undefined>  {
-	console.log("find element request body");
-
 	let json = await getJsonFromRequestBody(req);
 	let { type, css_selector } = json;
 	if ("find_element" === type && "string" === typeof css_selector) {

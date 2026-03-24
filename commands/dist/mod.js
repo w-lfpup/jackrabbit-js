@@ -10,5 +10,4 @@ export async function findElement(css_selector) {
     });
     if (200 === res.status)
         return await res.text();
-    console.log(res.status, await res.text());
 }

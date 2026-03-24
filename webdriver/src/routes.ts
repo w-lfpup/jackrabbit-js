@@ -168,9 +168,7 @@ function webdriverCommand(
 	webdriverCommands(req, res, sessionId, webdriverParams)
 		.catch(function () {
 			res.writeHead(401);
-		})
-		.finally(function () {
-			// res.end();
+			res.end();
 		});
 
 	return true;
@@ -192,15 +190,12 @@ export async function webdriverCommands(
 	// expecting http 1.1
 	let reqUrl = req.url;
 	if (reqUrl === "/cmd/find_element") {
-		console.log("find element!")
-
-		let elementId = findElement(
+		findElement(
 			req,
 			res,
 			sessionId,
 			params,
-		)
-		console.log("element id", elementId);
+		);
 	}
 	if (urlStr === "/cmd/element_click") {
 	}
