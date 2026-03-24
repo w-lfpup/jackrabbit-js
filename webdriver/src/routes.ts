@@ -7,7 +7,7 @@ import type { WebdriverParams } from "./config.js";
 import * as fs from "fs";
 import * as path from "path";
 import { testHanger } from "./test_hangar.js";
-// import { webdriverCommands } from "./commands.js";
+import { findElement } from "./commands.js";
 import { serveFile } from "./operations.js";
 import { Datastore } from "./datastore.js";
 
@@ -59,17 +59,6 @@ export class Router {
 	}
 }
 
-// function serveBadRequest(req: IncomingMessage, res: ServerResponse): boolean {
-// 	let { url } = req;
-// 	if (url) return false;
-
-// 	res.setHeader("Content-Type", "text/html");
-// 	res.writeHead(400);
-// 	res.end();
-
-// 	return true;
-// }
-
 function servePing(req: IncomingMessage, res: ServerResponse): boolean {
 	let { url, method } = req;
 	if (url !== "/ping" || "GET" !== method) return false;
@@ -109,14 +98,7 @@ function logAction(
 	let { url, method } = req;
 	if (!url?.startsWith("/log/") || "POST" !== method) return false;
 
-	let jackrabbitId: string | undefined;
-	let cookies = req.headers.cookie?.split(";") ?? [];
-	for (const cookieLine of cookies) {
-		if (cookieLine.startsWith("jackrabbit=")) {
-			let [_name, value] = cookieLine.split("=");
-			jackrabbitId = value;
-		}
-	}
+	let jackrabbitId = getCookie(req);
 	if (!jackrabbitId) {
 		res.writeHead(401);
 		res.end();
@@ -142,7 +124,18 @@ function logAction(
 	return true;
 }
 
-function getCookie() {}
+function getCookie(req: IncomingMessage): string | undefined {
+	let id: string | undefined;
+	let cookies = req.headers.cookie?.split(";") ?? [];
+	for (const cookieLine of cookies) {
+		if (cookieLine.startsWith("jackrabbit=")) {
+			let [_name, value] = cookieLine.split("=");
+			id = value;
+		}
+	}
+
+	return id;
+}
 
 function webdriverCommand(
 	req: IncomingMessage,
@@ -154,22 +147,15 @@ function webdriverCommand(
 	if (!url?.startsWith("/cmd/")) return false;
 
 	// make "getting a cookie" its own function
-	let id: string | undefined;
-	let cookies = req.headers.cookie?.split(";") ?? [];
-	for (const cookieLine of cookies) {
-		if (cookieLine.startsWith("jackrabbit=")) {
-			let [_name, value] = cookieLine.split("=");
-			id = value;
-		}
-	}
+	let jackrabbitId = getCookie(req);
 
-	if (!id) {
+	if (!jackrabbitId) {
 		res.writeHead(401);
 		res.end();
 		return true;
 	}
 
-	let session = datastore.getState().runs.get(id);
+	let session = datastore.getState().runs.get(jackrabbitId);
 	if (!session) {
 		res.writeHead(401);
 		res.end();
@@ -179,12 +165,12 @@ function webdriverCommand(
 	let { sessionId, webdriverParams } = session;
 
 	// send commands here
-	webdriverCommands(req, res, webdriverParams)
+	webdriverCommands(req, res, sessionId, webdriverParams)
 		.catch(function () {
 			res.writeHead(401);
 		})
 		.finally(function () {
-			res.end();
+			// res.end();
 		});
 
 	return true;
@@ -193,12 +179,28 @@ function webdriverCommand(
 export async function webdriverCommands(
 	req: IncomingMessage,
 	res: ServerResponse,
+	sessionId: string | undefined,
 	params: WebdriverParams,
 ) {
+	console.log("web driver commandsss", sessionId)
+	if (!sessionId) return;
+
 	let { url } = params;
+	console.log(req.url, url.pathname);
 	let urlStr = url.toString();
-	if (urlStr === "/cmd/find_element") {
-		// findElement request
+
+	// expecting http 1.1
+	let reqUrl = req.url;
+	if (reqUrl === "/cmd/find_element") {
+		console.log("find element!")
+
+		let elementId = findElement(
+			req,
+			res,
+			sessionId,
+			params,
+		)
+		console.log("element id", elementId);
 	}
 	if (urlStr === "/cmd/element_click") {
 	}

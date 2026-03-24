@@ -5,7 +5,8 @@
 		"rootDir": "./src",
 		"outDir": "./dist",
 		"paths": {
-			"jackrabbit/core/*": ["../core/*"]
+			"jackrabbit/core/*": ["../core/*"],
+			"jackrabbit/commands/*": ["../commands/*"]
 		}
 	}
 }

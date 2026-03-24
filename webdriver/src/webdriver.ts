@@ -4,11 +4,7 @@ import type { EventBusInterface } from "./eventbus.js";
 
 import { exec } from "child_process";
 import { deleteSession, newSession, addCookie, go } from "./commands.js";
-import {
-	untilWebdriverReady,
-	// goToPing,
-	// goToTestPage,
-} from "./operations.js";
+import { untilWebdriverReady } from "./operations.js";
 
 export class WebDrivers {
 	#config: ConfigInterface;

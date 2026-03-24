@@ -8,9 +8,9 @@
 		"nodejs",
 		"browser",
 		"webdriver",
+		"commands",
 		"dom_test_utils",
-		"tests",
-		"commands"
+		"tests"
 	],
 	"bin": {
 		"jackrabbit": "nodejs/dist/mod.js",
@@ -20,8 +20,8 @@
 		"prepare": "npm run build",
 		"build": "npm run --workspaces build",
 		"format": "npx prettier --write ./",
-		"test": "npx jackrabbit ./tests/dist/mod.js",
-		"test:browsers": "npx jackrabbit_webdriver ./browsers.json ./tests/dist/mod.js"
+		"test": "npx jackrabbit ./tests/dist/core/mod.js",
+		"test:browsers": "npx jackrabbit_webdriver ./browsers.json ./tests/dist/core/mod.js ./tests/dist/commands/mod.js"
 	},
 	"repository": {
 		"type": "git",
