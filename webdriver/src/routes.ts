@@ -2,11 +2,13 @@ import type { IncomingMessage, ServerResponse } from "http";
 import type { EventBusInterface } from "./eventbus.js";
 import type { LogActions } from "./eventbus.js";
 import type { ConfigInterface } from "./config.js";
+import type { WebdriverParams } from "./config.js";
 
 import * as fs from "fs";
 import * as path from "path";
 import { testHanger } from "./test_hangar.js";
-import { webdriverCommands } from "./commands.js";
+// import { webdriverCommands } from "./commands.js";
+import { serveFile } from "./operations.js";
 import { Datastore } from "./datastore.js";
 
 let cwd = process.cwd();
@@ -67,6 +69,7 @@ export class Router {
 
 // 	return true;
 // }
+
 
 function servePing(req: IncomingMessage, res: ServerResponse): boolean {
 	let { url, method } = req;
@@ -188,45 +191,26 @@ function webdriverCommand(
 	return true;
 }
 
-async function serveFile(req: IncomingMessage, res: ServerResponse) {
-	let { url, method } = req;
-
-	if (!url || "GET" !== method) {
-		res.setHeader("Content-Type", MIME_TYPES["html"]);
-		res.writeHead(400);
-		res.end();
-		return;
+export async function webdriverCommands(
+	req: IncomingMessage,
+	res: ServerResponse,
+	params: WebdriverParams,
+) {
+	let { url } = params;
+	let urlStr = url.toString();
+	if (urlStr === "/cmd/find_element") {
+		// findElement request
 	}
-
-	// assume http 1.1
-	let urlFilePath = path.join(url);
-
-	let extStr = "";
-	if (urlFilePath.endsWith("/")) extStr = "index.html";
-
-	if (urlFilePath.startsWith("/jackrabbit")) {
-		let strippedUrl = urlFilePath.substring("/jackrabbit".length);
-		urlFilePath = path.join(parentPath, strippedUrl, extStr);
-	} else {
-		urlFilePath = path.join(cwd, urlFilePath, extStr);
+	if (urlStr === "/cmd/element_click") {
 	}
-
-	let stream = await getFile(urlFilePath);
-	if (!stream) {
-		res.setHeader("Content-Type", MIME_TYPES["html"]);
-		res.writeHead(404);
-		res.end();
-		return;
+	if (urlStr === "/cmd/element_send_keys") {
 	}
-
-	// throws errors if not a string
-	// filepath is always a string
-	const ext = path.extname(urlFilePath).substring(1).toLowerCase();
-	let mimeType = MIME_TYPES[ext] ?? MIME_TYPES["octet"];
-	res.setHeader("Content-Type", mimeType);
-	res.writeHead(200);
-	stream.pipe(res);
+	if (urlStr === "/cmd/send_keys") {
+	}
+	if (urlStr === "/cmd/take_element_screenshot") {
+	}
 }
+
 
 function getJsonFromRequestBody(req: IncomingMessage): Promise<any> {
 	return new Promise(function (resolve, reject) {
@@ -261,11 +245,4 @@ function getStringFromRequestBody(req: IncomingMessage): Promise<string> {
 			reject(err);
 		});
 	});
-}
-
-async function getFile(filePath: string): Promise<fs.ReadStream | undefined> {
-	try {
-		await fs.promises.access(filePath);
-		return fs.createReadStream(filePath);
-	} catch {}
 }

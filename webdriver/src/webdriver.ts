@@ -3,12 +3,11 @@ import type { ConfigInterface, WebdriverParams } from "./config.js";
 import type { EventBusInterface } from "./eventbus.js";
 
 import { exec } from "child_process";
-import { deleteSession, newSession } from "./commands.js";
+import { deleteSession, newSession, addCookie, go } from "./commands.js";
 import {
 	untilWebdriverReady,
-	goToPing,
-	goToTestPage,
-	setCookie,
+	// goToPing,
+	// goToTestPage,
 } from "./operations.js";
 
 export class WebDrivers {
@@ -132,19 +131,21 @@ class WebdriverSession {
 					sessionId: this.#sessionId,
 				},
 			});
-			// session needs to be stored in state
-			await goToPing(
+			// session needs to be, go stored in state
+			await go(
 				this.#params,
 				this.#signal,
 				this.#sessionId,
 				this.#hostAndPort,
+				"/ping",
 			);
-			await setCookie(this.#params, this.#signal, this.#sessionId);
-			await goToTestPage(
+			await addCookie(this.#params, this.#signal, this.#sessionId);
+			await go(
 				this.#params,
 				this.#signal,
 				this.#sessionId,
 				this.#hostAndPort,
+				"/",
 			);
 		} catch (e) {
 			let errOutput;
