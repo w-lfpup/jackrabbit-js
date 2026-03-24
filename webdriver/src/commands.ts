@@ -7,7 +7,7 @@ import type { EventBusInterface } from "./eventbus.js";
 
 let headers = new Headers([["Content-Type", "application/json"]]);
 
-export async function newSession(params: WebdriverParams, signal: AbortSignal) {
+export async function newSession(params: WebdriverParams, signal: AbortSignal): Promise<string> {
 	let { url, capabilities } = params;
 
 	let res = await fetch(new URL("/session", url), {
@@ -33,7 +33,7 @@ export async function deleteSession(
 	signal: AbortSignal | undefined,
 	eventbus: EventBusInterface,
 	sessionId: string | undefined,
-) {
+): Promise<void> {
 	let { url, jackrabbitId } = params;
 	try {
 		let delReqest = await fetch(new URL(`/session/${sessionId}`, url), {
@@ -64,7 +64,7 @@ export async function go(
 	sessionId: string,
 	hostAndPort: URL,
 	targetPath: string,
-) {
+): Promise<void> {
 	let { url } = params;
 
 	let pingUrl = new URL(targetPath, hostAndPort);
@@ -86,7 +86,7 @@ export async function addCookie(
 	params: WebdriverParams,
 	signal: AbortSignal,
 	sessionId: string,
-) {
+): Promise<void> {
 	let { url, jackrabbitId } = params;
 
 	let cookieReq = await fetch(new URL(`/session/${sessionId}/cookie`, url), {
