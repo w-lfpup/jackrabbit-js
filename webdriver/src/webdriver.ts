@@ -3,10 +3,9 @@ import type { ConfigInterface, WebdriverParams } from "./config.js";
 import type { EventBusInterface } from "./eventbus.js";
 
 import { exec } from "child_process";
-import { deleteSession } from "./commands.js";
+import { deleteSession, newSession } from "./commands.js";
 import {
 	untilWebdriverReady,
-	getSession,
 	goToPing,
 	goToTestPage,
 	setCookie,
@@ -124,7 +123,7 @@ class WebdriverSession {
 
 		try {
 			await untilWebdriverReady(this.#params, this.#signal);
-			this.#sessionId = await getSession(this.#params, this.#signal);
+			this.#sessionId = await newSession(this.#params, this.#signal);
 			this.#eventbus.dispatchAction({
 				jackrabbitId,
 				type: "log",

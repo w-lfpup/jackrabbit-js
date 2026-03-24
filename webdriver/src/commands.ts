@@ -27,6 +27,27 @@ export async function webdriverCommands(
 	}
 }
 
+export async function newSession(params: WebdriverParams, signal: AbortSignal) {
+	let { url, capabilities } = params;
+
+	let res = await fetch(new URL("/session", url), {
+		method: "POST",
+		headers,
+		body: JSON.stringify({ capabilities: capabilities ?? {} }),
+		signal,
+	});
+	if (200 !== res.status) {
+		let cause = await res.text();
+		throw new Error("Failed to create a session", { cause });
+	}
+
+	let json = await res.json();
+	let { sessionId } = json?.value;
+	if (typeof sessionId !== "string") throw new Error("session is not a string");
+
+	return sessionId;
+}
+
 export async function deleteSession(
 	params: WebdriverParams,
 	signal: AbortSignal | undefined,
