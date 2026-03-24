@@ -70,7 +70,6 @@ export class Router {
 // 	return true;
 // }
 
-
 function servePing(req: IncomingMessage, res: ServerResponse): boolean {
 	let { url, method } = req;
 	if (url !== "/ping" || "GET" !== method) return false;
@@ -210,7 +209,6 @@ export async function webdriverCommands(
 	if (urlStr === "/cmd/take_element_screenshot") {
 	}
 }
-
 
 function getJsonFromRequestBody(req: IncomingMessage): Promise<any> {
 	return new Promise(function (resolve, reject) {

@@ -7,7 +7,10 @@ import type { EventBusInterface } from "./eventbus.js";
 
 let headers = new Headers([["Content-Type", "application/json"]]);
 
-export async function newSession(params: WebdriverParams, signal: AbortSignal): Promise<string> {
+export async function newSession(
+	params: WebdriverParams,
+	signal: AbortSignal,
+): Promise<string> {
 	let { url, capabilities } = params;
 
 	let res = await fetch(new URL("/session", url), {
@@ -81,7 +84,6 @@ export async function go(
 	}
 }
 
-
 export async function addCookie(
 	params: WebdriverParams,
 	signal: AbortSignal,
@@ -143,7 +145,6 @@ export async function findElement(
 		}
 	}
 }
-
 
 function getJsonFromRequestBody(req: IncomingMessage): Promise<any> {
 	return new Promise(function (resolve, reject) {

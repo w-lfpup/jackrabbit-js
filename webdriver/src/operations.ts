@@ -53,7 +53,6 @@ export async function untilWebdriverReady(
 	throw new Error("Webdriver was never ready.");
 }
 
-
 function sleep(timeMs: number): Promise<void> {
 	return new Promise(function (resolve) {
 		setTimeout(function () {
@@ -61,7 +60,6 @@ function sleep(timeMs: number): Promise<void> {
 		}, timeMs);
 	});
 }
-
 
 export async function serveFile(req: IncomingMessage, res: ServerResponse) {
 	let { url, method } = req;
@@ -102,7 +100,6 @@ export async function serveFile(req: IncomingMessage, res: ServerResponse) {
 	res.writeHead(200);
 	stream.pipe(res);
 }
-
 
 async function getFile(filePath: string): Promise<fs.ReadStream | undefined> {
 	try {
