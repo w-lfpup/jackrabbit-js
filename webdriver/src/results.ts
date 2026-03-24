@@ -13,7 +13,6 @@ const SPACE = "  ";
 	I'd rather see composition nested in one function
 	than have for loops spread across each function.
 */
-
 export function getResultsAsString(sessionResults: SessionResults): string {
 	const output: string[] = [];
 

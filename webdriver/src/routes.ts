@@ -177,7 +177,7 @@ function webdriverCommand(
 	let { sessionId, webdriverParams } = session;
 
 	// send commands here
-	webdriverCommands(webdriverParams)
+	webdriverCommands(req, res, webdriverParams)
 		.catch(function () {
 			res.writeHead(401);
 		})

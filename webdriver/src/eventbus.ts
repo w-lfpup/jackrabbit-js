@@ -36,12 +36,7 @@ export interface WebdriverLogAction extends WebdriverSessionAction {
 	loggerAction: LogActions;
 }
 
-export interface WebdriverCliOutpuAction extends WebdriverSessionAction {
-	type: "stdout";
-	output: string;
-}
-
-export interface WebdriverCliErrorOutpuAction extends WebdriverSessionAction {
+export interface WebdriverCliErrorOutputAction extends WebdriverSessionAction {
 	type: "stderr";
 	output: string;
 }
@@ -56,13 +51,11 @@ export interface WebdriverActionMap {
 	run_complete: WebdriverRunCompleteAction;
 	session_closed: WebdriverSessionClosedAction;
 	session_start: WebdriverSessionStartAction;
-	stderr: WebdriverCliErrorOutpuAction;
-	stdout: WebdriverCliOutpuAction;
+	stderr: WebdriverCliErrorOutputAction;
 }
 
 export type WebdriverActions =
-	| WebdriverCliErrorOutpuAction
-	| WebdriverCliOutpuAction
+	| WebdriverCliErrorOutputAction
 	| WebdriverEndAction
 	| WebdriverLogAction
 	| WebdriverRunCompleteAction

@@ -3,13 +3,13 @@ import type { ConfigInterface, WebdriverParams } from "./config.js";
 import type { EventBusInterface } from "./eventbus.js";
 
 import { exec } from "child_process";
+import { deleteSession } from "./commands.js";
 import {
 	untilWebdriverReady,
 	getSession,
 	goToPing,
 	goToTestPage,
 	setCookie,
-	deleteSession,
 } from "./operations.js";
 
 export class WebDrivers {
