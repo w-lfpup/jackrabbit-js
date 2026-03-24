@@ -130,7 +130,6 @@ export async function findElement(
 		undefined,
 		sessionId,
 	)
-	console.log("elementId", elementId);
 	if (!elementId) {
 		res.writeHead(401);
 		res.end();

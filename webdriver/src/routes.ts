@@ -180,11 +180,9 @@ export async function webdriverCommands(
 	sessionId: string | undefined,
 	params: WebdriverParams,
 ) {
-	console.log("web driver commandsss", sessionId)
 	if (!sessionId) return;
 
 	let { url } = params;
-	console.log(req.url, url.pathname);
 	let urlStr = url.toString();
 
 	// expecting http 1.1
