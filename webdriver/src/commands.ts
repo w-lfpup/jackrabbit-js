@@ -9,6 +9,7 @@ import * as path from "path";
 
 let headers = new Headers([["Content-Type", "application/json"]]);
 
+// NEW SESSION
 export async function newSession(
 	params: WebdriverParams,
 	signal: AbortSignal,
@@ -33,6 +34,7 @@ export async function newSession(
 	return sessionId;
 }
 
+// DELETE SESSION
 export async function deleteSession(
 	params: WebdriverParams,
 	signal: AbortSignal | undefined,
@@ -63,6 +65,7 @@ export async function deleteSession(
 	}
 }
 
+// GO
 export async function go(
 	params: WebdriverParams,
 	signal: AbortSignal,
@@ -86,6 +89,7 @@ export async function go(
 	}
 }
 
+// ADD COOKIE
 export async function addCookie(
 	params: WebdriverParams,
 	signal: AbortSignal,
@@ -113,6 +117,7 @@ export async function addCookie(
 	}
 }
 
+// FIND ELEMENT
 interface FindElementParams {
 	using: "css selector";
 	value: string;
@@ -193,6 +198,7 @@ async function getFindElementBody(
 	}
 }
 
+// ELEMENT CLICK
 export async function elementClick(
 	req: IncomingMessage,
 	res: ServerResponse,
@@ -234,6 +240,7 @@ async function getElementClickBody(
 	}
 }
 
+// ELEMENT SEND KEYS
 export async function elementSendKeys(
 	req: IncomingMessage,
 	res: ServerResponse,
@@ -287,6 +294,7 @@ async function getElementSendKeysBody(
 	}
 }
 
+// TAKE ELEMENT SCREENSHOT
 export async function takeElementScreenshot(
 	req: IncomingMessage,
 	res: ServerResponse,
@@ -393,6 +401,7 @@ async function saveFileToDisk(
 	await fs.promises.writeFile(filepath, buffer);
 }
 
+// FIND ELEMENTS
 export async function findElements(
 	req: IncomingMessage,
 	res: ServerResponse,
@@ -402,15 +411,15 @@ export async function findElements(
 ) {
 	if (!sessionId) return;
 
-	let elementId = await findElementsRequest(req, params, undefined, sessionId);
-	if (!elementId) {
+	let elementIds = await findElementsRequest(req, params, undefined, sessionId);
+	if (!elementIds) {
 		res.writeHead(401);
 		res.end();
 		return;
 	}
 
-	res.writeHead(200, { "content-type": "text/plain" });
-	res.write(elementId);
+	res.writeHead(200, { "content-type": "application/json" });
+	res.write(elementIds);
 	res.end();
 }
 
@@ -469,6 +478,84 @@ async function getFindElementsBody(
 
 export async function findElementFromElement() {}
 export async function findElementsFromElements() {}
-export async function findShadowRoot() {}
+
+// GET ELEMENT SHADOW ROOT
+export async function getElementShadowRoot(
+	req: IncomingMessage,
+	res: ServerResponse,
+	signal: AbortSignal | undefined, // driver defined state
+	sessionId: string | undefined,
+	params: WebdriverParams,
+) {
+	if (!sessionId) return;
+
+	let elementId = await getElementShadowRootRequest(
+		req,
+		params,
+		undefined,
+		sessionId,
+	);
+	if (!elementId) {
+		res.writeHead(401);
+		res.end();
+		return;
+	}
+
+	res.writeHead(200, { "content-type": "text/plain" });
+	res.write(elementId);
+	res.end();
+}
+
+async function getElementShadowRootRequest(
+	req: IncomingMessage,
+	params: WebdriverParams, // driver defined state
+	signal: AbortSignal | undefined, // driver defined state
+	sessionId: string, // derived state associated with driver
+): Promise<string | undefined> {
+	let { url } = params;
+
+	let elementId = await getElementShadowRootBody(req);
+	if (!elementId)
+		throw new Error("Failed to deserialize GetElementShadowRoot body.");
+
+	let findElementShadowRootRes = await fetch(
+		new URL(new URL(`/session/${sessionId}/element/${elementId}`, url)),
+		{
+			method: "GET",
+			headers,
+			signal,
+		},
+	);
+
+	if (200 !== findElementShadowRootRes.status) {
+		let cause = await findElementShadowRootRes.json();
+		throw new Error("find-element request failed", { cause });
+	}
+
+	let json = await findElementShadowRootRes.json();
+	if ("object" !== typeof json?.value)
+		throw new Error("GetElementShadowRoot return value is not an object");
+
+	for (let [key, value] of Object.entries(json.value)) {
+		if (
+			"string" === typeof key &&
+			"string" === typeof value &&
+			key.startsWith("shadow-")
+		)
+			return value;
+	}
+}
+
+async function getElementShadowRootBody(
+	req: IncomingMessage,
+): Promise<string | undefined> {
+	let json = await getJsonFromRequestBody(req);
+	let { type, element_id } = json;
+	if ("get_element_shadow_root" === type && "string" === typeof element_id) {
+		return element_id;
+	}
+}
+
+// export async function findShadowRoot() {}
 export async function findElementFromShadowRoot() {}
 export async function findElementsFromShadowRoot() {}
