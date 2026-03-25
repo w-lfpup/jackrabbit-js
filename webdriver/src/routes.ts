@@ -211,7 +211,6 @@ export async function webdriverCommands(
 	// find element in shadowroot
 	// find elements in shadowroot
 
-
 	// find elements (plural)
 	// find element in element
 	// find elements in element

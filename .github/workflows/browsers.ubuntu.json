@@ -32,24 +32,6 @@
 					}
 				}
 			}
-		},
-		{
-			"title": "Edge",
-			"command": "$EDGEWEBDRIVER/msedgedriver --port=4010",
-			"timeout_ms": 30000,
-			"url": "http://localhost:4010",
-			"capabilities": {
-				"alwaysMatch": {
-					"ms:edgeOptions": {
-						"args": [
-							"--headless",
-							"--disbale-gpu",
-							"--disable-dev-shm-usage",
-							"--start-maximized"
-						]
-					}
-				}
-			}
 		}
 	]
 }
