@@ -7,14 +7,30 @@ import type { WebdriverParams } from "./config.js";
 import { testHanger } from "./test_hangar.js";
 import {
 	findElement,
+	findElements,
 	elementClick,
 	elementSendKeys,
 	takeElementScreenshot,
+	log,
+	getElementShadowRoot,
 } from "./commands.js";
 import { serveFile } from "./operations.js";
 import { Datastore } from "./datastore.js";
 
 // needs access to state
+let routeMap = new Map([
+	["/cmd/find_element", findElement],
+	["/cmd/find_elements", findElements],
+	// ["/cmd/find_element_from_element", findElement],
+	// ["/cmd/find_elements_from_element", findElement],
+	["/cmd/element_click", elementClick],
+	["/cmd/element_send_keys", elementSendKeys],
+	["/cmd/take_element_screenshot", takeElementScreenshot],
+	["/cmd/log", log],
+	["/cmd/get_element_shadow_root", getElementShadowRoot],
+	// ["/cmd/find_element_from_shadow_root", findElement],
+	// ["/cmd/find_elements_from_shadow_root", findElement],
+])
 
 export class Router {
 	#config: ConfigInterface;
@@ -134,9 +150,7 @@ function webdriverCommand(
 	let { url, method } = req;
 	if (!url?.startsWith("/cmd/")) return false;
 
-	// make "getting a cookie" its own function
 	let jackrabbitId = getCookie(req);
-
 	if (!jackrabbitId) {
 		res.writeHead(401);
 		res.end();
@@ -174,29 +188,10 @@ export async function webdriverCommands(
 
 	// expecting http 1.1
 	let reqUrl = req.url;
-	if (reqUrl === "/cmd/find_element") {
-		return findElement(req, res, undefined, sessionId, params);
+	if (reqUrl) {
+		let action = routeMap.get(reqUrl);
+		if (action) return action(req, res, undefined, params, sessionId);
 	}
-
-	if (reqUrl === "/cmd/element_click") {
-		return elementClick(req, res, undefined, params, sessionId);
-	}
-
-	if (reqUrl === "/cmd/element_send_keys") {
-		return elementSendKeys(req, res, undefined, params, sessionId);
-	}
-
-	if (reqUrl === "/cmd/take_element_screenshot") {
-		return takeElementScreenshot(req, res, undefined, params, sessionId);
-	}
-
-	// get element shadow root
-	// find element in shadowroot
-	// find elements in shadowroot
-
-	// find elements (plural)
-	// find element in element
-	// find elements in element
 
 	res.writeHead(401);
 	res.end();
@@ -213,23 +208,6 @@ function getJsonFromRequestBody(req: IncomingMessage): Promise<any> {
 			let action = JSON.parse(actionStr);
 
 			resolve(action);
-		});
-		req.addListener("error", function (err: Error) {
-			reject(err);
-		});
-	});
-}
-
-function getStringFromRequestBody(req: IncomingMessage): Promise<string> {
-	return new Promise(function (resolve, reject) {
-		let data: Uint8Array[] = [];
-		req.addListener("data", function (chunk) {
-			data.push(chunk);
-		});
-		req.addListener("end", function () {
-			let actionStr = Buffer.concat(data).toString();
-
-			resolve(actionStr);
 		});
 		req.addListener("error", function (err: Error) {
 			reject(err);

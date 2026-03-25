@@ -126,9 +126,9 @@ interface FindElementParams {
 export async function findElement(
 	req: IncomingMessage,
 	res: ServerResponse,
-	signal: AbortSignal | undefined, // driver defined state
-	sessionId: string | undefined,
+	signal: AbortSignal | undefined,
 	params: WebdriverParams,
+	sessionId: string,
 ) {
 	if (!sessionId) return;
 
@@ -406,8 +406,8 @@ export async function findElements(
 	req: IncomingMessage,
 	res: ServerResponse,
 	signal: AbortSignal | undefined, // driver defined state
-	sessionId: string | undefined,
 	params: WebdriverParams,
+	sessionId: string | undefined,
 ) {
 	if (!sessionId) return;
 
@@ -484,8 +484,8 @@ export async function getElementShadowRoot(
 	req: IncomingMessage,
 	res: ServerResponse,
 	signal: AbortSignal | undefined, // driver defined state
-	sessionId: string | undefined,
 	params: WebdriverParams,
+	sessionId: string | undefined,
 ) {
 	if (!sessionId) return;
 
@@ -559,3 +559,30 @@ async function getElementShadowRootBody(
 // export async function findShadowRoot() {}
 export async function findElementFromShadowRoot() {}
 export async function findElementsFromShadowRoot() {}
+
+// LOG
+export async function log(
+	req: IncomingMessage,
+	res: ServerResponse,
+	signal: AbortSignal | undefined,
+	params: WebdriverParams,
+	sessionId: string,
+) {
+	let message = await getLogBody(req);
+	if (!message) {
+		res.writeHead(401);
+		res.end();
+		return;
+	}
+	console.log(`\n[${params.title}]\n${message}`);
+	res.writeHead(200, { "content-type": "text/plain" });
+	res.end();
+}
+
+async function getLogBody(req: IncomingMessage): Promise<string | undefined> {
+	let json = await getJsonFromRequestBody(req);
+	let { type, message } = json;
+	if ("log" === type && "string" === typeof message) {
+		return message;
+	}
+}
