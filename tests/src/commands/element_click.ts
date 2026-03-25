@@ -1,4 +1,7 @@
-import { findElement, elementClick } from "@w-lfpup/jackrabbit/commands/dist/mod.js";
+import {
+	findElement,
+	elementClick,
+} from "@w-lfpup/jackrabbit/commands/dist/mod.js";
 
 let clickCounter = 0;
 

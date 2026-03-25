@@ -4,8 +4,6 @@ import type { LogActions } from "./eventbus.js";
 import type { ConfigInterface } from "./config.js";
 import type { WebdriverParams } from "./config.js";
 
-import * as fs from "fs";
-import * as path from "path";
 import { testHanger } from "./test_hangar.js";
 import {
 	findElement,
@@ -15,21 +13,6 @@ import {
 } from "./commands.js";
 import { serveFile } from "./operations.js";
 import { Datastore } from "./datastore.js";
-
-let cwd = process.cwd();
-const parentPath = path.join(import.meta.url.substring(5), "../../../");
-
-const MIME_TYPES: Record<string, string> = {
-	octet: "application/octet-stream",
-	html: "text/html; charset=UTF-8",
-	js: "text/javascript",
-	json: "application/json",
-	css: "text/css",
-	png: "image/png",
-	jpg: "image/jpeg",
-	ico: "image/x-icon",
-	svg: "image/svg+xml",
-};
 
 // needs access to state
 

@@ -1,8 +1,7 @@
 import type { IncomingMessage, ServerResponse } from "http";
 
 // BELOW ARE ACTIONS FROM TESTS THEMSELVES
-import type { ChildProcess } from "child_process";
-import type { ConfigInterface, WebdriverParams } from "./config.js";
+import type { WebdriverParams } from "./config.js";
 import type { EventBusInterface } from "./eventbus.js";
 
 import * as fs from "fs";
@@ -83,7 +82,7 @@ export async function go(
 
 	if (200 !== getCookie.status) {
 		let cause = await getCookie.json();
-		throw new Error("go-to-cookie request failed", { cause });
+		throw new Error("go-to request failed", { cause });
 	}
 }
 
@@ -394,7 +393,80 @@ async function saveFileToDisk(
 	await fs.promises.writeFile(filepath, buffer);
 }
 
-export async function findElements() {}
+export async function findElements(
+	req: IncomingMessage,
+	res: ServerResponse,
+	signal: AbortSignal | undefined, // driver defined state
+	sessionId: string | undefined,
+	params: WebdriverParams,
+) {
+	if (!sessionId) return;
+
+	let elementId = await findElementsRequest(req, params, undefined, sessionId);
+	if (!elementId) {
+		res.writeHead(401);
+		res.end();
+		return;
+	}
+
+	res.writeHead(200, { "content-type": "text/plain" });
+	res.write(elementId);
+	res.end();
+}
+
+async function findElementsRequest(
+	req: IncomingMessage,
+	params: WebdriverParams, // driver defined state
+	signal: AbortSignal | undefined, // driver defined state
+	sessionId: string, // derived state associated with driver
+): Promise<string[]> {
+	let { url } = params;
+
+	let bodyJson = await getFindElementsBody(req);
+	if (!bodyJson) throw new Error("Failed to deserialize FindElement body.");
+
+	let findElementRes = await fetch(
+		new URL(new URL(`/session/${sessionId}/elements`, url)),
+		{
+			method: "POST",
+			headers,
+			body: JSON.stringify(bodyJson),
+			signal,
+		},
+	);
+
+	if (200 !== findElementRes.status) {
+		let cause = await findElementRes.json();
+		throw new Error("find-element request failed", { cause });
+	}
+
+	let json = await findElementRes.json();
+	if ("object" !== typeof json?.value)
+		throw new Error("getElements return value is not an object");
+
+	let elementIds = [];
+	for (let [key, value] of Object.entries(json.value)) {
+		if (
+			"string" === typeof key &&
+			"string" === typeof value &&
+			key.startsWith("element-")
+		)
+			elementIds.push(value);
+	}
+
+	return elementIds;
+}
+
+async function getFindElementsBody(
+	req: IncomingMessage,
+): Promise<FindElementParams | undefined> {
+	let json = await getJsonFromRequestBody(req);
+	let { type, css_selector } = json;
+	if ("find_elements" === type && "string" === typeof css_selector) {
+		return { using: "css selector", value: css_selector };
+	}
+}
+
 export async function findElementFromElement() {}
 export async function findElementsFromElements() {}
 export async function findShadowRoot() {}
