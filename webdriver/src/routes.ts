@@ -7,7 +7,7 @@ import type { WebdriverParams } from "./config.js";
 import * as fs from "fs";
 import * as path from "path";
 import { testHanger } from "./test_hangar.js";
-import { findElement } from "./commands.js";
+import { findElement, elementClick } from "./commands.js";
 import { serveFile } from "./operations.js";
 import { Datastore } from "./datastore.js";
 
@@ -165,11 +165,10 @@ function webdriverCommand(
 	let { sessionId, webdriverParams } = session;
 
 	// send commands here
-	webdriverCommands(req, res, sessionId, webdriverParams)
-		.catch(function () {
-			res.writeHead(401);
-			res.end();
-		});
+	webdriverCommands(req, res, sessionId, webdriverParams).catch(function () {
+		res.writeHead(401);
+		res.end();
+	});
 
 	return true;
 }
@@ -188,20 +187,18 @@ export async function webdriverCommands(
 	// expecting http 1.1
 	let reqUrl = req.url;
 	if (reqUrl === "/cmd/find_element") {
-		findElement(
-			req,
-			res,
-			sessionId,
-			params,
-		);
+		findElement(req, res, undefined, sessionId, params);
 	}
-	if (urlStr === "/cmd/element_click") {
+	if (reqUrl === "/cmd/element_click") {
+		console.log("webdriver command: element click");
+
+		elementClick(req, res, undefined, params, sessionId);
 	}
-	if (urlStr === "/cmd/element_send_keys") {
+	if (reqUrl === "/cmd/element_send_keys") {
 	}
-	if (urlStr === "/cmd/send_keys") {
+	if (reqUrl === "/cmd/send_keys") {
 	}
-	if (urlStr === "/cmd/take_element_screenshot") {
+	if (reqUrl === "/cmd/take_element_screenshot") {
 	}
 }
 

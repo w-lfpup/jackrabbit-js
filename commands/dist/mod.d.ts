@@ -18,4 +18,5 @@ interface TakeElementScreenshot {
 }
 export type commands = FindElement | ElementClick | ElementSendKeys | TakeElementScreenshot;
 export declare function findElement(css_selector: string): Promise<string | undefined>;
+export declare function elementClick(element_id: string): Promise<string | undefined>;
 export {};

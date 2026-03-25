@@ -119,30 +119,26 @@ interface FindElementParams {
 export async function findElement(
 	req: IncomingMessage,
 	res: ServerResponse,
+	signal: AbortSignal | undefined, // driver defined state
 	sessionId: string | undefined,
 	params: WebdriverParams,
 ) {
 	if (!sessionId) return;
 
-	let elementId = await findElementRequest(
-		req,
-		params,
-		undefined,
-		sessionId,
-	)
+	let elementId = await findElementRequest(req, params, undefined, sessionId);
 	if (!elementId) {
 		res.writeHead(401);
 		res.end();
-		return
+		return;
 	}
 
-	res.writeHead(200, {"content-type": "text/plain"})
+	res.writeHead(200, { "content-type": "text/plain" });
 	res.write(elementId);
 	res.end();
 }
 
 // need event bus to send errors to error log
-export async function findElementRequest(
+async function findElementRequest(
 	req: IncomingMessage,
 	params: WebdriverParams, // driver defined state
 	signal: AbortSignal | undefined, // driver defined state
@@ -151,8 +147,7 @@ export async function findElementRequest(
 	let { url } = params;
 
 	let bodyJson = await getFindElementBody(req);
-	if (!bodyJson)
-		throw new Error("Failed to deserialize FindElement body.");
+	if (!bodyJson) throw new Error("Failed to deserialize FindElement body.");
 
 	let findElementRes = await fetch(
 		new URL(new URL(`/session/${sessionId}/element`, url)),
@@ -174,21 +169,74 @@ export async function findElementRequest(
 		throw new Error("getElements return value is not an object");
 
 	if (json.value instanceof Object) {
-		for (let key of Object.keys(json.value)) {
+		for (let [key, value] of Object.entries(json.value)) {
 			if (
 				"string" === typeof key &&
+				"string" === typeof value &&
 				key.startsWith("element-")
 			)
-			return key;
+				// return key;
+				return value;
 		}
 	}
 }
 
-async function getFindElementBody(req: IncomingMessage): Promise<FindElementParams | undefined>  {
+async function getFindElementBody(
+	req: IncomingMessage,
+): Promise<FindElementParams | undefined> {
 	let json = await getJsonFromRequestBody(req);
 	let { type, css_selector } = json;
 	if ("find_element" === type && "string" === typeof css_selector) {
-		return { using: "css selector", value: css_selector }
+		return { using: "css selector", value: css_selector };
+	}
+}
+
+// interface ElementClickParams {
+// 	type: "element_click";
+// 	element_id: string;
+// }
+
+export async function elementClick(
+	req: IncomingMessage,
+	res: ServerResponse,
+	signal: AbortSignal | undefined,
+	params: WebdriverParams,
+	sessionId: string,
+): Promise<void> {
+	console.log("click an element!@");
+	let { url } = params;
+
+	let elementId = await getElementClickBody(req);
+	console.log("to click", elementId);
+	if (!elementId) throw new Error("Failed to deserialize ElementClick body.");
+
+	let resposne = await fetch(
+		new URL(`/session/${sessionId}/element/${elementId}/click`, url),
+		{
+			method: "POST",
+			headers,
+			body: JSON.stringify({}),
+			signal,
+		},
+	);
+	console.log("clicked an element!", resposne);
+
+	if (200 !== resposne.status) {
+		let cause = await resposne.json();
+		throw new Error("element-click request failed", { cause });
+	}
+
+	res.writeHead(200, { "content-type": "text/plain" });
+	res.end();
+}
+
+async function getElementClickBody(
+	req: IncomingMessage,
+): Promise<string | undefined> {
+	let json = await getJsonFromRequestBody(req);
+	let { type, element_id } = json;
+	if ("element_click" === type && "string" === typeof element_id) {
+		return element_id;
 	}
 }
 
