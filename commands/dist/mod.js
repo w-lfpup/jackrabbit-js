@@ -49,3 +49,10 @@ export async function takeElementScreenshot(element_id, target_filepath) {
     });
     return 200 === res.status;
 }
+export async function log() { }
+export async function findElements() { }
+export async function findElementFromElement() { }
+export async function findElementsFromElements() { }
+export async function findShadowRoot() { }
+export async function findElementFromShadowRoot() { }
+export async function findElementsFromShadowRoot() { }

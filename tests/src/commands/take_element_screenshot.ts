@@ -1,7 +1,7 @@
 import {
 	findElement,
 	takeElementScreenshot,
-} from "jackrabbit/commands/dist/mod.js";
+} from "@w-lfpup/jackrabbit/commands/dist/mod.js";
 
 let text = document.createTextNode("Beasts tread softly underfoot");
 let span = document.createElement("span");

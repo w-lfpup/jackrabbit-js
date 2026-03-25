@@ -393,3 +393,10 @@ async function saveFileToDisk(
 	// write file
 	await fs.promises.writeFile(filepath, buffer);
 }
+
+export async function findElements() {}
+export async function findElementFromElement() {}
+export async function findElementsFromElements() {}
+export async function findShadowRoot() {}
+export async function findElementFromShadowRoot() {}
+export async function findElementsFromShadowRoot() {}
