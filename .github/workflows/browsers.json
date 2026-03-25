@@ -26,6 +26,7 @@
 						"args": [
 							"--headless",
 							"--disbale-gpu",
+							"--disable-dev-shm-usage",
 							"--start-maximized"
 						]
 					}
@@ -42,7 +43,9 @@
 					"ms:edgeOptions": {
 						"args": [
 							"--headless",
+							"--no-sandbox",
 							"--disbale-gpu",
+							"--disable-dev-shm-usage",
 							"--start-maximized"
 						]
 					}
