@@ -1,16 +1,63 @@
-import type { EndTest } from "../../core/dist/jackrabbit_types.js";
-import type { ConfigInterface } from "./config.js";
+import type { ConfigInterface, WebdriverParams } from "./config.js";
 import type {
-	EventBus,
+	EventBusInterface,
 	WebdriverLogAction,
-	WebdriverSessionErrorAction,
+	LogActions,
 } from "./eventbus.js";
-import type { SessionResults, RunResults } from "./results.js";
 
-import { getResultsAsString, isComplete } from "./results.js";
+export interface TestResults {
+	loggerStartAction: LogActions;
+	loggerEndAction: LogActions | undefined;
+}
 
-export class Logger {
-	#eventbus: EventBus;
+export interface ModuleResults {
+	loggerAction: LogActions;
+	fails: number;
+	errors: number;
+	expectedTests: number;
+	completedTests: number;
+	errorLogs: LogActions[];
+	testResults: (TestResults | undefined)[];
+}
+
+export interface CollectionResults {
+	loggerAction: LogActions;
+	fails: number;
+	errors: number;
+	expectedTests: number;
+	completedTests: number;
+	expectedModules: number;
+	completedModules: number;
+	errorLogs: LogActions[];
+	modules: (ModuleResults | undefined)[];
+}
+
+export interface RunResults {
+	sessionId: string | undefined;
+	fails: number;
+	errors: number;
+	startTime: number;
+	endTime: number;
+	testTime: number;
+	expectedTests: number;
+	completedTests: number;
+	expectedModules: number;
+	completedModules: number;
+	expectedCollections: number;
+	completedCollections: number;
+	errorLogs: LogActions[];
+	webdriverParams: WebdriverParams;
+	collections: (CollectionResults | undefined)[];
+}
+
+export interface SessionResults {
+	fails: number;
+	errors: number;
+	runs: Map<string, RunResults>;
+}
+
+export class Datastore {
+	#eventbus: EventBusInterface;
 
 	#sessionResults: SessionResults = {
 		fails: 0,
@@ -18,13 +65,13 @@ export class Logger {
 		runs: new Map(),
 	};
 
-	constructor(config: ConfigInterface, eventbus: EventBus) {
+	constructor(config: ConfigInterface, eventbus: EventBusInterface) {
 		this.#eventbus = eventbus;
-		this.#eventbus.addListener("log", this.#boundLog);
-		this.#eventbus.addListener("session_error", this.#boundError);
+		this.#eventbus.addListener("log", this.#boundDispatch);
 
 		for (let webdriverParams of config.webdrivers) {
-			this.#sessionResults.runs.set(webdriverParams.jrId, {
+			this.#sessionResults.runs.set(webdriverParams.jackrabbitId, {
+				sessionId: undefined,
 				startTime: 0,
 				fails: 0,
 				errors: 0,
@@ -43,40 +90,24 @@ export class Logger {
 		}
 	}
 
-	get failed() {
-		return this.#sessionResults.fails !== 0;
+	getState() {
+		return this.#sessionResults;
 	}
 
-	get errored() {
-		return this.#sessionResults.errors !== 0;
-	}
+	#boundDispatch = this.#dispatch.bind(this);
+	#dispatch(action: WebdriverLogAction) {
+		let { loggerAction, jackrabbitId } = action;
 
-	get completed() {
-		return isComplete(this.#sessionResults);
-	}
-
-	get results(): string {
-		return getResultsAsString(this.#sessionResults);
-	}
-
-	// get output
-	// output being a array of a string
-	#boundError = this.#onError.bind(this);
-	#onError(action: WebdriverSessionErrorAction) {
-		let runResults = this.#sessionResults.runs.get(action.id);
-		if (runResults) {
-			this.#sessionResults.errors += 1;
-			runResults.errors += 1;
-			runResults.errorLogs.push(action);
-		}
-	}
-
-	#boundLog = this.#onLog.bind(this);
-	#onLog(action: WebdriverLogAction) {
-		let { loggerAction, id } = action;
-
-		let runResults = this.#sessionResults.runs.get(id);
+		let runResults = this.#sessionResults.runs.get(jackrabbitId);
 		if (!runResults) return;
+
+		if ("session_synced" === loggerAction.type) {
+			runResults.sessionId = loggerAction.sessionId;
+		}
+
+		if ("session_error" === loggerAction.type) {
+			runResults.sessionId = loggerAction.error;
+		}
 
 		if ("start_run" === loggerAction.type) {
 			runResults.startTime = loggerAction.time;
@@ -87,14 +118,14 @@ export class Logger {
 			runResults.endTime = loggerAction.time;
 			this.#eventbus.dispatchAction({
 				type: "run_complete",
-				id,
+				jackrabbitId,
 			});
 		}
 
 		if ("run_error" === loggerAction.type) {
 			this.#sessionResults.errors += 1;
 			runResults.errors += 1;
-			runResults.errorLogs.push(action);
+			runResults.errorLogs.push(loggerAction);
 		}
 
 		if ("start_collection" === loggerAction.type) {
@@ -187,9 +218,7 @@ export class Logger {
 			};
 		}
 
-		if ("end_test" === loggerAction.type) {
-			endTest(this.#sessionResults, runResults, loggerAction);
-		}
+		if (endTest(this.#sessionResults, runResults, loggerAction)) return;
 
 		if ("test_error" === loggerAction.type) {
 			let collection = runResults.collections[loggerAction.collection_id];
@@ -213,16 +242,18 @@ export class Logger {
 function endTest(
 	sessionResults: SessionResults,
 	runResults: RunResults,
-	loggerAction: EndTest,
-) {
+	loggerAction: LogActions,
+): boolean {
+	if ("end_test" !== loggerAction.type) return false;
+
 	let collection = runResults.collections[loggerAction.collection_id];
-	if (!collection) return;
+	if (!collection) return true;
 
 	let module = collection.modules[loggerAction.module_id];
-	if (!module) return;
+	if (!module) return true;
 
 	let testResult = module.testResults[loggerAction.test_id];
-	if (!testResult) return;
+	if (!testResult) return true;
 
 	testResult.loggerEndAction = loggerAction;
 	runResults.completedTests += 1;
@@ -244,4 +275,6 @@ function endTest(
 		0,
 		loggerAction.end_time - loggerAction.start_time,
 	);
+
+	return true;
 }

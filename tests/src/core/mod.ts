@@ -2,7 +2,7 @@ import * as FailTests from "./test_fail.test.js";
 import * as PassTests from "./test_pass.test.js";
 import * as ErrorTests from "./test_error.test.js";
 
-import { runCollection } from "../../core/dist/mod.js";
+import { runCollection } from "../../../core/dist/mod.js";
 import { TestLogger } from "./test_logger.js";
 
 // jackrabbit test run won't pass failing tests

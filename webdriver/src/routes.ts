@@ -1,11 +1,20 @@
 import type { IncomingMessage, ServerResponse } from "http";
-import type { EventBus } from "./eventbus.js";
-import type { LoggerAction } from "../../core/dist/jackrabbit_types.js";
+import type { EventBusInterface } from "./eventbus.js";
+import type { LogActions } from "./eventbus.js";
+import type { ConfigInterface } from "./config.js";
+import type { WebdriverParams } from "./config.js";
 
 import * as fs from "fs";
 import * as path from "path";
 import { testHanger } from "./test_hangar.js";
-import { ConfigInterface } from "./config.js";
+import {
+	findElement,
+	elementClick,
+	elementSendKeys,
+	takeElementScreenshot,
+} from "./commands.js";
+import { serveFile } from "./operations.js";
+import { Datastore } from "./datastore.js";
 
 let cwd = process.cwd();
 const parentPath = path.join(import.meta.url.substring(5), "../../../");
@@ -22,13 +31,21 @@ const MIME_TYPES: Record<string, string> = {
 	svg: "image/svg+xml",
 };
 
+// needs access to state
+
 export class Router {
 	#config: ConfigInterface;
-	#eventbus: EventBus;
+	#eventbus: EventBusInterface;
+	#datastore: Datastore;
 
-	constructor(config: ConfigInterface, eventbus: EventBus) {
+	constructor(
+		config: ConfigInterface,
+		eventbus: EventBusInterface,
+		datastore: Datastore,
+	) {
 		this.#config = config;
 		this.#eventbus = eventbus;
+		this.#datastore = datastore;
 	}
 
 	get route() {
@@ -37,24 +54,14 @@ export class Router {
 
 	#boundRoute = this.#route.bind(this);
 	async #route(req: IncomingMessage, res: ServerResponse) {
-		if (serveBadRequest(req, res)) return;
+		// if (serveBadRequest(req, res)) return;
 		if (servePing(req, res)) return;
 		if (serveTestPage(req, res, this.#config)) return;
 		if (logAction(req, res, this.#eventbus)) return;
+		if (webdriverCommand(req, res, this.#config, this.#datastore)) return;
 
 		await serveFile(req, res);
 	}
-}
-
-function serveBadRequest(req: IncomingMessage, res: ServerResponse): boolean {
-	let { url } = req;
-	if (url) return false;
-
-	res.setHeader("Content-Type", "text/html");
-	res.writeHead(400);
-	res.end();
-
-	return true;
 }
 
 function servePing(req: IncomingMessage, res: ServerResponse): boolean {
@@ -91,11 +98,38 @@ function serveTestPage(
 function logAction(
 	req: IncomingMessage,
 	res: ServerResponse,
-	eventbus: EventBus,
+	eventbus: EventBusInterface,
 ): boolean {
 	let { url, method } = req;
 	if (!url?.startsWith("/log/") || "POST" !== method) return false;
 
+	let jackrabbitId = getCookie(req);
+	if (!jackrabbitId) {
+		res.writeHead(401);
+		res.end();
+		return true;
+	}
+
+	getJsonFromRequestBody(req)
+		.then(function (loggerAction: LogActions) {
+			eventbus.dispatchAction({
+				type: "log",
+				loggerAction,
+				jackrabbitId,
+			});
+			res.writeHead(201);
+		})
+		.catch(function () {
+			res.writeHead(401);
+		})
+		.finally(function () {
+			res.end();
+		});
+
+	return true;
+}
+
+function getCookie(req: IncomingMessage): string | undefined {
 	let id: string | undefined;
 	let cookies = req.headers.cookie?.split(";") ?? [];
 	for (const cookieLine of cookies) {
@@ -105,74 +139,87 @@ function logAction(
 		}
 	}
 
-	if (id) {
-		getLoggerActionFromRequestBody(req)
-			.then(function (loggerAction: LoggerAction) {
-				eventbus.dispatchAction({
-					type: "log",
-					loggerAction,
-					id,
-				});
-				res.writeHead(201);
-			})
-			.catch(function () {
-				res.writeHead(401);
-			})
-			.finally(function () {
-				res.end();
-			});
-	} else {
+	return id;
+}
+
+function webdriverCommand(
+	req: IncomingMessage,
+	res: ServerResponse,
+	config: ConfigInterface,
+	datastore: Datastore,
+): boolean {
+	let { url, method } = req;
+	if (!url?.startsWith("/cmd/")) return false;
+
+	// make "getting a cookie" its own function
+	let jackrabbitId = getCookie(req);
+
+	if (!jackrabbitId) {
 		res.writeHead(401);
 		res.end();
+		return true;
 	}
+
+	let session = datastore.getState().runs.get(jackrabbitId);
+	if (!session) {
+		res.writeHead(401);
+		res.end();
+		return true;
+	}
+
+	let { sessionId, webdriverParams } = session;
+
+	// send commands here
+	webdriverCommands(req, res, sessionId, webdriverParams).catch(function () {
+		res.writeHead(401);
+		res.end();
+	});
 
 	return true;
 }
 
-async function serveFile(req: IncomingMessage, res: ServerResponse) {
-	let { url, method } = req;
+export async function webdriverCommands(
+	req: IncomingMessage,
+	res: ServerResponse,
+	sessionId: string | undefined,
+	params: WebdriverParams,
+) {
+	if (!sessionId) return;
 
-	if (!url || "GET" !== method) {
-		res.setHeader("Content-Type", MIME_TYPES["html"]);
-		res.writeHead(400);
-		res.end();
-		return;
+	let { url } = params;
+	let urlStr = url.toString();
+
+	// expecting http 1.1
+	let reqUrl = req.url;
+	if (reqUrl === "/cmd/find_element") {
+		return findElement(req, res, undefined, sessionId, params);
 	}
 
-	// assume http 1.1
-	let urlFilePath = path.join(url);
-
-	let extStr = "";
-	if (url.endsWith("/")) extStr = "index.html";
-	let urlNoPrefix = url;
-
-	if (urlFilePath.startsWith("/jackrabbit")) {
-		let strippedUrl = urlFilePath.substring("/jackrabbit".length);
-		urlFilePath = path.join(parentPath, strippedUrl, extStr);
-	} else {
-		urlFilePath = path.join(cwd, urlNoPrefix, extStr);
+	if (reqUrl === "/cmd/element_click") {
+		return elementClick(req, res, undefined, params, sessionId);
 	}
 
-	let stream = await getFile(urlFilePath);
-
-	if (stream) {
-		// throws errors if not a string
-		// filepath is always a string
-		const ext = path.extname(urlFilePath).substring(1).toLowerCase();
-		let mimeType = MIME_TYPES[ext] ?? MIME_TYPES["octet"];
-		res.setHeader("Content-Type", mimeType);
-		res.writeHead(200);
-		stream.pipe(res);
-	} else {
-		res.setHeader("Content-Type", MIME_TYPES["html"]);
-		res.writeHead(404);
-		res.end();
+	if (reqUrl === "/cmd/element_send_keys") {
+		return elementSendKeys(req, res, undefined, params, sessionId);
 	}
+
+	if (reqUrl === "/cmd/take_element_screenshot") {
+		return takeElementScreenshot(req, res, undefined, params, sessionId);
+	}
+
+	// get element shadow root
+	// find element in shadowroot
+	// find elements in shadowroot
+
+	// find elements (plural)
+	// find element in element
+	// find elements in element
+
+	res.writeHead(401);
+	res.end();
 }
 
-function getLoggerActionFromRequestBody(
-	req: IncomingMessage,
-): Promise<LoggerAction> {
+function getJsonFromRequestBody(req: IncomingMessage): Promise<any> {
 	return new Promise(function (resolve, reject) {
 		let data: Uint8Array[] = [];
 		req.addListener("data", function (chunk) {
@@ -180,7 +227,7 @@ function getLoggerActionFromRequestBody(
 		});
 		req.addListener("end", function () {
 			let actionStr = Buffer.concat(data).toString();
-			let action = JSON.parse(actionStr) as LoggerAction;
+			let action = JSON.parse(actionStr);
 
 			resolve(action);
 		});
@@ -190,9 +237,19 @@ function getLoggerActionFromRequestBody(
 	});
 }
 
-async function getFile(filePath: string): Promise<fs.ReadStream | undefined> {
-	try {
-		await fs.promises.access(filePath);
-		return fs.createReadStream(filePath);
-	} catch {}
+function getStringFromRequestBody(req: IncomingMessage): Promise<string> {
+	return new Promise(function (resolve, reject) {
+		let data: Uint8Array[] = [];
+		req.addListener("data", function (chunk) {
+			data.push(chunk);
+		});
+		req.addListener("end", function () {
+			let actionStr = Buffer.concat(data).toString();
+
+			resolve(actionStr);
+		});
+		req.addListener("error", function (err: Error) {
+			reject(err);
+		});
+	});
 }

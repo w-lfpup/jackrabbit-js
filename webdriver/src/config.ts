@@ -9,7 +9,7 @@ interface WebdriverConfig {
 }
 
 export interface WebdriverParams extends WebdriverConfig {
-	jrId: string;
+	jackrabbitId: string;
 }
 
 export interface ConfigInterface {
@@ -50,9 +50,9 @@ export async function createConfig(
 				if (params instanceof Error) return params;
 
 				let session = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER);
-				let jrId = `${index}:${session.toString(32)}`;
+				let jackrabbitId = `${index}:${session.toString(32)}`;
 
-				webdrivers.push({ ...params, jrId });
+				webdrivers.push({ ...params, jackrabbitId });
 			}
 		return {
 			hostAndPort,

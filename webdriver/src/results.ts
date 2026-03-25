@@ -1,65 +1,18 @@
-import type { LoggerAction } from "../../core/dist/jackrabbit_types.js";
-import type { WebdriverParams } from "./config.js";
-import type { WebdriverActions } from "./eventbus.js";
-
-export interface TestResults {
-	loggerStartAction: LoggerAction;
-	loggerEndAction: LoggerAction | undefined;
-}
-
-export interface ModuleResults {
-	loggerAction: LoggerAction;
-	fails: number;
-	errors: number;
-	expectedTests: number;
-	completedTests: number;
-	errorLogs: LoggerAction[];
-	testResults: (TestResults | undefined)[];
-}
-
-export interface CollectionResults {
-	loggerAction: LoggerAction;
-	fails: number;
-	errors: number;
-	expectedTests: number;
-	completedTests: number;
-	expectedModules: number;
-	completedModules: number;
-	errorLogs: LoggerAction[];
-	modules: (ModuleResults | undefined)[];
-}
-
-export interface RunResults {
-	fails: number;
-	errors: number;
-	startTime: number;
-	endTime: number;
-	testTime: number;
-	expectedTests: number;
-	completedTests: number;
-	expectedModules: number;
-	completedModules: number;
-	expectedCollections: number;
-	completedCollections: number;
-	errorLogs: WebdriverActions[];
-	webdriverParams: WebdriverParams;
-	collections: (CollectionResults | undefined)[];
-}
-
-export interface SessionResults {
-	fails: number;
-	errors: number;
-	runs: Map<string, RunResults>;
-}
+import type {
+	SessionResults,
+	RunResults,
+	CollectionResults,
+	ModuleResults,
+	TestResults,
+} from "./datastore.js";
 
 const SPACE = "  ";
 
 /*
-	Lots of nested loops because results a nested structure.
+	Lots of nested loops because results is a nested structure.
 	I'd rather see composition nested in one function
 	than have for loops spread across each function.
 */
-
 export function getResultsAsString(sessionResults: SessionResults): string {
 	const output: string[] = [];
 
@@ -105,13 +58,10 @@ function logSessionErrors(output: string[], sessionResults: SessionResults) {
 function logRunResults(output: string[], result: RunResults): boolean {
 	output.push(`\n${result.webdriverParams.title}`);
 
-	for (let errorAction of result.errorLogs) {
-		if ("log" !== errorAction.type) continue;
-		if ("run_error" !== errorAction.loggerAction.type) continue;
+	for (let logAction of result.errorLogs) {
+		if ("run_error" !== logAction.type) continue;
 
-		output.push(
-			`${SPACE.repeat(2)}[run_error] ${errorAction.loggerAction.error}`,
-		);
+		output.push(`${SPACE.repeat(2)}[run_error] ${logAction.error}`);
 	}
 	if (result.errorLogs.length) output.push("");
 
