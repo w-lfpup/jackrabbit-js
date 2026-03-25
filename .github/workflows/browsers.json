@@ -26,7 +26,6 @@
 						"args": [
 							"--headless",
 							"--disbale-gpu",
-							"--disable-dev-shm-usage",
 							"--start-maximized"
 						]
 					}
@@ -44,7 +43,6 @@
 						"args": [
 							"--headless",
 							"--disbale-gpu",
-							"--disable-dev-shm-usage",
 							"--start-maximized"
 						]
 					}

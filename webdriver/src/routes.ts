@@ -194,9 +194,11 @@ export async function webdriverCommands(
 	if (reqUrl === "/cmd/find_element") {
 		return findElement(req, res, undefined, sessionId, params);
 	}
+
 	if (reqUrl === "/cmd/element_click") {
 		return elementClick(req, res, undefined, params, sessionId);
 	}
+
 	if (reqUrl === "/cmd/element_send_keys") {
 		return elementSendKeys(req, res, undefined, params, sessionId);
 	}
@@ -204,6 +206,15 @@ export async function webdriverCommands(
 	if (reqUrl === "/cmd/take_element_screenshot") {
 		return takeElementScreenshot(req, res, undefined, params, sessionId);
 	}
+
+	// get element shadow root
+	// find element in shadowroot
+	// find elements in shadowroot
+
+
+	// find elements (plural)
+	// find element in element
+	// find elements in element
 
 	res.writeHead(401);
 	res.end();
