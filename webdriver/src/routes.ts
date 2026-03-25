@@ -7,7 +7,12 @@ import type { WebdriverParams } from "./config.js";
 import * as fs from "fs";
 import * as path from "path";
 import { testHanger } from "./test_hangar.js";
-import { findElement, elementClick, elementSendKeys, takeElementScreenshot } from "./commands.js";
+import {
+	findElement,
+	elementClick,
+	elementSendKeys,
+	takeElementScreenshot,
+} from "./commands.js";
 import { serveFile } from "./operations.js";
 import { Datastore } from "./datastore.js";
 

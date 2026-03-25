@@ -295,17 +295,14 @@ export async function takeElementScreenshot(
 	params: WebdriverParams,
 	sessionId: string,
 ): Promise<void> {
-	console.log("take element screenshot");
 	let { url, title } = params;
 
 	let reqParams = await getTakeElementScreenshotBody(req);
-	console.log("req params", reqParams);
 	if (!reqParams)
 		throw new Error("Failed to deserialize TakeElementScreenshot body.");
 
 	let { element_id, target_filepath } = reqParams;
 
-	console.log("about to fetch screenshot");
 	let resposne = await fetch(
 		new URL(`/session/${sessionId}/element/${element_id}/screenshot`, url),
 		{
@@ -314,7 +311,6 @@ export async function takeElementScreenshot(
 			signal,
 		},
 	);
-	console.log("screenshoted an element!", resposne);
 
 	if (200 !== resposne.status) {
 		let cause = await resposne.json();
@@ -326,10 +322,9 @@ export async function takeElementScreenshot(
 	if ("string" !== typeof base64)
 		throw new Error("element screenshot is not a base64 string");
 
-
 	// get path relative to cwd
 	// if /absolute path
-	// 
+	//
 	// join process.cwd() + target_filepath;
 	let buffer = Buffer.from(base64, "base64");
 	await saveFileToDisk(target_filepath, title, buffer);
@@ -381,23 +376,20 @@ async function saveFileToDisk(
 	buffer: Buffer,
 ): Promise<void> {
 	// make sure path is in current working directory?
-	let cwd = process.cwd()
+	let cwd = process.cwd();
 	let filepath = path.join(cwd, target_filepath);
-	console.log("filepath:", filepath);
-	if (!filepath.startsWith(cwd)) throw new Error("Screenshot filepath is out of scope (not in cwd)")
-		
+	if (!filepath.startsWith(cwd))
+		throw new Error("Screenshot filepath is out of scope (not in cwd)");
+
 	let ext = path.extname(filepath);
 	if (ext) filepath = filepath.substring(0, filepath.length - ext.length);
-	console.log("updated extensionless filepath:", filepath);
-		
+
 	let title_ext = title.toLowerCase().replaceAll(" ", "_");
 	filepath = `${filepath}.${title_ext}.png`;
-	
-	console.log("updated filepath:", filepath);
-		
+
 	// create directories
 	let dir = path.dirname(filepath);
-	await fs.promises.mkdir(dir, { recursive: true })
+	await fs.promises.mkdir(dir, { recursive: true });
 	// write file
 	await fs.promises.writeFile(filepath, buffer);
 }
