@@ -5,6 +5,8 @@ import type { ChildProcess } from "child_process";
 import type { ConfigInterface, WebdriverParams } from "./config.js";
 import type { EventBusInterface } from "./eventbus.js";
 
+import * as fs from "fs";
+
 let headers = new Headers([["Content-Type", "application/json"]]);
 
 export async function newSession(
@@ -191,11 +193,6 @@ async function getFindElementBody(
 	}
 }
 
-// interface ElementClickParams {
-// 	type: "element_click";
-// 	element_id: string;
-// }
-
 export async function elementClick(
 	req: IncomingMessage,
 	res: ServerResponse,
@@ -275,6 +272,7 @@ export async function elementSendKeys(
 	res.end();
 }
 
+
 interface ElementSendKeysParams {
 	text: string;
 	element_id: string;
@@ -287,6 +285,63 @@ async function getElementSendKeysBody(
 	let { type, element_id, text } = json;
 	if ("element_send_keys" === type && "string" === typeof element_id && "string" === typeof text) {
 		return {element_id, text};
+	}
+}
+
+export async function takeElementScreenshot(
+	req: IncomingMessage,
+	res: ServerResponse,
+	signal: AbortSignal | undefined,
+	params: WebdriverParams,
+	sessionId: string,
+): Promise<void> {
+	console.log("take element screenshot");
+	let { url } = params;
+
+	let reqParams = await getTakeElementScreenshotBody(req);
+	if (!reqParams) throw new Error("Failed to deserialize ElementSendKeys body.");
+
+	let {element_id, target_filepath} = reqParams;
+	
+	let resposne = await fetch(
+		new URL(`/session/${sessionId}/element/${element_id}/screenshot`, url),
+		{
+			method: "POST",
+			headers,
+			body: JSON.stringify({}),
+			signal,
+		},
+	);
+	console.log("screenshoted an element!", resposne);
+
+	if (200 !== resposne.status) {
+		let cause = await resposne.json();
+		throw new Error("take-element-screenshot request failed", { cause });
+	}
+
+	let json = await resposne.json();
+	let base64 = json.value;
+	if ("string" !== typeof base64)
+		throw new Error("element screenshot is not a base64 string");
+
+	let buffer = Buffer.from(base64, "base64");
+	await saveFileToDisk(target_filepath, buffer);
+
+	res.writeHead(200, { "content-type": "text/plain" });
+	res.end();
+}
+
+
+interface TakeElementScreenshotParams {
+	element_id: string;
+	target_filepath: string;
+}
+
+async function getTakeElementScreenshotBody(req: IncomingMessage): Promise<TakeElementScreenshotParams | undefined> {
+	let json = await getJsonFromRequestBody(req);
+	let { type, element_id, target_filepath } = json;
+	if ("take_element_screenshot" === type && "string" === typeof element_id && "string" === typeof target_filepath) {
+		return {element_id, target_filepath};
 	}
 }
 
@@ -306,4 +361,15 @@ function getJsonFromRequestBody(req: IncomingMessage): Promise<any> {
 			reject(err);
 		});
 	});
+}
+
+function saveFileToDisk(
+	target_filepath: string,
+	buffer: Buffer,
+): Promise<void> {
+	return new Promise(function(resolve, _reject) {
+		fs.writeFile(target_filepath, buffer, function() {
+			resolve()
+		});
+	})	
 }

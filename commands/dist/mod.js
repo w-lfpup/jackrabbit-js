@@ -36,3 +36,16 @@ export async function elementSendKeys(element_id, text) {
     });
     return 200 === res.status;
 }
+export async function takeElementScreenshot(element_id, target_filepath) {
+    let action = {
+        type: "take_element_screenshot",
+        element_id,
+        target_filepath,
+    };
+    let res = await fetch(`/cmd/take_element_screenshot`, {
+        body: JSON.stringify(action),
+        headers: new Headers([["Content-Type", "application/json"]]),
+        method: "POST",
+    });
+    return 200 === res.status;
+}

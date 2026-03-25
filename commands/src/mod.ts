@@ -29,7 +29,7 @@ interface ElementSendKeys {
 interface TakeElementScreenshot {
 	type: "take_element_screenshot";
 	element_id: string;
-	value: string;
+	target_filepath: string;
 }
 
 // /session/{session id}/element/{element id}/screenshot
@@ -85,6 +85,25 @@ export async function elementSendKeys(
 	};
 
 	let res = await fetch(`/cmd/element_send_keys`, {
+		body: JSON.stringify(action),
+		headers: new Headers([["Content-Type", "application/json"]]),
+		method: "POST",
+	});
+
+	return 200 === res.status;
+}
+
+export async function takeElementScreenshot(
+	element_id: string,
+	target_filepath: string,
+): Promise<boolean> {
+	let action: TakeElementScreenshot = {
+		type: "take_element_screenshot",
+		element_id,
+		target_filepath,
+	};
+
+	let res = await fetch(`/cmd/take_element_screenshot`, {
 		body: JSON.stringify(action),
 		headers: new Headers([["Content-Type", "application/json"]]),
 		method: "POST",
