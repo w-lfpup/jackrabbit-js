@@ -10,7 +10,7 @@ let body = document.querySelector("body");
 body?.append(paragraph);
 
 async function testTakeElementScreenshot(): Promise<string | undefined> {
-	let elementId = await findElement("input");
+	let elementId = await findElement("p");
 	if (!elementId) return "failed to findElement before take-element-screenshot";
 
 	let result = await takeElementScreenshot(
