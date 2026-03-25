@@ -200,11 +200,9 @@ export async function elementClick(
 	params: WebdriverParams,
 	sessionId: string,
 ): Promise<void> {
-	console.log("click an element!@");
 	let { url } = params;
 
 	let elementId = await getElementClickBody(req);
-	console.log("to click", elementId);
 	if (!elementId) throw new Error("Failed to deserialize ElementClick body.");
 
 	let resposne = await fetch(
@@ -216,7 +214,6 @@ export async function elementClick(
 			signal,
 		},
 	);
-	console.log("clicked an element!", resposne);
 
 	if (200 !== resposne.status) {
 		let cause = await resposne.json();
@@ -244,7 +241,6 @@ export async function elementSendKeys(
 	params: WebdriverParams,
 	sessionId: string,
 ): Promise<void> {
-	console.log("keys an element!@");
 	let { url } = params;
 
 	let reqParams = await getElementSendKeysBody(req);
@@ -262,7 +258,6 @@ export async function elementSendKeys(
 			signal,
 		},
 	);
-	console.log("keyed an element!", resposne);
 
 	if (200 !== resposne.status) {
 		let cause = await resposne.json();
@@ -303,17 +298,18 @@ export async function takeElementScreenshot(
 	let { url } = params;
 
 	let reqParams = await getTakeElementScreenshotBody(req);
+	console.log("req params", reqParams);
 	if (!reqParams)
-		throw new Error("Failed to deserialize ElementSendKeys body.");
+		throw new Error("Failed to deserialize TakeElementScreenshot body.");
 
 	let { element_id, target_filepath } = reqParams;
 
+	console.log("about to fetch screenshot");
 	let resposne = await fetch(
 		new URL(`/session/${sessionId}/element/${element_id}/screenshot`, url),
 		{
-			method: "POST",
+			method: "GET",
 			headers,
-			body: JSON.stringify({}),
 			signal,
 		},
 	);
@@ -324,13 +320,13 @@ export async function takeElementScreenshot(
 		throw new Error("take-element-screenshot request failed", { cause });
 	}
 
-	let json = await resposne.json();
-	let base64 = json.value;
-	if ("string" !== typeof base64)
-		throw new Error("element screenshot is not a base64 string");
+	// let json = await resposne.json();
+	// let base64 = json.value;
+	// if ("string" !== typeof base64)
+	// 	throw new Error("element screenshot is not a base64 string");
 
-	let buffer = Buffer.from(base64, "base64");
-	await saveFileToDisk(target_filepath, buffer);
+	// let buffer = Buffer.from(base64, "base64");
+	// await saveFileToDisk(target_filepath, buffer);
 
 	res.writeHead(200, { "content-type": "text/plain" });
 	res.end();
@@ -378,7 +374,8 @@ function saveFileToDisk(
 	buffer: Buffer,
 ): Promise<void> {
 	return new Promise(function (resolve, _reject) {
-		fs.writeFile(target_filepath, buffer, function () {
+		fs.writeFile(target_filepath, buffer, function (err) {
+			if (err) console.log(err);
 			resolve();
 		});
 	});

@@ -7,7 +7,7 @@ import type { WebdriverParams } from "./config.js";
 import * as fs from "fs";
 import * as path from "path";
 import { testHanger } from "./test_hangar.js";
-import { findElement, elementClick, elementSendKeys } from "./commands.js";
+import { findElement, elementClick, elementSendKeys, takeElementScreenshot } from "./commands.js";
 import { serveFile } from "./operations.js";
 import { Datastore } from "./datastore.js";
 
@@ -190,8 +190,6 @@ export async function webdriverCommands(
 		return findElement(req, res, undefined, sessionId, params);
 	}
 	if (reqUrl === "/cmd/element_click") {
-		console.log("webdriver command: element click");
-
 		return elementClick(req, res, undefined, params, sessionId);
 	}
 	if (reqUrl === "/cmd/element_send_keys") {
@@ -199,6 +197,7 @@ export async function webdriverCommands(
 	}
 
 	if (reqUrl === "/cmd/take_element_screenshot") {
+		return takeElementScreenshot(req, res, undefined, params, sessionId);
 	}
 
 	res.writeHead(401);
