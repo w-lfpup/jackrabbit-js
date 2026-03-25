@@ -13,7 +13,7 @@ paragraph.append(span);
 body?.append(paragraph);
 
 async function testTakeElementScreenshot(): Promise<string | undefined> {
-	let elementId = await findElement("p");
+	let elementId = await findElement("span");
 	if (!elementId) return "failed to findElement before take-element-screenshot";
 
 	let result = await takeElementScreenshot(
