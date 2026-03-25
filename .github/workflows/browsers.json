@@ -17,7 +17,7 @@
 		},
 		{
 			"title": "Chrome",
-			"command": "$CHROMEWEBDRIVER/chromedriver --port=4001",
+			"command": "$CHROMEWEBDRIVER/chromedriver --port=4005",
 			"timeout_ms": 30000,
 			"url": "http://localhost:4005",
 			"capabilities": {
@@ -35,7 +35,7 @@
 		},
 		{
 			"title": "Edge",
-			"command": "$EDGEWEBDRIVER/msedgedriver --port=4001",
+			"command": "$EDGEWEBDRIVER/msedgedriver --port=4010",
 			"timeout_ms": 30000,
 			"url": "http://localhost:4010",
 			"capabilities": {
