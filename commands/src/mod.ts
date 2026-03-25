@@ -18,9 +18,9 @@ interface ElementClick {
 // value can just be a string
 
 interface ElementSendKeys {
-	type: "element_click";
+	type: "element_send_keys";
 	element_id: string;
-	value: string;
+	text: string;
 }
 
 // /session/{session id}/element/{element id}/value
@@ -59,7 +59,7 @@ export async function findElement(
 
 export async function elementClick(
 	element_id: string,
-): Promise<string | undefined> {
+): Promise<boolean> {
 	let action: ElementClick = {
 		type: "element_click",
 		element_id,
@@ -71,5 +71,24 @@ export async function elementClick(
 		method: "POST",
 	});
 
-	if (200 === res.status) return await res.text();
+	return 200 === res.status;
+}
+
+export async function elementSendKeys(
+	element_id: string,
+	text: string,
+): Promise<boolean> {
+	let action: ElementSendKeys = {
+		type: "element_send_keys",
+		element_id,
+		text,
+	};
+
+	let res = await fetch(`/cmd/element_send_keys`, {
+		body: JSON.stringify(action),
+		headers: new Headers([["Content-Type", "application/json"]]),
+		method: "POST",
+	});
+
+	return 200 === res.status;
 }

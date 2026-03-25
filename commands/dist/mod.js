@@ -21,6 +21,18 @@ export async function elementClick(element_id) {
         headers: new Headers([["Content-Type", "application/json"]]),
         method: "POST",
     });
-    if (200 === res.status)
-        return await res.text();
+    return 200 === res.status;
+}
+export async function elementSendKeys(element_id, text) {
+    let action = {
+        type: "element_send_keys",
+        element_id,
+        text,
+    };
+    let res = await fetch(`/cmd/element_send_keys`, {
+        body: JSON.stringify(action),
+        headers: new Headers([["Content-Type", "application/json"]]),
+        method: "POST",
+    });
+    return 200 === res.status;
 }

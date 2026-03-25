@@ -7,7 +7,7 @@ import type { WebdriverParams } from "./config.js";
 import * as fs from "fs";
 import * as path from "path";
 import { testHanger } from "./test_hangar.js";
-import { findElement, elementClick } from "./commands.js";
+import { findElement, elementClick, elementSendKeys } from "./commands.js";
 import { serveFile } from "./operations.js";
 import { Datastore } from "./datastore.js";
 
@@ -187,19 +187,22 @@ export async function webdriverCommands(
 	// expecting http 1.1
 	let reqUrl = req.url;
 	if (reqUrl === "/cmd/find_element") {
-		findElement(req, res, undefined, sessionId, params);
+		return findElement(req, res, undefined, sessionId, params);
 	}
 	if (reqUrl === "/cmd/element_click") {
 		console.log("webdriver command: element click");
 
-		elementClick(req, res, undefined, params, sessionId);
+		return elementClick(req, res, undefined, params, sessionId);
 	}
 	if (reqUrl === "/cmd/element_send_keys") {
+		return elementSendKeys(req, res, undefined, params, sessionId);
 	}
-	if (reqUrl === "/cmd/send_keys") {
-	}
+
 	if (reqUrl === "/cmd/take_element_screenshot") {
 	}
+
+	res.writeHead(401);
+	res.end();
 }
 
 function getJsonFromRequestBody(req: IncomingMessage): Promise<any> {
