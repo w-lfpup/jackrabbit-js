@@ -5,8 +5,8 @@
 		"rootDir": "./src",
 		"outDir": "./dist",
 		"paths": {
-			"jackrabbit/core/*": ["../core/*"],
-			"jackrabbit/commands/*": ["../commands/*"]
+			"@w-lfpup/jackrabbit/core/*": ["../core/*"],
+			"@w-lfpup/jackrabbit/commands/*": ["../commands/*"]
 		}
 	}
 }

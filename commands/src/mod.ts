@@ -1,8 +1,45 @@
 // find element just needs a string in body (element-28902489215801)
 //
 
+interface Log {
+	type: "log";
+	message: string;
+}
+
 interface FindElement {
 	type: "find_element";
+	css_selector: string;
+}
+
+interface FindElements {
+	type: "find_elements";
+	css_selector: string;
+}
+
+interface FindElementFromElement {
+	type: "find_element_from_element";
+	css_selector: string;
+}
+
+interface FindElementsFromElement {
+	type: "find_elements_from_element";
+	css_selector: string;
+}
+
+interface GetElementShadowRoot {
+	type: "get_element_shadow_root";
+	element_id: string;
+}
+
+interface FindElementFromShadowRoot {
+	type: "find_element_from_shadow_root";
+	shadow_root_id: string;
+	css_selector: string;
+}
+
+interface FindElementsFromShadowRoot {
+	type: "find_elements_from_shadow_root";
+	shadow_root_id: string;
 	css_selector: string;
 }
 
@@ -35,7 +72,14 @@ interface TakeElementScreenshot {
 // /session/{session id}/element/{element id}/screenshot
 
 export type commands =
+	| Log
 	| FindElement
+	| FindElements
+	| GetElementShadowRoot
+	| FindElementFromElement
+	| FindElementsFromElement
+	| FindElementFromShadowRoot
+	| FindElementsFromShadowRoot
 	| ElementClick
 	| ElementSendKeys
 	| TakeElementScreenshot;
@@ -109,3 +153,11 @@ export async function takeElementScreenshot(
 
 	return 200 === res.status;
 }
+
+export async function log() {}
+export async function findElements() {}
+export async function findElementFromElement() {}
+export async function findElementsFromElements() {}
+export async function findShadowRoot() {}
+export async function findElementFromShadowRoot() {}
+export async function findElementsFromShadowRoot() {}

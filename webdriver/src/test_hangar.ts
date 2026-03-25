@@ -7,15 +7,15 @@ export function testHanger(params: TestHangerParams) {
 	return `<!DOCTYPE html>
 <html>
 	<head>
-		<script type="jackrabbit_config">
-			${JSON.stringify(params)}
-		</script>
 		<script type="importmap">
 			{
 				"imports": {
-					"jackrabbit/": "/jackrabbit/"
+					"@w-lfpup/jackrabbit/": "/jackrabbit/"
 				}
 			}
+		</script>
+		<script type="jackrabbit_config">
+			${JSON.stringify(params)}
 		</script>
 		<script type="module" src="/jackrabbit/browser/dist/mod.js"></script>
 	</head>

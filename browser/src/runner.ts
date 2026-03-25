@@ -1,6 +1,6 @@
 import type { Logger } from "./logger.js";
 
-import { runCollection } from "jackrabbit/core/dist/mod.js";
+import { runCollection } from "@w-lfpup/jackrabbit/core/dist/mod.js";
 
 export async function run(logger: Logger, files: string[], baseUrl: string) {
 	for (const [collection_id, url] of files.entries()) {

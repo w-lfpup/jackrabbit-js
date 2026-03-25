@@ -107,3 +107,5 @@ async function getFile(filePath: string): Promise<fs.ReadStream | undefined> {
 		return fs.createReadStream(filePath);
 	} catch {}
 }
+
+export async function log() {}
