@@ -6,6 +6,7 @@ import type { ConfigInterface, WebdriverParams } from "./config.js";
 import type { EventBusInterface } from "./eventbus.js";
 
 import * as fs from "fs";
+import * as path from "path";
 
 let headers = new Headers([["Content-Type", "application/json"]]);
 
@@ -295,7 +296,7 @@ export async function takeElementScreenshot(
 	sessionId: string,
 ): Promise<void> {
 	console.log("take element screenshot");
-	let { url } = params;
+	let { url, title } = params;
 
 	let reqParams = await getTakeElementScreenshotBody(req);
 	console.log("req params", reqParams);
@@ -320,13 +321,18 @@ export async function takeElementScreenshot(
 		throw new Error("take-element-screenshot request failed", { cause });
 	}
 
-	// let json = await resposne.json();
-	// let base64 = json.value;
-	// if ("string" !== typeof base64)
-	// 	throw new Error("element screenshot is not a base64 string");
+	let json = await resposne.json();
+	let base64 = json.value;
+	if ("string" !== typeof base64)
+		throw new Error("element screenshot is not a base64 string");
 
-	// let buffer = Buffer.from(base64, "base64");
-	// await saveFileToDisk(target_filepath, buffer);
+
+	// get path relative to cwd
+	// if /absolute path
+	// 
+	// join process.cwd() + target_filepath;
+	let buffer = Buffer.from(base64, "base64");
+	await saveFileToDisk(target_filepath, title, buffer);
 
 	res.writeHead(200, { "content-type": "text/plain" });
 	res.end();
@@ -369,14 +375,29 @@ function getJsonFromRequestBody(req: IncomingMessage): Promise<any> {
 	});
 }
 
-function saveFileToDisk(
+async function saveFileToDisk(
 	target_filepath: string,
+	title: string,
 	buffer: Buffer,
 ): Promise<void> {
-	return new Promise(function (resolve, _reject) {
-		fs.writeFile(target_filepath, buffer, function (err) {
-			if (err) console.log(err);
-			resolve();
-		});
-	});
+	// make sure path is in current working directory?
+	let cwd = process.cwd()
+	let filepath = path.join(cwd, target_filepath);
+	console.log("filepath:", filepath);
+	if (!filepath.startsWith(cwd)) throw new Error("Screenshot filepath is out of scope (not in cwd)")
+		
+	let ext = path.extname(filepath);
+	if (ext) filepath = filepath.substring(0, filepath.length - ext.length);
+	console.log("updated extensionless filepath:", filepath);
+		
+	let title_ext = title.toLowerCase().replaceAll(" ", "_");
+	filepath = `${filepath}.${title_ext}.png`;
+	
+	console.log("updated filepath:", filepath);
+		
+	// create directories
+	let dir = path.dirname(filepath);
+	await fs.promises.mkdir(dir, { recursive: true })
+	// write file
+	await fs.promises.writeFile(filepath, buffer);
 }

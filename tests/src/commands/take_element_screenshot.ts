@@ -4,9 +4,12 @@ import {
 } from "jackrabbit/commands/dist/mod.js";
 
 let text = document.createTextNode("Beasts tread softly underfoot");
+let span = document.createElement("span");
 let paragraph = document.createElement("p");
-paragraph.append(text);
 let body = document.querySelector("body");
+
+span.append(text);
+paragraph.append(span);
 body?.append(paragraph);
 
 async function testTakeElementScreenshot(): Promise<string | undefined> {
