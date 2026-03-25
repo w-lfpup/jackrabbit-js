@@ -248,16 +248,17 @@ export async function elementSendKeys(
 	let { url } = params;
 
 	let reqParams = await getElementSendKeysBody(req);
-	if (!reqParams) throw new Error("Failed to deserialize ElementSendKeys body.");
+	if (!reqParams)
+		throw new Error("Failed to deserialize ElementSendKeys body.");
 
-	let {element_id, text} = reqParams;
-	
+	let { element_id, text } = reqParams;
+
 	let resposne = await fetch(
 		new URL(`/session/${sessionId}/element/${element_id}/value`, url),
 		{
 			method: "POST",
 			headers,
-			body: JSON.stringify({text}),
+			body: JSON.stringify({ text }),
 			signal,
 		},
 	);
@@ -272,7 +273,6 @@ export async function elementSendKeys(
 	res.end();
 }
 
-
 interface ElementSendKeysParams {
 	text: string;
 	element_id: string;
@@ -283,8 +283,12 @@ async function getElementSendKeysBody(
 ): Promise<ElementSendKeysParams | undefined> {
 	let json = await getJsonFromRequestBody(req);
 	let { type, element_id, text } = json;
-	if ("element_send_keys" === type && "string" === typeof element_id && "string" === typeof text) {
-		return {element_id, text};
+	if (
+		"element_send_keys" === type &&
+		"string" === typeof element_id &&
+		"string" === typeof text
+	) {
+		return { element_id, text };
 	}
 }
 
@@ -299,10 +303,11 @@ export async function takeElementScreenshot(
 	let { url } = params;
 
 	let reqParams = await getTakeElementScreenshotBody(req);
-	if (!reqParams) throw new Error("Failed to deserialize ElementSendKeys body.");
+	if (!reqParams)
+		throw new Error("Failed to deserialize ElementSendKeys body.");
 
-	let {element_id, target_filepath} = reqParams;
-	
+	let { element_id, target_filepath } = reqParams;
+
 	let resposne = await fetch(
 		new URL(`/session/${sessionId}/element/${element_id}/screenshot`, url),
 		{
@@ -331,17 +336,22 @@ export async function takeElementScreenshot(
 	res.end();
 }
 
-
 interface TakeElementScreenshotParams {
 	element_id: string;
 	target_filepath: string;
 }
 
-async function getTakeElementScreenshotBody(req: IncomingMessage): Promise<TakeElementScreenshotParams | undefined> {
+async function getTakeElementScreenshotBody(
+	req: IncomingMessage,
+): Promise<TakeElementScreenshotParams | undefined> {
 	let json = await getJsonFromRequestBody(req);
 	let { type, element_id, target_filepath } = json;
-	if ("take_element_screenshot" === type && "string" === typeof element_id && "string" === typeof target_filepath) {
-		return {element_id, target_filepath};
+	if (
+		"take_element_screenshot" === type &&
+		"string" === typeof element_id &&
+		"string" === typeof target_filepath
+	) {
+		return { element_id, target_filepath };
 	}
 }
 
@@ -367,9 +377,9 @@ function saveFileToDisk(
 	target_filepath: string,
 	buffer: Buffer,
 ): Promise<void> {
-	return new Promise(function(resolve, _reject) {
-		fs.writeFile(target_filepath, buffer, function() {
-			resolve()
+	return new Promise(function (resolve, _reject) {
+		fs.writeFile(target_filepath, buffer, function () {
+			resolve();
 		});
-	})	
+	});
 }

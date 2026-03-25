@@ -57,9 +57,7 @@ export async function findElement(
 	if (200 === res.status) return await res.text();
 }
 
-export async function elementClick(
-	element_id: string,
-): Promise<boolean> {
+export async function elementClick(element_id: string): Promise<boolean> {
 	let action: ElementClick = {
 		type: "element_click",
 		element_id,

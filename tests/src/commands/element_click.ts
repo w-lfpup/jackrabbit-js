@@ -1,12 +1,12 @@
-import { findElement, elementClick } from "jackrabbit/commands/dist/mod.js"
+import { findElement, elementClick } from "jackrabbit/commands/dist/mod.js";
 
 let clickCounter = 0;
 
 let button = document.createElement("button");
 button.setAttribute("data-element_click", "");
-button.addEventListener("click", function() {
-	clickCounter += 1
-})
+button.addEventListener("click", function () {
+	clickCounter += 1;
+});
 
 let body = document.querySelector("body");
 body?.append(button);
@@ -29,14 +29,12 @@ async function testMultipleElementClicks(): Promise<string | undefined> {
 	await elementClick(elementId);
 	await elementClick(elementId);
 
-	if (3 !== clickCounter) return `click counter failed to click ${clickCounter}/3 times`;
+	if (3 !== clickCounter)
+		return `click counter failed to click ${clickCounter}/3 times`;
 }
 
 // export tests
-export const tests = [
-	testElementClick,
-	testMultipleElementClicks,
-];
+export const tests = [testElementClick, testMultipleElementClicks];
 
 // export optional test details
 export const options = {
