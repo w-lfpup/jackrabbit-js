@@ -2,10 +2,7 @@ import type { IncomingMessage, ServerResponse } from "http";
 
 // BELOW ARE ACTIONS FROM TESTS THEMSELVES
 import type { WebdriverParams } from "../config.js";
-import type { EventBusInterface } from "../eventbus.js";
 
-import * as fs from "fs";
-import * as path from "path";
 import { jsonHeaders, getJsonFromRequestBody } from "./flyweight.js";
 
 export async function elementSendKeys(

@@ -3,8 +3,12 @@ import type { ConfigInterface, WebdriverParams } from "./config.js";
 import type { EventBusInterface } from "./eventbus.js";
 
 import { exec } from "child_process";
-import { addCookie, go } from "./commands.js";
-import { deleteSession, newSession } from "./commands/mod.js";
+import {
+	deleteSession,
+	newSession,
+	addCookie,
+	navigateTo,
+} from "./commands/mod.js";
 import { untilWebdriverReady } from "./operations.js";
 
 export class WebDrivers {
@@ -129,7 +133,7 @@ class WebdriverSession {
 				},
 			});
 			// session needs to be, go stored in state
-			await go(
+			await navigateTo(
 				this.#params,
 				this.#signal,
 				this.#sessionId,
@@ -137,7 +141,7 @@ class WebdriverSession {
 				"/ping",
 			);
 			await addCookie(this.#params, this.#signal, this.#sessionId);
-			await go(
+			await navigateTo(
 				this.#params,
 				this.#signal,
 				this.#sessionId,
