@@ -5,15 +5,9 @@ import type { ConfigInterface } from "./config.js";
 import type { WebdriverParams } from "./config.js";
 
 import { testHanger } from "./test_hangar.js";
-import {
-	findElement,
-	findElements,
-	elementClick,
-	elementSendKeys,
-	takeElementScreenshot,
-	log,
-	getElementShadowRoot,
-} from "./commands.js";
+import { getElementShadowRoot,	findElements,
+ findElement,	log, takeElementScreenshot, 	elementClick,
+	elementSendKeys, } from "./commands/mod.js";
 import { serveFile } from "./operations.js";
 import { Datastore } from "./datastore.js";
 
@@ -21,15 +15,15 @@ import { Datastore } from "./datastore.js";
 let routeMap = new Map([
 	["/cmd/find_element", findElement],
 	["/cmd/find_elements", findElements],
-	// ["/cmd/find_element_from_element", findElement],
-	// ["/cmd/find_elements_from_element", findElement],
+	// ["/cmd/find_element_from_element", findElementFromElement],
+	// ["/cmd/find_elements_from_element", findElementsFromElement],
 	["/cmd/element_click", elementClick],
 	["/cmd/element_send_keys", elementSendKeys],
 	["/cmd/take_element_screenshot", takeElementScreenshot],
 	["/cmd/log", log],
 	["/cmd/get_element_shadow_root", getElementShadowRoot],
-	// ["/cmd/find_element_from_shadow_root", findElement],
-	// ["/cmd/find_elements_from_shadow_root", findElement],
+	// ["/cmd/find_element_from_shadow_root", findElementFromShadowRoot],
+	// ["/cmd/find_elements_from_shadow_root", findElementsFromShadowRoot],
 ])
 
 export class Router {
