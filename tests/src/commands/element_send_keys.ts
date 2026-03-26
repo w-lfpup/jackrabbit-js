@@ -1,7 +1,4 @@
-import {
-	findElement,
-	elementSendKeys,
-} from "@w-lfpup/jackrabbit/commands/dist/mod.js";
+import { findElement, elementSendKeys } from "@w-lfpup/jackrabbit/mod.js";
 
 let input = document.createElement("input");
 let body = document.querySelector("body");

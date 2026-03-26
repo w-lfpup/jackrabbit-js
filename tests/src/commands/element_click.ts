@@ -1,7 +1,4 @@
-import {
-	findElement,
-	elementClick,
-} from "@w-lfpup/jackrabbit/commands/dist/mod.js";
+import { findElement, elementClick } from "@w-lfpup/jackrabbit/mod.js";
 
 let clickCounter = 0;
 
@@ -40,12 +37,16 @@ async function testMultipleElementClicks(): Promise<string | undefined> {
 }
 
 // tear down
-function teardown() {
-	section.remove()
+function teardownElementClick() {
+	section.remove();
 }
 
 // export tests
-export const tests = [testElementClick, testMultipleElementClicks, teardown];
+export const tests = [
+	testElementClick,
+	testMultipleElementClicks,
+	teardownElementClick,
+];
 
 // export optional test details
 export const options = {

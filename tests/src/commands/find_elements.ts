@@ -1,4 +1,4 @@
-import { findElement } from "@w-lfpup/jackrabbit/commands/dist/mod.js";
+import { findElement } from "@w-lfpup/jackrabbit/mod.js";
 
 let button = document.createElement("button");
 let body = document.querySelector("body");
