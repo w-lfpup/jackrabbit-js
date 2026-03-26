@@ -9,7 +9,6 @@
 		"browser",
 		"webdriver",
 		"commands",
-		"dom_test_utils",
 		"tests"
 	],
 	"bin": {
