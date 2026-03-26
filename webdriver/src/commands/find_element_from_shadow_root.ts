@@ -20,7 +20,12 @@ export async function findElementFromShadowRoot(
 ) {
 	if (!sessionId) return;
 
-	let elementId = await findElementFromShadowRootRequest(req, params, undefined, sessionId);
+	let elementId = await findElementFromShadowRootRequest(
+		req,
+		params,
+		undefined,
+		sessionId,
+	);
 	if (!elementId) {
 		res.writeHead(401);
 		res.end();
@@ -44,14 +49,16 @@ async function findElementFromShadowRootRequest(
 	let bodyJson = await getFindElementFromShadowRootBody(req);
 	if (!bodyJson) throw new Error("Failed to deserialize FindElement body.");
 
-	let {shadow_root_id, using, value} = bodyJson;
-	
+	let { shadow_root_id, using, value } = bodyJson;
+
 	let findElementRes = await fetch(
-		new URL(new URL(`/session/${sessionId}/shadow/${shadow_root_id}/element`, url)),
+		new URL(
+			new URL(`/session/${sessionId}/shadow/${shadow_root_id}/element`, url),
+		),
 		{
 			method: "POST",
 			headers: jsonHeaders,
-			body: JSON.stringify({ using, value}),
+			body: JSON.stringify({ using, value }),
 			signal,
 		},
 	);
@@ -83,7 +90,11 @@ async function getFindElementFromShadowRootBody(
 ): Promise<FindElementParams | undefined> {
 	let json = await getJsonFromRequestBody(req);
 	let { type, css_selector, shadow_root_id } = json;
-	if ("find_element_from_shadow_root" === type && "string" === typeof css_selector && "string" === typeof shadow_root_id) {
+	if (
+		"find_element_from_shadow_root" === type &&
+		"string" === typeof css_selector &&
+		"string" === typeof shadow_root_id
+	) {
 		return { using: "css selector", value: css_selector, shadow_root_id };
 	}
 }

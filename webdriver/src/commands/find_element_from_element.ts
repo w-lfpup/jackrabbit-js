@@ -20,7 +20,12 @@ export async function findElementFromElement(
 ) {
 	if (!sessionId) return;
 
-	let elementId = await findElementFromElementRequest(req, params, undefined, sessionId);
+	let elementId = await findElementFromElementRequest(
+		req,
+		params,
+		undefined,
+		sessionId,
+	);
 	if (!elementId) {
 		res.writeHead(401);
 		res.end();
@@ -44,14 +49,16 @@ async function findElementFromElementRequest(
 	let bodyJson = await getFindElementFromElementBody(req);
 	if (!bodyJson) throw new Error("Failed to deserialize FindElement body.");
 
-	let {element_id, using, value} = bodyJson;
-	
+	let { element_id, using, value } = bodyJson;
+
 	let findElementRes = await fetch(
-		new URL(new URL(`/session/${sessionId}/element/${element_id}/element`, url)),
+		new URL(
+			new URL(`/session/${sessionId}/element/${element_id}/element`, url),
+		),
 		{
 			method: "POST",
 			headers: jsonHeaders,
-			body: JSON.stringify({ using, value}),
+			body: JSON.stringify({ using, value }),
 			signal,
 		},
 	);
@@ -83,7 +90,11 @@ async function getFindElementFromElementBody(
 ): Promise<FindElementParams | undefined> {
 	let json = await getJsonFromRequestBody(req);
 	let { type, css_selector, element_id } = json;
-	if ("find_element_from_element" === type && "string" === typeof css_selector && "string" === typeof element_id) {
+	if (
+		"find_element_from_element" === type &&
+		"string" === typeof css_selector &&
+		"string" === typeof element_id
+	) {
 		return { using: "css selector", value: css_selector, element_id };
 	}
 }
