@@ -3,7 +3,6 @@ import type { WebdriverParams } from "../config.js";
 
 import { getJsonFromRequestBody, jsonHeaders } from "./flyweight.js";
 
-
 export async function getElementShadowRoot(
 	req: IncomingMessage,
 	res: ServerResponse,

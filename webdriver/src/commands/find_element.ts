@@ -13,7 +13,6 @@ interface FindElementParams {
 	value: string;
 }
 
-
 export async function findElement(
 	req: IncomingMessage,
 	res: ServerResponse,

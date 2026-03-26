@@ -5,9 +5,15 @@ import type { ConfigInterface } from "./config.js";
 import type { WebdriverParams } from "./config.js";
 
 import { testHanger } from "./test_hangar.js";
-import { getElementShadowRoot,	findElements,
- findElement,	log, takeElementScreenshot, 	elementClick,
-	elementSendKeys, } from "./commands/mod.js";
+import {
+	getElementShadowRoot,
+	findElements,
+	findElement,
+	log,
+	takeElementScreenshot,
+	elementClick,
+	elementSendKeys,
+} from "./commands/mod.js";
 import { serveFile } from "./operations.js";
 import { Datastore } from "./datastore.js";
 
@@ -24,7 +30,7 @@ let routeMap = new Map([
 	["/cmd/get_element_shadow_root", getElementShadowRoot],
 	// ["/cmd/find_element_from_shadow_root", findElementFromShadowRoot],
 	// ["/cmd/find_elements_from_shadow_root", findElementsFromShadowRoot],
-])
+]);
 
 export class Router {
 	#config: ConfigInterface;

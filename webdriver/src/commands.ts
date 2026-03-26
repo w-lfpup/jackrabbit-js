@@ -9,8 +9,6 @@ import * as path from "path";
 
 let headers = new Headers([["Content-Type", "application/json"]]);
 
-
-
 // GO
 export async function go(
 	params: WebdriverParams,
@@ -65,8 +63,6 @@ export async function addCookie(
 
 // FIND ELEMENT
 
-
-
 function getJsonFromRequestBody(req: IncomingMessage): Promise<any> {
 	return new Promise(function (resolve, reject) {
 		let data: Uint8Array[] = [];
@@ -85,11 +81,8 @@ function getJsonFromRequestBody(req: IncomingMessage): Promise<any> {
 	});
 }
 
-
 export async function findElementFromElement() {}
 export async function findElementsFromElements() {}
-
-
 
 // export async function findShadowRoot() {}
 export async function findElementFromShadowRoot() {}
