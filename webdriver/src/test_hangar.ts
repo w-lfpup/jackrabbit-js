@@ -10,7 +10,7 @@ export function testHanger(params: TestHangerParams) {
 		<script type="importmap">
 			{
 				"imports": {
-					"@w-lfpup/jackrabbit": "/jackrabbit/commands/dist/mod.js"
+					"@w-lfpup/jackrabbit/": "/jackrabbit/"
 				}
 			}
 		</script>
