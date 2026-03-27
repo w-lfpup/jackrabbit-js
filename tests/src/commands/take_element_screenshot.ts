@@ -3,14 +3,16 @@ import {
 	takeElementScreenshot,
 } from "@w-lfpup/jackrabbit/commands/dist/mod.js";
 
-let text = document.createTextNode("Beasts tread softly underfoot");
-let span = document.createElement("span");
-let paragraph = document.createElement("p");
-let body = document.querySelector("body");
+let section = document.createElement("section");
 
-span.append(text);
-paragraph.append(span);
-body?.append(paragraph);
+function setupFindElement() {
+	section.setHTMLUnsafe(`
+		<p><span>Beasts tread softly underfoot.</span></p>
+	`);
+
+	let body = document.querySelector("body");
+	body?.append(section);
+}
 
 async function testTakeElementScreenshot(): Promise<string | undefined> {
 	let elementId = await findElement("span");
@@ -24,8 +26,16 @@ async function testTakeElementScreenshot(): Promise<string | undefined> {
 	if (!result) return "failed to take element screenshot";
 }
 
+function teardownTakeElementScreenshot() {
+	section.remove();
+}
+
 // export tests
-export const tests = [testTakeElementScreenshot];
+export const tests = [
+	setupFindElement,
+	testTakeElementScreenshot,
+	teardownTakeElementScreenshot,
+];
 
 // export optional test details
 export const options = {

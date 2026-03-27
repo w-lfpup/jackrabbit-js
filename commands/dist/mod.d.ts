@@ -51,8 +51,8 @@ export declare function findElement(css_selector: string): Promise<string | unde
 export declare function elementClick(element_id: string): Promise<boolean>;
 export declare function elementSendKeys(element_id: string, text: string): Promise<boolean>;
 export declare function takeElementScreenshot(element_id: string, target_filepath: string): Promise<boolean>;
-export declare function log(): Promise<void>;
-export declare function findElements(): Promise<void>;
+export declare function log(message: string): Promise<boolean>;
+export declare function findElements(css_selector: string): Promise<string[] | undefined>;
 export declare function findElementFromElement(): Promise<void>;
 export declare function findElementsFromElements(): Promise<void>;
 export declare function findShadowRoot(): Promise<void>;

@@ -6,8 +6,7 @@ import {
 let section = document.createElement("section");
 
 function setupElementSendKeys() {
-	let input = document.createElement("input");
-	section.append(input);
+	section.setHTMLUnsafe(`<input>`);
 	let body = document.querySelector("body");
 	body?.append(section);
 }

@@ -7,7 +7,7 @@ import type { WebdriverParams } from "./config.js";
 import { testHanger } from "./test_hangar.js";
 import {
 	getElementShadowRoot,
-	findElements,
+	// findElements,
 	findElement,
 	log,
 	takeElementScreenshot,
@@ -30,7 +30,7 @@ let routeMap = new Map([
 	["/cmd/find_element", findElement],
 	["/cmd/find_elements_from_element", findElementsFromElement],
 	["/cmd/find_elements_from_shadow_root", findElementsFromShadowRoot],
-	["/cmd/find_elements", findElements],
+	// ["/cmd/find_elements", findElements],
 	["/cmd/get_element_shadow_root", getElementShadowRoot],
 	["/cmd/log", log],
 	["/cmd/take_element_screenshot", takeElementScreenshot],

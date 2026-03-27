@@ -49,8 +49,40 @@ export async function takeElementScreenshot(element_id, target_filepath) {
     });
     return 200 === res.status;
 }
-export async function log() { }
-export async function findElements() { }
+export async function log(message) {
+    let action = {
+        type: "log",
+        message,
+    };
+    let res = await fetch(`/cmd/log`, {
+        body: JSON.stringify(action),
+        headers: new Headers([["Content-Type", "application/json"]]),
+        method: "POST",
+    });
+    return 200 === res.status;
+}
+export async function findElements(css_selector) {
+    let action = {
+        type: "find_elements",
+        css_selector,
+    };
+    let res = await fetch(`/cmd/find_elements`, {
+        body: JSON.stringify(action),
+        headers: new Headers([["Content-Type", "application/json"]]),
+        method: "POST",
+    });
+    if (200 !== res.status)
+        return;
+    let json = await res.json();
+    if (!Array.isArray(json))
+        return;
+    let elementIds = [];
+    for (let item of json) {
+        if ("string" === typeof item)
+            elementIds.push(item);
+    }
+    return elementIds;
+}
 export async function findElementFromElement() { }
 export async function findElementsFromElements() { }
 export async function findShadowRoot() { }
