@@ -41,7 +41,7 @@ async function findElementsRequest(
 	let { url } = params;
 
 	let bodyJson = await getFindElementsBody(req);
-	if (!bodyJson) throw new Error("Failed to deserialize FindElement body.");
+	if (!bodyJson) throw new Error("Failed to deserialize FindElements body.");
 
 	let findElementRes = await fetch(
 		new URL(new URL(`/session/${sessionId}/elements`, url)),

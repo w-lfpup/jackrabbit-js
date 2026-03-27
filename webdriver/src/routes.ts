@@ -6,17 +6,17 @@ import type { WebdriverParams } from "./config.js";
 
 import { testHanger } from "./test_hangar.js";
 import {
-	getElementShadowRoot,
-	// findElements,
+	// getElementShadowRoot,
+	findElements,
 	findElement,
-	log,
+	// log,
 	takeElementScreenshot,
 	elementClick,
 	elementSendKeys,
-	findElementFromElement,
-	findElementsFromElement,
-	findElementFromShadowRoot,
-	findElementsFromShadowRoot,
+	// findElementFromElement,
+	// findElementsFromElement,
+	// findElementFromShadowRoot,
+	// findElementsFromShadowRoot,
 } from "./commands/mod.js";
 import { serveFile } from "./operations.js";
 import { Datastore } from "./datastore.js";
@@ -25,14 +25,14 @@ import { Datastore } from "./datastore.js";
 let routeMap = new Map([
 	["/cmd/element_click", elementClick],
 	["/cmd/element_send_keys", elementSendKeys],
-	["/cmd/find_element_from_element", findElementFromElement],
-	["/cmd/find_element_from_shadow_root", findElementFromShadowRoot],
+	// ["/cmd/find_element_from_element", findElementFromElement],
+	// ["/cmd/find_element_from_shadow_root", findElementFromShadowRoot],
 	["/cmd/find_element", findElement],
-	["/cmd/find_elements_from_element", findElementsFromElement],
-	["/cmd/find_elements_from_shadow_root", findElementsFromShadowRoot],
-	// ["/cmd/find_elements", findElements],
-	["/cmd/get_element_shadow_root", getElementShadowRoot],
-	["/cmd/log", log],
+	// ["/cmd/find_elements_from_element", findElementsFromElement],
+	// ["/cmd/find_elements_from_shadow_root", findElementsFromShadowRoot],
+	["/cmd/find_elements", findElements],
+	// ["/cmd/get_element_shadow_root", getElementShadowRoot],
+	// ["/cmd/log", log],
 	["/cmd/take_element_screenshot", takeElementScreenshot],
 ]);
 
