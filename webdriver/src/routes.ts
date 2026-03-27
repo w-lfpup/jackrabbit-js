@@ -13,7 +13,7 @@ import {
 	takeElementScreenshot,
 	elementClick,
 	elementSendKeys,
-	// findElementFromElement,
+	findElementFromElement,
 	// findElementsFromElement,
 	// findElementFromShadowRoot,
 	// findElementsFromShadowRoot,
@@ -25,7 +25,7 @@ import { Datastore } from "./datastore.js";
 let routeMap = new Map([
 	["/cmd/element_click", elementClick],
 	["/cmd/element_send_keys", elementSendKeys],
-	// ["/cmd/find_element_from_element", findElementFromElement],
+	["/cmd/find_element_from_element", findElementFromElement],
 	// ["/cmd/find_element_from_shadow_root", findElementFromShadowRoot],
 	["/cmd/find_element", findElement],
 	// ["/cmd/find_elements_from_element", findElementsFromElement],

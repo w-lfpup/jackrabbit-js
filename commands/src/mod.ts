@@ -18,6 +18,7 @@ interface FindElements {
 
 interface FindElementFromElement {
 	type: "find_element_from_element";
+	element_id: string;
 	css_selector: string;
 }
 
@@ -196,7 +197,25 @@ export async function findElements(
 	return elementIds;
 }
 
-export async function findElementFromElement() {}
+export async function findElementFromElement(
+	element_id: string,
+	css_selector: string,
+): Promise<string | undefined> {
+	let action: FindElementFromElement = {
+		type: "find_element_from_element",
+		css_selector,
+		element_id,
+	};
+
+	let res = await fetch(`/cmd/find_element_from_element`, {
+		body: JSON.stringify(action),
+		headers: new Headers([["Content-Type", "application/json"]]),
+		method: "POST",
+	});
+
+	if (200 === res.status) return await res.text();
+}
+
 export async function findElementsFromElements() {}
 export async function findShadowRoot() {}
 export async function findElementFromShadowRoot() {}

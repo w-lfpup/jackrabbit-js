@@ -83,7 +83,20 @@ export async function findElements(css_selector) {
     }
     return elementIds;
 }
-export async function findElementFromElement() { }
+export async function findElementFromElement(element_id, css_selector) {
+    let action = {
+        type: "find_element_from_element",
+        css_selector,
+        element_id,
+    };
+    let res = await fetch(`/cmd/find_element_from_element`, {
+        body: JSON.stringify(action),
+        headers: new Headers([["Content-Type", "application/json"]]),
+        method: "POST",
+    });
+    if (200 === res.status)
+        return await res.text();
+}
 export async function findElementsFromElements() { }
 export async function findShadowRoot() { }
 export async function findElementFromShadowRoot() { }
