@@ -18,8 +18,6 @@ async function testFindElements(): Promise<string | undefined> {
 	if (undefined === elementIds) return "query did not return array";
 
 	if (3 !== elementIds.length) return `only ${elementIds.length} were found`;
-
-	return "failed to findElement";
 }
 
 function teardownFindElements() {

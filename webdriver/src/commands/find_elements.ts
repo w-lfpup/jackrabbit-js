@@ -18,18 +18,14 @@ export async function findElements(
 	params: WebdriverParams,
 	sessionId: string | undefined,
 ) {
-	console.log("find elements");
 	if (!sessionId) return;
 
 	let elementIds = await findElementsRequest(req, params, undefined, sessionId);
 	if (!elementIds) {
-		console.log("no element ids");
 		res.writeHead(401);
 		res.end();
 		return;
 	}
-
-	console.log("tail of findelements:", elementIds);
 
 	res.setHeader("Content-Type", "application/json");
 	res.writeHead(200);
@@ -42,7 +38,6 @@ async function findElementsRequest(
 	signal: AbortSignal | undefined, // driver defined state
 	sessionId: string, // derived state associated with driver
 ): Promise<string[]> {
-	console.log("find elements request");
 	let { url } = params;
 
 	let bodyJson = await getFindElementsBody(req);
@@ -64,11 +59,9 @@ async function findElementsRequest(
 	}
 
 	let json = await findElementRes.json();
-	console.log("query response:", json);
 	if (!Array.isArray(json?.value))
 		throw new Error("getElements return value is not an array");
 
-	console.log("about to iterate through json response");
 	let elementIds = [];
 	for (let elObj of json.value) {
 		if (typeof elObj === "object") {
@@ -84,16 +77,12 @@ async function findElementsRequest(
 		}
 	}
 
-	console.log("elementIds:", elementIds);
-
 	return elementIds;
 }
 
 async function getFindElementsBody(
 	req: IncomingMessage,
 ): Promise<FindElementParams | undefined> {
-	console.log("find elements body");
-
 	let json = await getJsonFromRequestBody(req);
 	let { type, css_selector } = json;
 	if ("find_elements" === type && "string" === typeof css_selector) {
