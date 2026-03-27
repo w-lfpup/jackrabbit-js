@@ -27,7 +27,7 @@ function setupFindElement() {
 	body?.append(section);
 }
 
-async function testFindElement(): Promise<string | undefined> {
+async function testGetElementShadowRoot(): Promise<string | undefined> {
 	let formId = await findElement("my-component");
 	if (!formId) return "failed to find my-component element";
 
@@ -40,7 +40,7 @@ function teardownFindElement() {
 }
 
 // export tests
-export const tests = [setupFindElement, testFindElement, teardownFindElement];
+export const tests = [setupFindElement, testGetElementShadowRoot, teardownFindElement];
 
 // export optional test details
 export const options = {

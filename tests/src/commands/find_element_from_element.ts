@@ -5,7 +5,7 @@ import {
 
 let section = document.createElement("section");
 
-function setupFindElement() {
+function setup() {
 	section.setHTMLUnsafe(`
 		<form>
 			<button>click me softly</button>
@@ -16,7 +16,7 @@ function setupFindElement() {
 	body?.append(section);
 }
 
-async function testFindElement(): Promise<string | undefined> {
+async function testFindElementFromElement(): Promise<string | undefined> {
 	let formId = await findElement("form");
 	if (!formId) return "failed to find form element";
 
@@ -24,12 +24,12 @@ async function testFindElement(): Promise<string | undefined> {
 	if (!buttonId) return "failed to find button from form element";
 }
 
-function teardownFindElement() {
+function teardown() {
 	section.remove();
 }
 
 // export tests
-export const tests = [setupFindElement, testFindElement, teardownFindElement];
+export const tests = [setup, testFindElementFromElement, teardown];
 
 // export optional test details
 export const options = {
