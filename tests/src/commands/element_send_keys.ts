@@ -1,8 +1,16 @@
-import { findElement, elementSendKeys } from "@w-lfpup/jackrabbit/commands/dist/mod.js";
+import {
+	findElement,
+	elementSendKeys,
+} from "@w-lfpup/jackrabbit/commands/dist/mod.js";
 
-let input = document.createElement("input");
-let body = document.querySelector("body");
-body?.append(input);
+let section = document.createElement("section");
+
+function setupElementSendKeys() {
+	let input = document.createElement("input");
+	section.append(input);
+	let body = document.querySelector("body");
+	body?.append(section);
+}
 
 async function testElementSendKeys(): Promise<string | undefined> {
 	let elementId = await findElement("input");
@@ -10,11 +18,20 @@ async function testElementSendKeys(): Promise<string | undefined> {
 
 	await elementSendKeys(elementId, "hellooo, nurse!");
 
-	if ("hellooo, nurse!" !== input.value) return "failed to send element keys";
+	let input = section.querySelector("input");
+	if ("hellooo, nurse!" !== input?.value) return "failed to send element keys";
+}
+
+function teardownElementSendKeys() {
+	section.remove();
 }
 
 // export tests
-export const tests = [testElementSendKeys];
+export const tests = [
+	setupElementSendKeys,
+	testElementSendKeys,
+	teardownElementSendKeys,
+];
 
 // export optional test details
 export const options = {

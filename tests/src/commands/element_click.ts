@@ -1,4 +1,7 @@
-import { findElement, elementClick } from "@w-lfpup/jackrabbit/commands/dist/mod.js";
+import {
+	findElement,
+	elementClick,
+} from "@w-lfpup/jackrabbit/commands/dist/mod.js";
 
 let clickCounter = 0;
 let section = document.createElement("section");
@@ -6,14 +9,14 @@ let section = document.createElement("section");
 function setupElementClick() {
 	section.setHTMLUnsafe(`
 		<button data-element_click>click me softly</button>
-	`)
+	`);
 
 	let button = section.querySelector("button");
 	button?.setAttribute("data-element_click", "");
 	button?.addEventListener("click", function () {
 		clickCounter += 1;
 	});
-	
+
 	let body = document.querySelector("body");
 	body?.append(section);
 }
