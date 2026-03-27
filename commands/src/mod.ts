@@ -216,7 +216,24 @@ export async function findElementFromElement(
 	if (200 === res.status) return await res.text();
 }
 
+export async function getElementShadowRoot(
+	element_id: string,
+): Promise<string | undefined> {
+	let action: GetElementShadowRoot = {
+		type: "get_element_shadow_root",
+		element_id,
+	};
+
+	let res = await fetch(`/cmd/get_element_shadow_root`, {
+		body: JSON.stringify(action),
+		headers: new Headers([["Content-Type", "application/json"]]),
+		method: "POST",
+	});
+
+	if (200 === res.status) return await res.text();
+}
+
 export async function findElementsFromElements() {}
-export async function findShadowRoot() {}
+
 export async function findElementFromShadowRoot() {}
 export async function findElementsFromShadowRoot() {}

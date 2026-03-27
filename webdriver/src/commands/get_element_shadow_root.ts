@@ -35,14 +35,16 @@ async function getElementShadowRootRequest(
 ): Promise<string | undefined> {
 	let { url } = params;
 
+	console.log("get shadow root");
 	if (!sessionId) return;
 
 	let elementId = await getElementShadowRootBody(req);
 	if (!elementId)
 		throw new Error("Failed to deserialize GetElementShadowRoot body.");
+	console.log("elementId", elementId);
 
 	let response = await fetch(
-		new URL(new URL(`/session/${sessionId}/element/${elementId}`, url)),
+		new URL(new URL(`/session/${sessionId}/element/${elementId}/shadow`, url)),
 		{
 			method: "GET",
 			headers: jsonHeaders,
@@ -50,16 +52,21 @@ async function getElementShadowRootRequest(
 		},
 	);
 
+	console.log(response);
 	if (200 !== response.status) {
 		let cause = await response.json();
 		throw new Error("find-element request failed", { cause });
 	}
 
 	let json = await response.json();
+	console.log("shadow response", json);
+
 	if ("object" !== typeof json?.value)
 		throw new Error("GetElementShadowRoot return value is not an object");
 
+	console.log("shadow root json:", json);
 	for (let [key, value] of Object.entries(json.value)) {
+		console.log("key, value:", key, value);
 		if (
 			"string" === typeof key &&
 			"string" === typeof value &&
