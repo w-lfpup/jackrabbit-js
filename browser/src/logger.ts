@@ -1,7 +1,7 @@
 import type {
 	LoggerAction,
 	LoggerInterface,
-} from "jackrabbit/core/dist/mod.js";
+} from "@w-lfpup/jackrabbit/core/dist/mod.js";
 
 interface Queueable {
 	(): Promise<unknown>;

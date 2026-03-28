@@ -1,15 +1,25 @@
-import { findElement, elementClick } from "jackrabbit/commands/dist/mod.js";
+import {
+	findElement,
+	elementClick,
+} from "@w-lfpup/jackrabbit/commands/dist/mod.js";
 
 let clickCounter = 0;
+let section = document.createElement("section");
 
-let button = document.createElement("button");
-button.setAttribute("data-element_click", "");
-button.addEventListener("click", function () {
-	clickCounter += 1;
-});
+function setupElementClick() {
+	section.setHTMLUnsafe(`
+		<button data-element_click>click me softly</button>
+	`);
 
-let body = document.querySelector("body");
-body?.append(button);
+	let button = section.querySelector("button");
+	button?.setAttribute("data-element_click", "");
+	button?.addEventListener("click", function () {
+		clickCounter += 1;
+	});
+
+	let body = document.querySelector("body");
+	body?.append(section);
+}
 
 async function testElementClick(): Promise<string | undefined> {
 	let elementId = await findElement("button[data-element_click]");
@@ -33,8 +43,18 @@ async function testMultipleElementClicks(): Promise<string | undefined> {
 		return `click counter failed to click ${clickCounter}/3 times`;
 }
 
+// tear down
+function teardownElementClick() {
+	section.remove();
+}
+
 // export tests
-export const tests = [testElementClick, testMultipleElementClicks];
+export const tests = [
+	setupElementClick,
+	testElementClick,
+	testMultipleElementClicks,
+	teardownElementClick,
+];
 
 // export optional test details
 export const options = {

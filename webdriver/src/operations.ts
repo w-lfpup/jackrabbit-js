@@ -33,6 +33,7 @@ export async function untilWebdriverReady(
 
 	while (signal && !signal.aborted) {
 		try {
+			// this should be a command
 			let res = await fetch(new URL("/status", url), {
 				method: "GET",
 				headers,
