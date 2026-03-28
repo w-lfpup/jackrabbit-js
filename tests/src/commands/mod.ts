@@ -5,7 +5,8 @@ import * as elementSendKeysTests from "./element_send_keys.js";
 import * as takeElementScreenshotTests from "./take_element_screenshot.js";
 import * as findElementFromElementTests from "./find_element_from_element.js";
 import * as getElementShadowRootTests from "./get_element_shadow_root.js";
-import * as findElementsFromElement from "./find_elements_from_element.js";
+import * as findElementsFromElementTests from "./find_elements_from_element.js";
+import * as logTests from "./log.js";
 
 export const testModules = [
 	findElementTests,
@@ -15,5 +16,6 @@ export const testModules = [
 	takeElementScreenshotTests,
 	findElementFromElementTests,
 	getElementShadowRootTests,
-	findElementsFromElement,
+	findElementsFromElementTests,
+	logTests,
 ];

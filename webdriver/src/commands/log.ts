@@ -18,7 +18,7 @@ export async function log(
 		res.end();
 		return;
 	}
-	console.log(`\n[${params.title}]\n${message}`);
+	console.log(`[${params.title}] ${message}`);
 	res.writeHead(200, { "content-type": "text/plain" });
 	res.end();
 }

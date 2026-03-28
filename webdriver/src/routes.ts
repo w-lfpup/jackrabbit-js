@@ -9,7 +9,7 @@ import {
 	getElementShadowRoot,
 	findElements,
 	findElement,
-	// log,
+	log,
 	takeElementScreenshot,
 	elementClick,
 	elementSendKeys,
@@ -32,7 +32,7 @@ let routeMap = new Map([
 	// ["/cmd/find_elements_from_shadow_root", findElementsFromShadowRoot],
 	["/cmd/find_elements", findElements],
 	["/cmd/get_element_shadow_root", getElementShadowRoot],
-	// ["/cmd/log", log],
+	["/cmd/log", log],
 	["/cmd/take_element_screenshot", takeElementScreenshot],
 ]);
 
