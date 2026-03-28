@@ -97,6 +97,29 @@ export async function findElementFromElement(element_id, css_selector) {
     if (200 === res.status)
         return await res.text();
 }
+export async function findElementsFromElement(element_id, css_selector) {
+    let action = {
+        type: "find_elements_from_element",
+        element_id,
+        css_selector,
+    };
+    let res = await fetch(`/cmd/find_elements_from_element`, {
+        body: JSON.stringify(action),
+        headers: new Headers([["Content-Type", "application/json"]]),
+        method: "POST",
+    });
+    if (200 !== res.status)
+        return;
+    let json = await res.json();
+    if (!Array.isArray(json))
+        return;
+    let elementIds = [];
+    for (let item of json) {
+        if ("string" === typeof item)
+            elementIds.push(item);
+    }
+    return elementIds;
+}
 export async function getElementShadowRoot(element_id) {
     let action = {
         type: "get_element_shadow_root",
@@ -110,6 +133,5 @@ export async function getElementShadowRoot(element_id) {
     if (200 === res.status)
         return await res.text();
 }
-export async function findElementsFromElements() { }
 export async function findElementFromShadowRoot() { }
 export async function findElementsFromShadowRoot() { }

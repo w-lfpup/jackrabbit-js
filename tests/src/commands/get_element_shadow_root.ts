@@ -8,7 +8,7 @@ let section = document.createElement("section");
 // Safari needs mode open to return shadow root
 
 class MyComponent extends HTMLElement {
-	#shadow = this.attachShadow({ mode: "closed" });
+	#shadow = this.attachShadow({ mode: "open" });
 	constructor() {
 		super();
 		let text = document.createTextNode("hello world!");
@@ -40,7 +40,11 @@ function teardownFindElement() {
 }
 
 // export tests
-export const tests = [setupFindElement, testGetElementShadowRoot, teardownFindElement];
+export const tests = [
+	setupFindElement,
+	testGetElementShadowRoot,
+	teardownFindElement,
+];
 
 // export optional test details
 export const options = {

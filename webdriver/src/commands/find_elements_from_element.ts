@@ -20,21 +20,21 @@ export async function findElementsFromElement(
 ) {
 	if (!sessionId) return;
 
-	let elementId = await findElementsFromElementRequest(
+	let elementIds = await findElementsFromElementRequest(
 		req,
 		params,
 		undefined,
 		sessionId,
 	);
-	if (!elementId) {
+	if (!elementIds) {
 		res.writeHead(401);
 		res.end();
 		return;
 	}
 
-	res.writeHead(200, { "content-type": "text/plain" });
-	res.write(elementId);
-	res.end();
+	res.setHeader("Content-Type", "application/json");
+	res.writeHead(200);
+	res.end(JSON.stringify(elementIds));
 }
 
 // need event bus to send errors to error log
@@ -69,22 +69,24 @@ async function findElementsFromElementRequest(
 	}
 
 	let json = await findElementRes.json();
-	if ("object" !== typeof json?.value)
-		throw new Error("getElements return value is not an object");
+	if (!Array.isArray(json?.value))
+		throw new Error("getElements return value is not an array");
 
 	let elementIds = [];
-	if (json.value instanceof Object) {
-		for (let [key, value] of Object.entries(json.value)) {
-			if (
-				"string" === typeof key &&
-				"string" === typeof value &&
-				key.startsWith("element-")
-			)
-				// return key;
-				// return value;
-				elementIds.push(value);
+	for (let elObj of json.value) {
+		if (typeof elObj === "object") {
+			for (let [elHash, elId] of Object.entries(elObj)) {
+				if (
+					"string" === typeof elHash &&
+					"string" === typeof elId &&
+					elHash.startsWith("element-")
+				) {
+					elementIds.push(elId);
+				}
+			}
 		}
 	}
+
 	return elementIds;
 }
 

@@ -17,6 +17,7 @@ interface FindElementFromElement {
 }
 interface FindElementsFromElement {
     type: "find_elements_from_element";
+    element_id: string;
     css_selector: string;
 }
 interface GetElementShadowRoot {
@@ -55,8 +56,8 @@ export declare function takeElementScreenshot(element_id: string, target_filepat
 export declare function log(message: string): Promise<boolean>;
 export declare function findElements(css_selector: string): Promise<string[] | undefined>;
 export declare function findElementFromElement(element_id: string, css_selector: string): Promise<string | undefined>;
+export declare function findElementsFromElement(element_id: string, css_selector: string): Promise<string[] | undefined>;
 export declare function getElementShadowRoot(element_id: string): Promise<string | undefined>;
-export declare function findElementsFromElements(): Promise<void>;
 export declare function findElementFromShadowRoot(): Promise<void>;
 export declare function findElementsFromShadowRoot(): Promise<void>;
 export {};

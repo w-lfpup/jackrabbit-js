@@ -14,7 +14,7 @@ import {
 	elementClick,
 	elementSendKeys,
 	findElementFromElement,
-	// findElementsFromElement,
+	findElementsFromElement,
 	// findElementFromShadowRoot,
 	// findElementsFromShadowRoot,
 } from "./commands/mod.js";
@@ -28,7 +28,7 @@ let routeMap = new Map([
 	["/cmd/find_element_from_element", findElementFromElement],
 	// ["/cmd/find_element_from_shadow_root", findElementFromShadowRoot],
 	["/cmd/find_element", findElement],
-	// ["/cmd/find_elements_from_element", findElementsFromElement],
+	["/cmd/find_elements_from_element", findElementsFromElement],
 	// ["/cmd/find_elements_from_shadow_root", findElementsFromShadowRoot],
 	["/cmd/find_elements", findElements],
 	["/cmd/get_element_shadow_root", getElementShadowRoot],
