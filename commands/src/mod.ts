@@ -7,7 +7,6 @@ interface Log {
 }
 
 interface FindElement {
-	type: "find_element";
 	css_selector: string;
 }
 
@@ -90,7 +89,6 @@ export async function findElement(
 	css_selector: string,
 ): Promise<string | undefined> {
 	let action: FindElement = {
-		type: "find_element",
 		css_selector,
 	};
 

@@ -22,6 +22,8 @@ export async function createConfig(
 	args: string[],
 ): Promise<ConfigInterface | Error> {
 	let configFilepath = args[0];
+	// is absolute?
+	path.isAbsolute(configFilepath);
 	let relPath = path.resolve(process.cwd(), configFilepath);
 
 	try {
