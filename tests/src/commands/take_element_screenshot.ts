@@ -5,7 +5,7 @@ import {
 
 let section = document.createElement("section");
 
-function setupFindElement() {
+function setup() {
 	section.setHTMLUnsafe(`
 		<p><span>Beasts tread softly underfoot.</span></p>
 	`);
@@ -26,16 +26,12 @@ async function testTakeElementScreenshot(): Promise<string | undefined> {
 	if (!result) return "failed to take element screenshot";
 }
 
-function teardownTakeElementScreenshot() {
+function teardown() {
 	section.remove();
 }
 
 // export tests
-export const tests = [
-	setupFindElement,
-	testTakeElementScreenshot,
-	teardownTakeElementScreenshot,
-];
+export const tests = [setup, testTakeElementScreenshot, teardown];
 
 // export optional test details
 export const options = {

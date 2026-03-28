@@ -2,7 +2,7 @@ import { findElement } from "@w-lfpup/jackrabbit/commands/dist/mod.js";
 
 let section = document.createElement("section");
 
-function setupFindElement() {
+function setup() {
 	section.setHTMLUnsafe(`
 		<button>click me softly</button>
 	`);
@@ -18,12 +18,12 @@ async function testFindElement(): Promise<string | undefined> {
 	return "failed to findElement";
 }
 
-function teardownFindElement() {
+function teardown() {
 	section.remove();
 }
 
 // export tests
-export const tests = [setupFindElement, testFindElement, teardownFindElement];
+export const tests = [setup, testFindElement, teardown];
 
 // export optional test details
 export const options = {

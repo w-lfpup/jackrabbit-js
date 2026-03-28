@@ -6,7 +6,7 @@ import {
 let clickCounter = 0;
 let section = document.createElement("section");
 
-function setupElementClick() {
+function setup() {
 	section.setHTMLUnsafe(`
 		<button data-element_click>click me softly</button>
 	`);
@@ -44,16 +44,16 @@ async function testMultipleElementClicks(): Promise<string | undefined> {
 }
 
 // tear down
-function teardownElementClick() {
+function teardown() {
 	section.remove();
 }
 
 // export tests
 export const tests = [
-	setupElementClick,
+	setup,
 	testElementClick,
 	testMultipleElementClicks,
-	teardownElementClick,
+	teardown,
 ];
 
 // export optional test details

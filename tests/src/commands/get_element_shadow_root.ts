@@ -13,7 +13,7 @@ class MyComponent extends HTMLElement {
 
 customElements.define("component-a", MyComponent);
 
-function setupFindElement() {
+function setup() {
 	section.setHTMLUnsafe(`
 		<component-a></component-a>
 	`);
@@ -30,16 +30,12 @@ async function testGetElementShadowRoot(): Promise<string | undefined> {
 	if (!shadowId) return "failed to find shadow root";
 }
 
-function teardownFindElement() {
+function teardown() {
 	section.remove();
 }
 
 // export tests
-export const tests = [
-	setupFindElement,
-	testGetElementShadowRoot,
-	teardownFindElement,
-];
+export const tests = [setup, testGetElementShadowRoot, teardown];
 
 // export optional test details
 export const options = {
