@@ -1,7 +1,7 @@
 import {
 	findElement,
 	elementClick,
-} from "@w-lfpup/jackrabbit/commands/dist/mod.js";
+} from "@w-lfpup/jackrabbit/browser/dist/mod.js";
 
 let clickCounter = 0;
 let section = document.createElement("section");

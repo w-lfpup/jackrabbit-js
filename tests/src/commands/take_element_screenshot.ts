@@ -1,7 +1,7 @@
 import {
 	findElement,
 	takeElementScreenshot,
-} from "@w-lfpup/jackrabbit/commands/dist/mod.js";
+} from "@w-lfpup/jackrabbit/browser/dist/mod.js";
 
 let section = document.createElement("section");
 

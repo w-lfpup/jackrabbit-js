@@ -1,5 +1,4 @@
 interface Log {
-	type: "log";
 	message: string;
 }
 
@@ -117,7 +116,6 @@ export async function takeElementScreenshot(
 
 export async function log(message: string): Promise<boolean> {
 	let action: Log = {
-		type: "log",
 		message,
 	};
 
@@ -262,4 +260,12 @@ export async function findElementsFromShadowRoot(
 	}
 
 	return elementIds;
+}
+
+export function nextFrame(): Promise<void> {
+	return new Promise(function (resolve) {
+		queueMicrotask(function () {
+			resolve();
+		});
+	});
 }

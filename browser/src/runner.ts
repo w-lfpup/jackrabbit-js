@@ -1,8 +1,10 @@
-import type { Logger } from "./logger.js";
+import { Logger } from "./logger.js";
 
 import { runCollection } from "@w-lfpup/jackrabbit/core/dist/mod.js";
 
-export async function run(logger: Logger, files: string[], baseUrl: string) {
+let logger = new Logger();
+
+async function run(logger: Logger, files: string[], baseUrl: string) {
 	for (const [collection_id, url] of files.entries()) {
 		try {
 			let filepath = URL.parse(url, baseUrl);
@@ -19,4 +21,30 @@ export async function run(logger: Logger, files: string[], baseUrl: string) {
 			});
 		}
 	}
+}
+
+try {
+	let jackrabbitMap = document.querySelector("script[type=jackrabbit_config]");
+	if (null === jackrabbitMap)
+		throw new Error("Failed to query jackrabbit_config script");
+
+	// should be it's own verification and then throw
+	let config = JSON.parse(jackrabbitMap.textContent);
+
+	logger.log({
+		type: "start_run",
+		time: performance.now(),
+		expected_collection_count: config?.test_collections?.length ?? 0,
+	});
+
+	await run(logger, config.test_collections, config.jackrabbit_url);
+	logger.log({
+		type: "end_run",
+		time: performance.now(),
+	});
+} catch (e: unknown) {
+	logger.log({
+		type: "run_error",
+		error: e?.toString() ?? "wild horses error",
+	});
 }

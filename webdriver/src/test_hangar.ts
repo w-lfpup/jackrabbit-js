@@ -17,7 +17,7 @@ export function testHanger(params: TestHangerParams) {
 		<script type="jackrabbit_config">
 			${JSON.stringify(params)}
 		</script>
-		<script type="module" src="/jackrabbit/browser/dist/mod.js"></script>
+		<script type="module" src="/jackrabbit/browser/dist/runner.js"></script>
 	</head>
 	<body></body>
 </html>
