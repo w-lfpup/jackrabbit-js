@@ -1,6 +1,3 @@
-import type { IncomingMessage, ServerResponse } from "http";
-
-// BELOW ARE ACTIONS FROM TESTS THEMSELVES
 import type { WebdriverParams } from "../config.js";
 
 import { jsonHeaders } from "./flyweight.js";

@@ -1,11 +1,8 @@
 import type { IncomingMessage, ServerResponse } from "http";
-
-// BELOW ARE ACTIONS FROM TESTS THEMSELVES
 import type { WebdriverParams } from "../config.js";
 
 import { jsonHeaders, getJsonFromRequestBody } from "./flyweight.js";
 
-// ELEMENT CLICK
 export async function elementClick(
 	req: IncomingMessage,
 	res: ServerResponse,

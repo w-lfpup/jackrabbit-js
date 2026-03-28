@@ -5,7 +5,6 @@ import * as fs from "fs";
 import * as path from "path";
 import { getJsonFromRequestBody, jsonHeaders } from "./flyweight.js";
 
-// TAKE ELEMENT SCREENSHOT
 export async function takeElementScreenshot(
 	req: IncomingMessage,
 	res: ServerResponse,

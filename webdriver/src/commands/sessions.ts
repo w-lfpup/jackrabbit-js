@@ -1,12 +1,8 @@
-import type { IncomingMessage, ServerResponse } from "http";
-
-// BELOW ARE ACTIONS FROM TESTS THEMSELVES
 import type { WebdriverParams } from "../config.js";
 import type { EventBusInterface } from "../eventbus.js";
 
 import { jsonHeaders } from "./flyweight.js";
 
-// NEW SESSION
 export async function newSession(
 	params: WebdriverParams,
 	signal: AbortSignal,
@@ -31,7 +27,6 @@ export async function newSession(
 	return sessionId;
 }
 
-// DELETE SESSION
 export async function deleteSession(
 	params: WebdriverParams,
 	signal: AbortSignal | undefined,
