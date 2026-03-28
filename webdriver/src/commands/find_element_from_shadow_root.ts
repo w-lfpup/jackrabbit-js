@@ -62,16 +62,12 @@ async function findElementFromShadowRootRequest(
 		},
 	);
 
-	console.log("findelementfromshadowroot", findElementRes);
-
 	if (200 !== findElementRes.status) {
 		let cause = await findElementRes.json();
 		throw new Error("find-element request failed", { cause });
 	}
 
 	let json = await findElementRes.json();
-	console.log("json", findElementRes);
-
 	if ("object" !== typeof json?.value)
 		throw new Error("getElements return value is not an object");
 

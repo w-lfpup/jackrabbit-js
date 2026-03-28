@@ -1,8 +1,10 @@
 import {
 	findElement,
 	findElementFromShadowRoot,
+	getElementShadowRoot,
 } from "@w-lfpup/jackrabbit/commands/dist/mod.js";
 
+// cannot find element in shadow root
 class MyComponent extends HTMLElement {
 	#shadow = this.attachShadow({ mode: "open" });
 	constructor() {
@@ -22,6 +24,8 @@ function setup() {
 		<component-b></component-b>
 	`);
 
+	// wait a frame?
+
 	let body = document.querySelector("body");
 	body?.append(section);
 }
@@ -30,7 +34,11 @@ async function testFindElementFromElement(): Promise<string | undefined> {
 	let componentId = await findElement("component-b");
 	if (!componentId) return "failed to find componentId element";
 
-	let buttonId = await findElementFromShadowRoot(componentId, "button");
+	let shadowRootId = await getElementShadowRoot(componentId);
+	if (!shadowRootId) return "failed to find shadow root";
+
+
+	let buttonId = await findElementFromShadowRoot(shadowRootId, "button");
 	if (!buttonId) return "failed to find button from component-b element";
 }
 

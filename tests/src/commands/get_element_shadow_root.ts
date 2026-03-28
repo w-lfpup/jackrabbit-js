@@ -9,9 +9,6 @@ let section = document.createElement("section");
 
 class MyComponent extends HTMLElement {
 	#shadow = this.attachShadow({ mode: "open" });
-	constructor() {
-		super();
-	}
 }
 
 customElements.define("component-a", MyComponent);
