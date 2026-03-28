@@ -1,13 +1,8 @@
 import type { WebdriverParams } from "./config.js";
 import type { IncomingMessage, ServerResponse } from "http";
-import type { EventBusInterface } from "./eventbus.js";
-import type { LogActions } from "./eventbus.js";
-import type { ConfigInterface } from "./config.js";
 
 import * as fs from "fs";
 import * as path from "path";
-import { testHanger } from "./test_hangar.js";
-import { Datastore } from "./datastore.js";
 
 let headers = new Headers([["Content-Type", "application/json"]]);
 let cwd = process.cwd();
