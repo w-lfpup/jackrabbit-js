@@ -11,8 +11,6 @@ class MyComponent extends HTMLElement {
 	#shadow = this.attachShadow({ mode: "open" });
 	constructor() {
 		super();
-		let text = document.createTextNode("hello world!");
-		this.#shadow.append(text);
 	}
 }
 
