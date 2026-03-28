@@ -263,5 +263,22 @@ export async function getElementShadowRoot(
 	if (200 === res.status) return await res.text();
 }
 
-export async function findElementFromShadowRoot() {}
+export async function findElementFromShadowRoot(
+	shadow_root_id: string,
+	css_selector: string,
+) {
+		let action: FindElementFromShadowRoot = {
+		type: "find_element_from_shadow_root",
+		css_selector,
+		shadow_root_id,
+	};
+
+	let res = await fetch(`/cmd/find_element_from_shadow_root`, {
+		body: JSON.stringify(action),
+		headers: new Headers([["Content-Type", "application/json"]]),
+		method: "POST",
+	});
+
+	if (200 === res.status) return await res.text();
+}
 export async function findElementsFromShadowRoot() {}

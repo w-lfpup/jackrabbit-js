@@ -3,7 +3,7 @@ export * from "./add_cookie.js";
 export * from "./element_click.js";
 export * from "./element_send_keys.js";
 export * from "./find_element_from_element.js";
-// export * from "./find_element_from_shadow_root.js";
+export * from "./find_element_from_shadow_root.js";
 export * from "./find_element.js";
 export * from "./find_elements_from_element.js";
 // export * from "./find_elements_from_shadow_root.js";

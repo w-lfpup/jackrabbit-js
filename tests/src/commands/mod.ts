@@ -7,6 +7,7 @@ import * as findElementFromElementTests from "./find_element_from_element.js";
 import * as getElementShadowRootTests from "./get_element_shadow_root.js";
 import * as findElementsFromElementTests from "./find_elements_from_element.js";
 import * as logTests from "./log.js";
+// import * as findElementFromShadowRootTests from "./find_element_from_shadow_root.js"
 
 export const testModules = [
 	findElementTests,
@@ -18,4 +19,5 @@ export const testModules = [
 	getElementShadowRootTests,
 	findElementsFromElementTests,
 	logTests,
+	// findElementFromShadowRootTests,
 ];

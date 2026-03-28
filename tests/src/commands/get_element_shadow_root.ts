@@ -14,11 +14,11 @@ class MyComponent extends HTMLElement {
 	}
 }
 
-customElements.define("my-component", MyComponent);
+customElements.define("component-a", MyComponent);
 
 function setupFindElement() {
 	section.setHTMLUnsafe(`
-		<my-component></my-component>
+		<component-a></component-a>
 	`);
 
 	let body = document.querySelector("body");
@@ -26,8 +26,8 @@ function setupFindElement() {
 }
 
 async function testGetElementShadowRoot(): Promise<string | undefined> {
-	let formId = await findElement("my-component");
-	if (!formId) return "failed to find my-component element";
+	let formId = await findElement("component-a");
+	if (!formId) return "failed to find component-a element";
 
 	let shadowId = await getElementShadowRoot(formId);
 	if (!shadowId) return "failed to find shadow root";
