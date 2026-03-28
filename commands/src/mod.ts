@@ -1,6 +1,3 @@
-// find element just needs a string in body (element-28902489215801)
-//
-
 interface Log {
 	type: "log";
 	message: string;
@@ -38,30 +35,19 @@ interface FindElementsFromShadowRoot {
 	css_selector: string;
 }
 
-// /session/<session_id>/element
-// find element can be just a string
-
 interface ElementClick {
 	element_id: string;
 }
-
-// /session/{session id}/element/{element id}/click
-// value can just be a string
 
 interface ElementSendKeys {
 	element_id: string;
 	text: string;
 }
 
-// /session/{session id}/element/{element id}/value
-// only need to send a string
-
 interface TakeElementScreenshot {
 	element_id: string;
 	target_filepath: string;
 }
-
-// /session/{session id}/element/{element id}/screenshot
 
 export async function findElement(
 	css_selector: string,
