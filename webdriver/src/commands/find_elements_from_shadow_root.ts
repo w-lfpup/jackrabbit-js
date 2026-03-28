@@ -92,12 +92,8 @@ async function getFindElementFromShadowRootBody(
 	req: IncomingMessage,
 ): Promise<FindElementParams | undefined> {
 	let json = await getJsonFromRequestBody(req);
-	let { type, css_selector, shadow_root_id } = json;
-	if (
-		"find_element_from_shadow_root" === type &&
-		"string" === typeof css_selector &&
-		"string" === typeof shadow_root_id
-	) {
+	let { css_selector, shadow_root_id } = json;
+	if ("string" === typeof css_selector && "string" === typeof shadow_root_id) {
 		return { using: "css selector", value: css_selector, shadow_root_id };
 	}
 }

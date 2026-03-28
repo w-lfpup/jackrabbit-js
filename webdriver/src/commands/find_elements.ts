@@ -82,8 +82,8 @@ async function getFindElementsBody(
 	req: IncomingMessage,
 ): Promise<FindElementParams | undefined> {
 	let json = await getJsonFromRequestBody(req);
-	let { type, css_selector } = json;
-	if ("find_elements" === type && "string" === typeof css_selector) {
+	let { css_selector } = json;
+	if ("string" === typeof css_selector) {
 		return { using: "css selector", value: css_selector };
 	}
 }

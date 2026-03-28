@@ -46,12 +46,8 @@ async function getElementSendKeysBody(
 	req: IncomingMessage,
 ): Promise<ElementSendKeysParams | undefined> {
 	let json = await getJsonFromRequestBody(req);
-	let { type, element_id, text } = json;
-	if (
-		"element_send_keys" === type &&
-		"string" === typeof element_id &&
-		"string" === typeof text
-	) {
+	let { element_id, text } = json;
+	if ("string" === typeof element_id && "string" === typeof text) {
 		return { element_id, text };
 	}
 }

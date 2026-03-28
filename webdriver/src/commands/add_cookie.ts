@@ -9,7 +9,7 @@ export async function addCookie(
 ): Promise<void> {
 	let { url, jackrabbitId } = params;
 
-	let cookieReq = await fetch(new URL(`/session/${sessionId}/cookie`, url), {
+	let response = await fetch(new URL(`/session/${sessionId}/cookie`, url), {
 		method: "POST",
 		headers: jsonHeaders,
 		body: JSON.stringify({
@@ -23,8 +23,8 @@ export async function addCookie(
 		signal,
 	});
 
-	if (200 !== cookieReq.status) {
-		let cause = await cookieReq.json();
+	if (200 !== response.status) {
+		let cause = await response.json();
 		throw new Error("set-cookie request failed", { cause });
 	}
 }

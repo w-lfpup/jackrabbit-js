@@ -13,7 +13,7 @@ export async function elementClick(
 	let { url } = params;
 
 	let elementId = await getElementClickBody(req);
-	if (!elementId) throw new Error("Failed to deserialize ElementClick body.");
+	if (!elementId) throw new Error("Failed to deserialize element-click body.");
 
 	let resposne = await fetch(
 		new URL(`/session/${sessionId}/element/${elementId}/click`, url),
@@ -27,7 +27,7 @@ export async function elementClick(
 
 	if (200 !== resposne.status) {
 		let cause = await resposne.json();
-		throw new Error("element-click request failed", { cause });
+		throw new Error("Element-click request failed", { cause });
 	}
 
 	res.writeHead(200, { "content-type": "text/plain" });
@@ -38,8 +38,8 @@ async function getElementClickBody(
 	req: IncomingMessage,
 ): Promise<string | undefined> {
 	let json = await getJsonFromRequestBody(req);
-	let { type, element_id } = json;
-	if ("element_click" === type && "string" === typeof element_id) {
+	let { element_id } = json;
+	if ("string" === typeof element_id) {
 		return element_id;
 	}
 }

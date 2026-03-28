@@ -59,12 +59,8 @@ async function getTakeElementScreenshotBody(
 	req: IncomingMessage,
 ): Promise<TakeElementScreenshotParams | undefined> {
 	let json = await getJsonFromRequestBody(req);
-	let { type, element_id, target_filepath } = json;
-	if (
-		"take_element_screenshot" === type &&
-		"string" === typeof element_id &&
-		"string" === typeof target_filepath
-	) {
+	let { element_id, target_filepath } = json;
+	if ("string" === typeof element_id && "string" === typeof target_filepath) {
 		return { element_id, target_filepath };
 	}
 }

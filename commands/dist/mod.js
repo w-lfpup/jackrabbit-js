@@ -1,6 +1,5 @@
 export async function findElement(css_selector) {
     let action = {
-        type: "find_element",
         css_selector,
     };
     let res = await fetch(`/cmd/find_element`, {
@@ -13,7 +12,6 @@ export async function findElement(css_selector) {
 }
 export async function elementClick(element_id) {
     let action = {
-        type: "element_click",
         element_id,
     };
     let res = await fetch(`/cmd/element_click`, {
@@ -25,7 +23,6 @@ export async function elementClick(element_id) {
 }
 export async function elementSendKeys(element_id, text) {
     let action = {
-        type: "element_send_keys",
         element_id,
         text,
     };
@@ -38,7 +35,6 @@ export async function elementSendKeys(element_id, text) {
 }
 export async function takeElementScreenshot(element_id, target_filepath) {
     let action = {
-        type: "take_element_screenshot",
         element_id,
         target_filepath,
     };
@@ -63,7 +59,6 @@ export async function log(message) {
 }
 export async function findElements(css_selector) {
     let action = {
-        type: "find_elements",
         css_selector,
     };
     let res = await fetch(`/cmd/find_elements`, {
@@ -85,7 +80,6 @@ export async function findElements(css_selector) {
 }
 export async function findElementFromElement(element_id, css_selector) {
     let action = {
-        type: "find_element_from_element",
         css_selector,
         element_id,
     };
@@ -99,7 +93,6 @@ export async function findElementFromElement(element_id, css_selector) {
 }
 export async function findElementsFromElement(element_id, css_selector) {
     let action = {
-        type: "find_elements_from_element",
         element_id,
         css_selector,
     };
@@ -122,7 +115,6 @@ export async function findElementsFromElement(element_id, css_selector) {
 }
 export async function getElementShadowRoot(element_id) {
     let action = {
-        type: "get_element_shadow_root",
         element_id,
     };
     let res = await fetch(`/cmd/get_element_shadow_root`, {
@@ -135,7 +127,6 @@ export async function getElementShadowRoot(element_id) {
 }
 export async function findElementFromShadowRoot(shadow_root_id, css_selector) {
     let action = {
-        type: "find_element_from_shadow_root",
         css_selector,
         shadow_root_id,
     };
@@ -149,7 +140,6 @@ export async function findElementFromShadowRoot(shadow_root_id, css_selector) {
 }
 export async function findElementsFromShadowRoot(shadow_root_id, css_selector) {
     let action = {
-        type: "find_elements_from_shadow_root",
         shadow_root_id,
         css_selector,
     };

@@ -11,35 +11,29 @@ interface FindElement {
 }
 
 interface FindElements {
-	type: "find_elements";
 	css_selector: string;
 }
 
 interface FindElementFromElement {
-	type: "find_element_from_element";
 	element_id: string;
 	css_selector: string;
 }
 
 interface FindElementsFromElement {
-	type: "find_elements_from_element";
 	element_id: string;
 	css_selector: string;
 }
 
 interface GetElementShadowRoot {
-	type: "get_element_shadow_root";
 	element_id: string;
 }
 
 interface FindElementFromShadowRoot {
-	type: "find_element_from_shadow_root";
 	shadow_root_id: string;
 	css_selector: string;
 }
 
 interface FindElementsFromShadowRoot {
-	type: "find_elements_from_shadow_root";
 	shadow_root_id: string;
 	css_selector: string;
 }
@@ -48,7 +42,6 @@ interface FindElementsFromShadowRoot {
 // find element can be just a string
 
 interface ElementClick {
-	type: "element_click";
 	element_id: string;
 }
 
@@ -56,7 +49,6 @@ interface ElementClick {
 // value can just be a string
 
 interface ElementSendKeys {
-	type: "element_send_keys";
 	element_id: string;
 	text: string;
 }
@@ -65,25 +57,11 @@ interface ElementSendKeys {
 // only need to send a string
 
 interface TakeElementScreenshot {
-	type: "take_element_screenshot";
 	element_id: string;
 	target_filepath: string;
 }
 
 // /session/{session id}/element/{element id}/screenshot
-
-export type commands =
-	| Log
-	| FindElement
-	| FindElements
-	| GetElementShadowRoot
-	| FindElementFromElement
-	| FindElementsFromElement
-	| FindElementFromShadowRoot
-	| FindElementsFromShadowRoot
-	| ElementClick
-	| ElementSendKeys
-	| TakeElementScreenshot;
 
 export async function findElement(
 	css_selector: string,
@@ -103,7 +81,6 @@ export async function findElement(
 
 export async function elementClick(element_id: string): Promise<boolean> {
 	let action: ElementClick = {
-		type: "element_click",
 		element_id,
 	};
 
@@ -121,7 +98,6 @@ export async function elementSendKeys(
 	text: string,
 ): Promise<boolean> {
 	let action: ElementSendKeys = {
-		type: "element_send_keys",
 		element_id,
 		text,
 	};
@@ -140,7 +116,6 @@ export async function takeElementScreenshot(
 	target_filepath: string,
 ): Promise<boolean> {
 	let action: TakeElementScreenshot = {
-		type: "take_element_screenshot",
 		element_id,
 		target_filepath,
 	};
@@ -173,7 +148,6 @@ export async function findElements(
 	css_selector: string,
 ): Promise<string[] | undefined> {
 	let action: FindElements = {
-		type: "find_elements",
 		css_selector,
 	};
 
@@ -201,7 +175,6 @@ export async function findElementFromElement(
 	css_selector: string,
 ): Promise<string | undefined> {
 	let action: FindElementFromElement = {
-		type: "find_element_from_element",
 		css_selector,
 		element_id,
 	};
@@ -220,7 +193,6 @@ export async function findElementsFromElement(
 	css_selector: string,
 ) {
 	let action: FindElementsFromElement = {
-		type: "find_elements_from_element",
 		element_id,
 		css_selector,
 	};
@@ -248,7 +220,6 @@ export async function getElementShadowRoot(
 	element_id: string,
 ): Promise<string | undefined> {
 	let action: GetElementShadowRoot = {
-		type: "get_element_shadow_root",
 		element_id,
 	};
 
@@ -266,7 +237,6 @@ export async function findElementFromShadowRoot(
 	css_selector: string,
 ) {
 	let action: FindElementFromShadowRoot = {
-		type: "find_element_from_shadow_root",
 		css_selector,
 		shadow_root_id,
 	};
@@ -285,7 +255,6 @@ export async function findElementsFromShadowRoot(
 	css_selector: string,
 ) {
 	let action: FindElementsFromShadowRoot = {
-		type: "find_elements_from_shadow_root",
 		shadow_root_id,
 		css_selector,
 	};

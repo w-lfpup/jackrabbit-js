@@ -21,6 +21,6 @@ export async function navigateTo(
 
 	if (200 !== getCookie.status) {
 		let cause = await getCookie.json();
-		throw new Error("go-to request failed", { cause });
+		throw new Error("navigate-to request failed", { cause });
 	}
 }

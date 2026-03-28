@@ -23,8 +23,8 @@ export async function log(
 
 async function getLogBody(req: IncomingMessage): Promise<string | undefined> {
 	let json = await getJsonFromRequestBody(req);
-	let { type, message } = json;
-	if ("log" === type && "string" === typeof message) {
+	let { message } = json;
+	if ("string" === typeof message) {
 		return message;
 	}
 }

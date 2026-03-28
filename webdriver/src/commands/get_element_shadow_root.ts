@@ -73,8 +73,8 @@ async function getElementShadowRootBody(
 	req: IncomingMessage,
 ): Promise<string | undefined> {
 	let json = await getJsonFromRequestBody(req);
-	let { type, element_id } = json;
-	if ("get_element_shadow_root" === type && "string" === typeof element_id) {
+	let { element_id } = json;
+	if ("string" === typeof element_id) {
 		return element_id;
 	}
 }
