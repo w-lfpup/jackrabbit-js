@@ -1,9 +1,3 @@
-interface FindElementParams {
-	using: "css selector";
-	value: string;
-	shadow_root_id: string;
-}
-
 import type { IncomingMessage, ServerResponse } from "http";
 
 // BELOW ARE ACTIONS FROM TESTS THEMSELVES
@@ -26,25 +20,25 @@ export async function findElementsFromShadowRoot(
 ) {
 	if (!sessionId) return;
 
-	let elementId = await findElementFromShadowRootRequest(
+	let elementIds = await findElementsFromShadowRootRequest(
 		req,
 		params,
 		undefined,
 		sessionId,
 	);
-	if (!elementId) {
+	if (!elementIds) {
 		res.writeHead(401);
 		res.end();
 		return;
 	}
 
-	res.writeHead(200, { "content-type": "text/plain" });
-	res.write(elementId);
-	res.end();
+	res.setHeader("Content-Type", "application/json");
+	res.writeHead(200);
+	res.end(JSON.stringify(elementIds));
 }
 
 // need event bus to send errors to error log
-async function findElementFromShadowRootRequest(
+async function findElementsFromShadowRootRequest(
 	req: IncomingMessage,
 	params: WebdriverParams, // driver defined state
 	signal: AbortSignal | undefined, // driver defined state
@@ -75,20 +69,21 @@ async function findElementFromShadowRootRequest(
 	}
 
 	let json = await findElementRes.json();
-	if ("object" !== typeof json?.value)
-		throw new Error("getElements return value is not an object");
+	if (!Array.isArray(json?.value))
+		throw new Error("getElements return value is not an array");
 
 	let elementIds = [];
-	if (json.value instanceof Object) {
-		for (let [key, value] of Object.entries(json.value)) {
-			if (
-				"string" === typeof key &&
-				"string" === typeof value &&
-				key.startsWith("element-")
-			)
-				// return key;
-				// return value;
-				elementIds.push(value);
+	for (let elObj of json.value) {
+		if (typeof elObj === "object") {
+			for (let [elHash, elId] of Object.entries(elObj)) {
+				if (
+					"string" === typeof elHash &&
+					"string" === typeof elId &&
+					elHash.startsWith("element-")
+				) {
+					elementIds.push(elId);
+				}
+			}
 		}
 	}
 

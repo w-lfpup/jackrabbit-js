@@ -6,7 +6,7 @@ export * from "./find_element_from_element.js";
 export * from "./find_element_from_shadow_root.js";
 export * from "./find_element.js";
 export * from "./find_elements_from_element.js";
-// export * from "./find_elements_from_shadow_root.js";
+export * from "./find_elements_from_shadow_root.js";
 export * from "./find_elements.js";
 export * from "./get_element_shadow_root.js";
 export * from "./log.js";

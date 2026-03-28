@@ -16,7 +16,7 @@ import {
 	findElementFromElement,
 	findElementsFromElement,
 	findElementFromShadowRoot,
-	// findElementsFromShadowRoot,
+	findElementsFromShadowRoot,
 } from "./commands/mod.js";
 import { serveFile } from "./operations.js";
 import { Datastore } from "./datastore.js";
@@ -29,7 +29,7 @@ let routeMap = new Map([
 	["/cmd/find_element_from_shadow_root", findElementFromShadowRoot],
 	["/cmd/find_element", findElement],
 	["/cmd/find_elements_from_element", findElementsFromElement],
-	// ["/cmd/find_elements_from_shadow_root", findElementsFromShadowRoot],
+	["/cmd/find_elements_from_shadow_root", findElementsFromShadowRoot],
 	["/cmd/find_elements", findElements],
 	["/cmd/get_element_shadow_root", getElementShadowRoot],
 	["/cmd/log", log],

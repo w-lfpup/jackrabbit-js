@@ -59,5 +59,5 @@ export declare function findElementFromElement(element_id: string, css_selector:
 export declare function findElementsFromElement(element_id: string, css_selector: string): Promise<string[] | undefined>;
 export declare function getElementShadowRoot(element_id: string): Promise<string | undefined>;
 export declare function findElementFromShadowRoot(shadow_root_id: string, css_selector: string): Promise<string | undefined>;
-export declare function findElementsFromShadowRoot(): Promise<void>;
+export declare function findElementsFromShadowRoot(shadow_root_id: string, css_selector: string): Promise<string[] | undefined>;
 export {};

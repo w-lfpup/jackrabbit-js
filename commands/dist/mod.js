@@ -147,4 +147,26 @@ export async function findElementFromShadowRoot(shadow_root_id, css_selector) {
     if (200 === res.status)
         return await res.text();
 }
-export async function findElementsFromShadowRoot() { }
+export async function findElementsFromShadowRoot(shadow_root_id, css_selector) {
+    let action = {
+        type: "find_elements_from_shadow_root",
+        shadow_root_id,
+        css_selector,
+    };
+    let res = await fetch(`/cmd/find_elements_from_shadow_root`, {
+        body: JSON.stringify(action),
+        headers: new Headers([["Content-Type", "application/json"]]),
+        method: "POST",
+    });
+    if (200 !== res.status)
+        return;
+    let json = await res.json();
+    if (!Array.isArray(json))
+        return;
+    let elementIds = [];
+    for (let item of json) {
+        if ("string" === typeof item)
+            elementIds.push(item);
+    }
+    return elementIds;
+}
