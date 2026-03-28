@@ -187,9 +187,6 @@ export async function webdriverCommands(
 ) {
 	if (!sessionId) return;
 
-	let { url } = params;
-	let urlStr = url.toString();
-
 	// expecting http 1.1
 	let reqUrl = req.url;
 	if (reqUrl) {
