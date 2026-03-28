@@ -12,15 +12,15 @@ export async function navigateTo(
 	let { url } = params;
 
 	let pingUrl = new URL(targetPath, hostAndPort);
-	let getCookie = await fetch(new URL(`/session/${sessionId}/url`, url), {
+	let response = await fetch(new URL(`/session/${sessionId}/url`, url), {
 		method: "POST",
 		headers: jsonHeaders,
 		body: JSON.stringify({ url: pingUrl }),
 		signal,
 	});
 
-	if (200 !== getCookie.status) {
-		let cause = await getCookie.json();
+	if (200 !== response.status) {
+		let cause = await response.json();
 		throw new Error("navigate-to request failed", { cause });
 	}
 }

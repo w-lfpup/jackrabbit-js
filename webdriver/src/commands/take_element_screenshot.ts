@@ -20,7 +20,7 @@ export async function takeElementScreenshot(
 
 	let { element_id, target_filepath } = reqParams;
 
-	let resposne = await fetch(
+	let response = await fetch(
 		new URL(`/session/${sessionId}/element/${element_id}/screenshot`, url),
 		{
 			method: "GET",
@@ -29,12 +29,12 @@ export async function takeElementScreenshot(
 		},
 	);
 
-	if (200 !== resposne.status) {
-		let cause = await resposne.json();
+	if (200 !== response.status) {
+		let cause = await response.json();
 		throw new Error("take-element-screenshot request failed", { cause });
 	}
 
-	let json = await resposne.json();
+	let json = await response.json();
 	let base64 = json.value;
 	if ("string" !== typeof base64)
 		throw new Error("element screenshot is not a base64 string");

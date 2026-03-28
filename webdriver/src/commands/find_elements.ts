@@ -41,7 +41,7 @@ async function findElementsRequest(
 	let bodyJson = await getFindElementsBody(req);
 	if (!bodyJson) throw new Error("Failed to deserialize FindElements body.");
 
-	let findElementRes = await fetch(
+	let response = await fetch(
 		new URL(new URL(`/session/${sessionId}/elements`, url)),
 		{
 			method: "POST",
@@ -51,12 +51,12 @@ async function findElementsRequest(
 		},
 	);
 
-	if (200 !== findElementRes.status) {
-		let cause = await findElementRes.json();
+	if (200 !== response.status) {
+		let cause = await response.json();
 		throw new Error("find-element request failed", { cause });
 	}
 
-	let json = await findElementRes.json();
+	let json = await response.json();
 	if (!Array.isArray(json?.value))
 		throw new Error("getElements return value is not an array");
 

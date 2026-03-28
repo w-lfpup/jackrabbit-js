@@ -80,9 +80,9 @@ class WebdriverSession {
 	#params: WebdriverParams;
 	#hostAndPort: URL;
 	#eventbus: EventBusInterface;
-	#process: ChildProcess | undefined;
-	#signal: AbortSignal | undefined;
-	#abortController: AbortController;
+	#process: ChildProcess | undefined; // belongs in state
+	#signal: AbortSignal | undefined; // belongs in state
+	#abortController: AbortController; // belongs in state
 	#sessionId: string | undefined;
 
 	constructor(

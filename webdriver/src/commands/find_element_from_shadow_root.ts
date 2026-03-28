@@ -48,7 +48,7 @@ async function findElementFromShadowRootRequest(
 
 	let { shadow_root_id, using, value } = bodyJson;
 
-	let findElementRes = await fetch(
+	let response = await fetch(
 		new URL(
 			new URL(`/session/${sessionId}/shadow/${shadow_root_id}/element`, url),
 		),
@@ -60,12 +60,12 @@ async function findElementFromShadowRootRequest(
 		},
 	);
 
-	if (200 !== findElementRes.status) {
-		let cause = await findElementRes.json();
+	if (200 !== response.status) {
+		let cause = await response.json();
 		throw new Error("find-element request failed", { cause });
 	}
 
-	let json = await findElementRes.json();
+	let json = await response.json();
 	if ("object" !== typeof json?.value)
 		throw new Error("getElements return value is not an object");
 

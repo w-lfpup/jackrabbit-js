@@ -1,5 +1,4 @@
 import { Logger } from "./logger.js";
-
 import { runCollection } from "@w-lfpup/jackrabbit/core/dist/mod.js";
 
 let logger = new Logger();
@@ -25,6 +24,7 @@ async function run(logger: Logger, files: string[], baseUrl: string) {
 
 try {
 	let jackrabbitMap = document.querySelector("script[type=jackrabbit_config]");
+	// this should just send a logger error instead of quitting
 	if (null === jackrabbitMap)
 		throw new Error("Failed to query jackrabbit_config script");
 

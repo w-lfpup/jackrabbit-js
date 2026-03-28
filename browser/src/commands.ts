@@ -262,7 +262,7 @@ export async function findElementsFromShadowRoot(
 	return elementIds;
 }
 
-export function nextFrame(): Promise<void> {
+export function afterMicrotaskQueue(): Promise<void> {
 	return new Promise(function (resolve) {
 		queueMicrotask(function () {
 			resolve();

@@ -9,20 +9,20 @@ export async function newSession(
 ): Promise<string> {
 	let { url, capabilities } = params;
 
-	let res = await fetch(new URL("/session", url), {
+	let response = await fetch(new URL("/session", url), {
 		method: "POST",
 		headers: jsonHeaders,
 		body: JSON.stringify({ capabilities: capabilities ?? {} }),
 		signal,
 	});
-	if (200 !== res.status) {
-		let cause = await res.text();
+	if (200 !== response.status) {
+		let cause = await response.text();
 		throw new Error("Failed to create a session", { cause });
 	}
 
-	let json = await res.json();
+	let json = await response.json();
 	let { sessionId } = json?.value;
-	if (typeof sessionId !== "string") throw new Error("session is not a string");
+	if (typeof sessionId !== "string") throw new Error("Session is not a string");
 
 	return sessionId;
 }
@@ -35,14 +35,14 @@ export async function deleteSession(
 ): Promise<void> {
 	let { url, jackrabbitId } = params;
 	try {
-		let delReqest = await fetch(new URL(`/session/${sessionId}`, url), {
+		let response = await fetch(new URL(`/session/${sessionId}`, url), {
 			method: "DELETE",
 			headers: jsonHeaders,
 			body: null,
 			signal: signal,
 		});
-		if (200 !== delReqest.status) {
-			let cause = await delReqest.json();
+		if (200 !== response.status) {
+			let cause = await response.json();
 			throw new Error("delete-cookie request failed", { cause });
 		}
 	} catch (e) {
