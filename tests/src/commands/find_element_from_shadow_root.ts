@@ -37,7 +37,6 @@ async function testFindElementFromElement(): Promise<string | undefined> {
 	let shadowRootId = await getElementShadowRoot(componentId);
 	if (!shadowRootId) return "failed to find shadow root";
 
-
 	let buttonId = await findElementFromShadowRoot(shadowRootId, "button");
 	if (!buttonId) return "failed to find button from component-b element";
 }

@@ -267,7 +267,7 @@ export async function findElementFromShadowRoot(
 	shadow_root_id: string,
 	css_selector: string,
 ) {
-		let action: FindElementFromShadowRoot = {
+	let action: FindElementFromShadowRoot = {
 		type: "find_element_from_shadow_root",
 		css_selector,
 		shadow_root_id,
