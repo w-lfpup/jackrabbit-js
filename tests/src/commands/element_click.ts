@@ -8,11 +8,10 @@ let section = document.createElement("section");
 
 function setup() {
 	section.setHTMLUnsafe(`
-		<button data-element_click>click me softly</button>
+		<button>boop</button>
 	`);
 
 	let button = section.querySelector("button");
-	button?.setAttribute("data-element_click", "");
 	button?.addEventListener("click", function () {
 		clickCounter += 1;
 	});
@@ -22,7 +21,7 @@ function setup() {
 }
 
 async function testElementClick(): Promise<string | undefined> {
-	let elementId = await findElement("button[data-element_click]");
+	let elementId = await findElement("button");
 	if (!elementId) return "failed to find element";
 
 	await elementClick(elementId);
@@ -32,7 +31,7 @@ async function testElementClick(): Promise<string | undefined> {
 
 async function testMultipleElementClicks(): Promise<string | undefined> {
 	clickCounter = 0;
-	let elementId = await findElement("button[data-element_click]");
+	let elementId = await findElement("button");
 	if (!elementId) return "failed to find element";
 
 	await elementClick(elementId);

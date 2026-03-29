@@ -1,3 +1,4 @@
+import type { ChildProcess } from "child_process";
 import type { ConfigInterface, WebdriverParams } from "./config.js";
 import type {
 	EventBusInterface,
@@ -34,6 +35,8 @@ export interface CollectionResults {
 
 export interface RunResults {
 	sessionId: string | undefined;
+	signal: AbortSignal | undefined;
+	process: ChildProcess | undefined;
 	fails: number;
 	errors: number;
 	startTime: number;
@@ -72,6 +75,8 @@ export class Datastore {
 		for (let webdriverParams of config.webdrivers) {
 			this.#sessionResults.runs.set(webdriverParams.jackrabbitId, {
 				sessionId: undefined,
+				signal: undefined,
+				process: undefined,
 				startTime: 0,
 				fails: 0,
 				errors: 0,
@@ -102,7 +107,10 @@ export class Datastore {
 		if (!runResults) return;
 
 		if ("session_synced" === loggerAction.type) {
-			runResults.sessionId = loggerAction.sessionId;
+			let { sessionId, process, signal } = loggerAction;
+			runResults.sessionId = sessionId;
+			runResults.process = process;
+			runResults.signal = signal;
 		}
 
 		if ("session_error" === loggerAction.type) {

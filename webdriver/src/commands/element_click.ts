@@ -38,7 +38,7 @@ async function getElementClickBody(
 	req: IncomingMessage,
 ): Promise<string | undefined> {
 	let json = await getJsonFromRequestBody(req);
-	let { element_id } = json;
+	let element_id = json?.element_id;
 	if ("string" === typeof element_id) {
 		return element_id;
 	}

@@ -21,7 +21,6 @@ import {
 import { serveFile } from "./operations.js";
 import { Datastore } from "./datastore.js";
 
-// needs access to state
 let routeMap = new Map([
 	["/cmd/element_click", elementClick],
 	["/cmd/element_send_keys", elementSendKeys],
@@ -61,7 +60,7 @@ export class Router {
 		if (servePing(req, res)) return;
 		if (serveTestPage(req, res, this.#config)) return;
 		if (logAction(req, res, this.#eventbus)) return;
-		if (webdriverCommand(req, res, this.#config, this.#datastore)) return;
+		if (webdriverCommand(req, res, this.#datastore)) return;
 
 		await serveFile(req, res);
 	}
@@ -98,6 +97,15 @@ function serveTestPage(
 	return true;
 }
 
+function getCookie(req: IncomingMessage): string | undefined {
+	let cookies = req.headers.cookie?.split(";") ?? [];
+	for (const cookieLine of cookies) {
+		if (cookieLine.startsWith("jackrabbit=")) {
+			return cookieLine.split("=")[1];
+		}
+	}
+}
+
 function logAction(
 	req: IncomingMessage,
 	res: ServerResponse,
@@ -121,37 +129,22 @@ function logAction(
 				jackrabbitId,
 			});
 			res.writeHead(201);
+			res.end();
 		})
 		.catch(function () {
 			res.writeHead(401);
-		})
-		.finally(function () {
 			res.end();
 		});
 
 	return true;
 }
 
-function getCookie(req: IncomingMessage): string | undefined {
-	let id: string | undefined;
-	let cookies = req.headers.cookie?.split(";") ?? [];
-	for (const cookieLine of cookies) {
-		if (cookieLine.startsWith("jackrabbit=")) {
-			let [_name, value] = cookieLine.split("=");
-			id = value;
-		}
-	}
-
-	return id;
-}
-
 function webdriverCommand(
 	req: IncomingMessage,
 	res: ServerResponse,
-	config: ConfigInterface,
 	datastore: Datastore,
 ): boolean {
-	let { url, method } = req;
+	let { url } = req;
 	if (!url?.startsWith("/cmd/")) return false;
 
 	let jackrabbitId = getCookie(req);

@@ -10,6 +10,7 @@ import {
 	navigateTo,
 } from "./commands/mod.js";
 import { untilWebdriverReady } from "./operations.js";
+import type { Datastore } from "./datastore.js";
 
 export class WebDrivers {
 	#config: ConfigInterface;
@@ -17,13 +18,13 @@ export class WebDrivers {
 	#webdrivers: WebdriverSession[] = [];
 	#currentIndex = 0;
 
-	constructor(config: ConfigInterface, eventbus: EventBusInterface) {
+	constructor(config: ConfigInterface, eventbus: EventBusInterface, datastore: Datastore) {
 		this.#eventbus = eventbus;
 		this.#config = config;
 
 		for (const params of config.webdrivers) {
 			this.#webdrivers.push(
-				new WebdriverSession(params, config.hostAndPort, eventbus),
+				new WebdriverSession(params, config.hostAndPort, eventbus, datastore),
 			);
 		}
 	}
@@ -80,20 +81,18 @@ class WebdriverSession {
 	#params: WebdriverParams;
 	#hostAndPort: URL;
 	#eventbus: EventBusInterface;
-	#process: ChildProcess | undefined; // belongs in state
-	#signal: AbortSignal | undefined; // belongs in state
-	#abortController: AbortController; // belongs in state
-	#sessionId: string | undefined;
+	#datastore: Datastore;
 
 	constructor(
 		params: WebdriverParams,
 		hostAndPort: URL,
 		eventbus: EventBusInterface,
+		datastore: Datastore,
 	) {
 		this.#params = params;
 		this.#hostAndPort = hostAndPort;
 		this.#eventbus = eventbus;
-		this.#abortController = new AbortController();
+		this.#datastore = datastore;
 
 		this.#eventbus.addListener("run_complete", (action) => {
 			if (action.jackrabbitId === this.#params.jackrabbitId) this.#down();
@@ -101,50 +100,54 @@ class WebdriverSession {
 	}
 
 	async run() {
-		if (this.#process) return;
-
 		let { jackrabbitId } = this.#params;
 
+		let sessionState = this.#datastore.getState().runs.get(jackrabbitId);
+		if (sessionState?.process) return;
+
+		let abortController = new AbortController()
 		this.#eventbus.dispatchAction({
 			jackrabbitId,
 			type: "session_start",
 		});
 
-		this.#signal = setupSignal(
+		let signal = setupSignal(
 			this.#params,
 			this.#eventbus,
-			this.#abortController.signal,
+			abortController.signal,
 		);
-		this.#process = setupProcess(
+		let process = setupProcess(
 			this.#params,
 			this.#eventbus,
-			this.#abortController.signal,
+			abortController.signal,
 		);
 
 		try {
-			await untilWebdriverReady(this.#params, this.#signal);
-			this.#sessionId = await newSession(this.#params, this.#signal);
+			await untilWebdriverReady(this.#params, signal);
+			let sessionId = await newSession(this.#params, signal);
 			this.#eventbus.dispatchAction({
 				jackrabbitId,
 				type: "log",
 				loggerAction: {
 					type: "session_synced",
-					sessionId: this.#sessionId,
+					sessionId,
+					process,
+					signal
 				},
 			});
 			// session needs to be, go stored in state
 			await navigateTo(
 				this.#params,
-				this.#signal,
-				this.#sessionId,
+				signal,
+				sessionId,
 				this.#hostAndPort,
 				"/ping",
 			);
-			await addCookie(this.#params, this.#signal, this.#sessionId);
+			await addCookie(this.#params, signal, sessionId);
 			await navigateTo(
 				this.#params,
-				this.#signal,
-				this.#sessionId,
+				signal,
+				sessionId,
 				this.#hostAndPort,
 				"/",
 			);
@@ -163,21 +166,25 @@ class WebdriverSession {
 					error: errOutput ?? "Unknown error creating browser session",
 				},
 			});
-			this.#abortController.abort();
+			abortController.abort();
 		}
 	}
 
 	async #down() {
-		if (!this.#process) return;
+		let { jackrabbitId } = this.#params;
+
+		let sessionState = this.#datastore.getState().runs.get(jackrabbitId);
+		if (!sessionState) return;
+
 		await deleteSession(
 			this.#params,
-			this.#signal,
+			sessionState.signal,
 			this.#eventbus,
-			this.#sessionId,
+			sessionState.sessionId,
 		);
 
-		this.#process.kill();
-		this.#process = undefined;
+		sessionState.process?.kill();
+		sessionState.process = undefined;
 	}
 }
 

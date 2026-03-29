@@ -19,7 +19,7 @@ if (config instanceof Error) {
 let eventbus = new EventBus();
 let datastore = new Datastore(config, eventbus);
 let router = new Router(config, eventbus, datastore);
-let webdrivers = new WebDrivers(config, eventbus);
+let webdrivers = new WebDrivers(config, eventbus, datastore);
 
 // setup server
 let server = http.createServer();
