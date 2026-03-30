@@ -1,13 +1,8 @@
 import type { IncomingMessage, ServerResponse } from "http";
 import type { WebdriverParams } from "../config.js";
+import type { FindElementFromElementParams } from "../../../browser/dist/mod.js";
 
 import { headers, getJsonFromRequestBody } from "./flyweight.js";
-
-interface FindElementParams {
-	using: "css selector";
-	value: string;
-	element_id: string;
-}
 
 export async function findElementFromElement(
 	req: IncomingMessage,
@@ -36,9 +31,9 @@ export async function findElementFromElement(
 // need event bus to send errors to error log
 async function findElementFromElementRequest(
 	req: IncomingMessage,
-	params: WebdriverParams, // driver defined state
-	signal: AbortSignal | undefined, // driver defined state
-	sessionId: string, // derived state associated with driver
+	params: WebdriverParams,
+	signal: AbortSignal | undefined,
+	sessionId: string,
 ): Promise<string | undefined> {
 	let { url } = params;
 
@@ -46,7 +41,7 @@ async function findElementFromElementRequest(
 	if (!reqParams)
 		throw new Error("Failed to deserialize find-element-from-element body.");
 
-	let { element_id, using, value } = reqParams;
+	let { element_id, css_selector } = reqParams;
 
 	let response = await fetch(
 		new URL(
@@ -55,7 +50,7 @@ async function findElementFromElementRequest(
 		{
 			method: "POST",
 			headers,
-			body: JSON.stringify({ using, value }),
+			body: JSON.stringify({ using: "css selector", value: css_selector }),
 			signal,
 		},
 	);
@@ -84,10 +79,10 @@ async function findElementFromElementRequest(
 
 async function getRequestParams(
 	req: IncomingMessage,
-): Promise<FindElementParams | undefined> {
+): Promise<FindElementFromElementParams | undefined> {
 	let json = await getJsonFromRequestBody(req);
 	let { css_selector, element_id } = json;
 	if ("string" === typeof css_selector && "string" === typeof element_id) {
-		return { using: "css selector", value: css_selector, element_id };
+		return { css_selector, element_id };
 	}
 }

@@ -2,7 +2,7 @@ export interface Log {
 	message: string;
 }
 
-export interface FindElement {
+export interface FindElementParams {
 	css_selector: string;
 }
 
@@ -10,7 +10,7 @@ export interface FindElements {
 	css_selector: string;
 }
 
-export interface FindElementFromElement {
+export interface FindElementFromElementParams {
 	element_id: string;
 	css_selector: string;
 }
@@ -51,7 +51,7 @@ export interface TakeElementScreenshot {
 export async function findElement(
 	css_selector: string,
 ): Promise<string | undefined> {
-	let action: FindElement = {
+	let action: FindElementParams = {
 		css_selector,
 	};
 
@@ -158,7 +158,7 @@ export async function findElementFromElement(
 	element_id: string,
 	css_selector: string,
 ): Promise<string | undefined> {
-	let action: FindElementFromElement = {
+	let action: FindElementFromElementParams = {
 		css_selector,
 		element_id,
 	};
