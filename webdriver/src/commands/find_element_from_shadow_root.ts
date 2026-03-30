@@ -43,10 +43,10 @@ async function findElementFromShadowRootRequest(
 ): Promise<string | undefined> {
 	let { url } = params;
 
-	let bodyJson = await getFindElementFromShadowRootBody(req);
-	if (!bodyJson) throw new Error("Failed to deserialize FindElement body.");
+	let reqParams = await getRequestParams(req);
+	if (!reqParams) throw new Error("Failed to deserialize FindElement body.");
 
-	let { shadow_root_id, using, value } = bodyJson;
+	let { shadow_root_id, using, value } = reqParams;
 
 	let response = await fetch(
 		new URL(
@@ -82,7 +82,7 @@ async function findElementFromShadowRootRequest(
 	}
 }
 
-async function getFindElementFromShadowRootBody(
+async function getRequestParams(
 	req: IncomingMessage,
 ): Promise<FindElementParams | undefined> {
 	let json = await getJsonFromRequestBody(req);

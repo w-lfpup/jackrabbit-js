@@ -12,7 +12,7 @@ export async function elementSendKeys(
 ): Promise<void> {
 	let { url } = params;
 
-	let reqParams = await getElementSendKeysBody(req);
+	let reqParams = await getRequestParams(req);
 	if (!reqParams)
 		throw new Error("Failed to deserialize ElementSendKeys body.");
 
@@ -42,7 +42,7 @@ interface ElementSendKeysParams {
 	element_id: string;
 }
 
-async function getElementSendKeysBody(
+async function getRequestParams(
 	req: IncomingMessage,
 ): Promise<ElementSendKeysParams | undefined> {
 	let json = await getJsonFromRequestBody(req);

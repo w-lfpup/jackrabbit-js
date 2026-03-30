@@ -37,7 +37,7 @@ async function getElementShadowRootRequest(
 
 	if (!sessionId) return;
 
-	let elementId = await getElementShadowRootBody(req);
+	let elementId = await getRequestParams(req);
 	if (!elementId)
 		throw new Error("Failed to deserialize GetElementShadowRoot body.");
 
@@ -69,7 +69,7 @@ async function getElementShadowRootRequest(
 	}
 }
 
-async function getElementShadowRootBody(
+async function getRequestParams(
 	req: IncomingMessage,
 ): Promise<string | undefined> {
 	let json = await getJsonFromRequestBody(req);

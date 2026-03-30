@@ -10,7 +10,7 @@ export async function log(
 	params: WebdriverParams,
 	sessionId: string,
 ) {
-	let message = await getLogBody(req);
+	let message = await getRequestParams(req);
 	if (!message) {
 		res.writeHead(401);
 		res.end();
@@ -21,7 +21,9 @@ export async function log(
 	res.end();
 }
 
-async function getLogBody(req: IncomingMessage): Promise<string | undefined> {
+async function getRequestParams(
+	req: IncomingMessage,
+): Promise<string | undefined> {
 	let json = await getJsonFromRequestBody(req);
 	let { message } = json;
 	if ("string" === typeof message) {

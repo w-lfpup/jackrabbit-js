@@ -12,7 +12,7 @@ export async function elementClick(
 ): Promise<void> {
 	let { url } = params;
 
-	let elementId = await getElementIdFromReques(req);
+	let elementId = await getElementIdFromRequest(req);
 	if (!elementId) throw new Error("Failed to deserialize element-click body.");
 
 	let response = await fetch(
@@ -34,7 +34,7 @@ export async function elementClick(
 	res.end();
 }
 
-async function getElementIdFromReques(
+async function getElementIdFromRequest(
 	req: IncomingMessage,
 ): Promise<string | undefined> {
 	let json = await getJsonFromRequestBody(req);

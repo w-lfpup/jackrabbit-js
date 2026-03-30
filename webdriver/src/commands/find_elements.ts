@@ -38,15 +38,15 @@ async function findElementsRequest(
 ): Promise<string[]> {
 	let { url } = params;
 
-	let bodyJson = await getFindElementsBody(req);
-	if (!bodyJson) throw new Error("Failed to deserialize FindElements body.");
+	let reqParams = await getRequestParams(req);
+	if (!reqParams) throw new Error("Failed to deserialize FindElements body.");
 
 	let response = await fetch(
 		new URL(new URL(`/session/${sessionId}/elements`, url)),
 		{
 			method: "POST",
 			headers,
-			body: JSON.stringify(bodyJson),
+			body: JSON.stringify(reqParams),
 			signal,
 		},
 	);
@@ -78,7 +78,7 @@ async function findElementsRequest(
 	return elementIds;
 }
 
-async function getFindElementsBody(
+async function getRequestParams(
 	req: IncomingMessage,
 ): Promise<FindElementParams | undefined> {
 	let json = await getJsonFromRequestBody(req);

@@ -44,10 +44,10 @@ async function findElementFromElementRequest(
 ): Promise<string | undefined> {
 	let { url } = params;
 
-	let bodyJson = await getFindElementFromElementBody(req);
-	if (!bodyJson) throw new Error("Failed to deserialize FindElement body.");
+	let reqParams = await getRequestParams(req);
+	if (!reqParams) throw new Error("Failed to deserialize FindElement body.");
 
-	let { element_id, using, value } = bodyJson;
+	let { element_id, using, value } = reqParams;
 
 	let response = await fetch(
 		new URL(
@@ -83,7 +83,7 @@ async function findElementFromElementRequest(
 	}
 }
 
-async function getFindElementFromElementBody(
+async function getRequestParams(
 	req: IncomingMessage,
 ): Promise<FindElementParams | undefined> {
 	let json = await getJsonFromRequestBody(req);

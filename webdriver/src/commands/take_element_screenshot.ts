@@ -14,7 +14,7 @@ export async function takeElementScreenshot(
 ): Promise<void> {
 	let { url, title } = params;
 
-	let reqParams = await getTakeElementScreenshotBody(req);
+	let reqParams = await getRequestParams(req);
 	if (!reqParams)
 		throw new Error("Failed to deserialize TakeElementScreenshot body.");
 
@@ -55,7 +55,7 @@ interface TakeElementScreenshotParams {
 	target_filepath: string;
 }
 
-async function getTakeElementScreenshotBody(
+async function getRequestParams(
 	req: IncomingMessage,
 ): Promise<TakeElementScreenshotParams | undefined> {
 	let json = await getJsonFromRequestBody(req);
