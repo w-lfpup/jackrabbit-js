@@ -19,7 +19,7 @@ export async function findElement(
 
 	let elementId = await findElementRequest(req, params, signal, sessionId);
 	if (!elementId) {
-		res.writeHead(401);
+		res.writeHead(404, { "content-type": "text/plain" });
 		res.end();
 		return;
 	}
@@ -38,7 +38,7 @@ async function findElementRequest(
 	let { url } = params;
 
 	let reqParams = await getRequestParams(req);
-	if (!reqParams) throw new Error("Failed to deserialize FindElement body.");
+	if (!reqParams) throw new Error("Failed to deserialize find-element body.");
 
 	let response = await fetch(
 		new URL(new URL(`/session/${sessionId}/element`, url)),
@@ -52,12 +52,12 @@ async function findElementRequest(
 
 	if (200 !== response.status) {
 		let cause = await response.json();
-		throw new Error("find-element request failed", { cause });
+		throw new Error("Find-element request failed", { cause });
 	}
 
 	let json = await response.json();
 	if ("object" !== typeof json?.value)
-		throw new Error("find-element return value is not an object");
+		throw new Error("Find-element return value is not an object");
 
 	for (let [elHash, elId] of Object.entries(json.value)) {
 		if ("string" === typeof elId && elHash.startsWith("element-")) return elId;

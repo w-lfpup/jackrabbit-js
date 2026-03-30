@@ -12,7 +12,7 @@ export async function log(
 ) {
 	let message = await getRequestParams(req);
 	if (!message) {
-		res.writeHead(401);
+		res.writeHead(404, { "content-type": "text/plain" });
 		res.end();
 		return;
 	}

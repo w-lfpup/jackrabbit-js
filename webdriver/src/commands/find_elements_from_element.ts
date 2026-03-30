@@ -25,7 +25,7 @@ export async function findElementsFromElement(
 		sessionId,
 	);
 	if (!elementIds) {
-		res.writeHead(401);
+		res.writeHead(404, { "content-type": "text/plain" });
 		res.end();
 		return;
 	}

@@ -29,8 +29,8 @@ export async function elementSendKeys(
 	);
 
 	if (200 !== response.status) {
-		let cause = await response.json();
-		throw new Error("Element-send-keys request failed", { cause });
+		res.writeHead(404, { "content-type": "text/plain" });
+		res.end();
 	}
 
 	res.writeHead(200, { "content-type": "text/plain" });

@@ -21,6 +21,10 @@ import {
 import { serveFile } from "./operations.js";
 import { Datastore } from "./datastore.js";
 
+// 404 - not found / undefined
+// 400 - bad request
+// 401 - unauthorized
+
 let routeMap = new Map([
 	["/cmd/element_click", elementClick],
 	["/cmd/element_send_keys", elementSendKeys],
@@ -128,11 +132,11 @@ function logAction(
 				loggerAction,
 				jackrabbitId,
 			});
-			res.writeHead(201);
+			res.writeHead(200);
 			res.end();
 		})
 		.catch(function () {
-			res.writeHead(401);
+			res.writeHead(400);
 			res.end();
 		});
 
@@ -165,7 +169,7 @@ function webdriverCommand(
 
 	// send commands here
 	webdriverCommands(req, res, sessionId, webdriverParams).catch(function () {
-		res.writeHead(401);
+		res.writeHead(400);
 		res.end();
 	});
 
@@ -187,7 +191,7 @@ export async function webdriverCommands(
 		if (action) return action(req, res, undefined, params, sessionId);
 	}
 
-	res.writeHead(401);
+	res.writeHead(400);
 	res.end();
 }
 

@@ -26,8 +26,9 @@ export async function elementClick(
 	);
 
 	if (200 !== response.status) {
-		let cause = await response.json();
-		throw new Error("Element-click request failed", { cause });
+		res.writeHead(404, { "content-type": "text/plain" });
+		res.end();
+		return;
 	}
 
 	res.writeHead(200, { "content-type": "text/plain" });

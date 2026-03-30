@@ -25,6 +25,6 @@ export async function addCookie(
 
 	if (200 !== response.status) {
 		let cause = await response.json();
-		throw new Error("Add-cookie request failed", { cause });
+		throw new Error("Add-cookie request failed.", { cause });
 	}
 }

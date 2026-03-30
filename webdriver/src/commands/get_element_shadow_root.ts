@@ -17,7 +17,7 @@ export async function getElementShadowRoot(
 		sessionId,
 	);
 	if (!elementId) {
-		res.writeHead(401);
+		res.writeHead(404, { "content-type": "text/plain" });
 		res.end();
 		return;
 	}

@@ -20,7 +20,7 @@ export async function findElements(
 
 	let elementIds = await findElementsRequest(req, params, undefined, sessionId);
 	if (!elementIds) {
-		res.writeHead(401);
+		res.writeHead(404, { "content-type": "text/plain" });
 		res.end();
 		return;
 	}

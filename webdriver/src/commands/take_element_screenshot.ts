@@ -30,8 +30,9 @@ export async function takeElementScreenshot(
 	);
 
 	if (200 !== response.status) {
-		let cause = await response.json();
-		throw new Error("take-element-screenshot request failed", { cause });
+		res.writeHead(404, { "content-type": "text/plain" });
+		res.end();
+		return;
 	}
 
 	let json = await response.json();
