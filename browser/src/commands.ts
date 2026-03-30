@@ -1,49 +1,49 @@
-interface Log {
+export interface Log {
 	message: string;
 }
 
-interface FindElement {
+export interface FindElement {
 	css_selector: string;
 }
 
-interface FindElements {
+export interface FindElements {
 	css_selector: string;
 }
 
-interface FindElementFromElement {
+export interface FindElementFromElement {
 	element_id: string;
 	css_selector: string;
 }
 
-interface FindElementsFromElement {
+export interface FindElementsFromElement {
 	element_id: string;
 	css_selector: string;
 }
 
-interface GetElementShadowRoot {
+export interface GetElementShadowRoot {
 	element_id: string;
 }
 
-interface FindElementFromShadowRoot {
+export interface FindElementFromShadowRoot {
 	shadow_root_id: string;
 	css_selector: string;
 }
 
-interface FindElementsFromShadowRoot {
+export interface FindElementsFromShadowRoot {
 	shadow_root_id: string;
 	css_selector: string;
 }
 
-interface ElementClick {
+export interface ElementClick {
 	element_id: string;
 }
 
-interface ElementSendKeys {
+export interface ElementSendKeysParams {
 	element_id: string;
 	text: string;
 }
 
-interface TakeElementScreenshot {
+export interface TakeElementScreenshot {
 	element_id: string;
 	target_filepath: string;
 }
@@ -82,7 +82,7 @@ export async function elementSendKeys(
 	element_id: string,
 	text: string,
 ): Promise<boolean> {
-	let action: ElementSendKeys = {
+	let action: ElementSendKeysParams = {
 		element_id,
 		text,
 	};

@@ -19,7 +19,7 @@ export async function findElementsFromElement(
 	let elementIds = await findElementsFromElementRequest(
 		req,
 		params,
-		undefined,
+		signal,
 		sessionId,
 	);
 	if (!elementIds) {

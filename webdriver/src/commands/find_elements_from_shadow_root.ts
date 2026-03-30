@@ -19,7 +19,7 @@ export async function findElementsFromShadowRoot(
 	let elementIds = await findElementsFromShadowRootRequest(
 		req,
 		params,
-		undefined,
+		signal,
 		sessionId,
 	);
 	if (!elementIds) {

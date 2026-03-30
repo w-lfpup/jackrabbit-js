@@ -31,7 +31,7 @@ export async function deleteSession(
 	params: WebdriverParams,
 	signal: AbortSignal | undefined,
 	eventbus: EventBusInterface,
-	sessionId: string | undefined,
+	sessionId: string,
 ): Promise<void> {
 	let { url, jackrabbitId } = params;
 	try {

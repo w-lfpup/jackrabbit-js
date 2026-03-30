@@ -174,12 +174,10 @@ class WebdriverSession {
 		let sessionState = this.#datastore.getState().runs.get(jackrabbitId);
 		if (!sessionState) return;
 
-		await deleteSession(
-			this.#params,
-			sessionState.signal,
-			this.#eventbus,
-			sessionState.sessionId,
-		);
+		let { sessionId, signal } = sessionState;
+		if (!sessionId) return;
+
+		await deleteSession(this.#params, signal, this.#eventbus, sessionId);
 
 		sessionState.process?.kill();
 		sessionState.process = undefined;

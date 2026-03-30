@@ -15,8 +15,11 @@ export async function takeElementScreenshot(
 	let { url, title } = params;
 
 	let reqParams = await getRequestParams(req);
-	if (!reqParams)
-		throw new Error("Failed to deserialize TakeElementScreenshot body.");
+	if (!reqParams) {
+		res.writeHead(400, { "content-type": "text/plain" });
+		res.end();
+		return;
+	}
 
 	let { element_id, target_filepath } = reqParams;
 
@@ -38,7 +41,7 @@ export async function takeElementScreenshot(
 	let json = await response.json();
 	let base64 = json.value;
 	if ("string" !== typeof base64)
-		throw new Error("lement screenshot is not a base64 string");
+		throw new Error("take-element-screeshot is not a base64 string");
 
 	// get path relative to cwd
 	// if /absolute path

@@ -1,5 +1,6 @@
 import type { IncomingMessage, ServerResponse } from "http";
 import type { WebdriverParams } from "../config.js";
+import type { ElementSendKeysParams } from "../../../browser/dist/mod.js";
 
 import { headers, getJsonFromRequestBody } from "./flyweight.js";
 
@@ -39,11 +40,6 @@ export async function elementSendKeys(
 
 	res.writeHead(404, { "content-type": "text/plain" });
 	res.end();
-}
-
-interface ElementSendKeysParams {
-	text: string;
-	element_id: string;
 }
 
 async function getRequestParams(
