@@ -19,8 +19,7 @@ export async function findElementFromElement(
 	);
 	if (elementId) {
 		res.writeHead(200, { "content-type": "text/plain" });
-		res.write(elementId);
-		res.end();
+		res.end(elementId);
 		return;
 	}
 
@@ -65,14 +64,13 @@ async function findElementFromElementRequest(
 		throw new Error("find-element-from-element return value is not an object.");
 
 	if (json.value instanceof Object) {
-		for (let [key, value] of Object.entries(json.value)) {
+		for (let [elHash, id] of Object.entries(json.value)) {
 			if (
-				"string" === typeof key &&
-				"string" === typeof value &&
-				key.startsWith("element-")
+				"string" === typeof elHash &&
+				"string" === typeof id &&
+				elHash.startsWith("element-")
 			)
-				// return key;
-				return value;
+				return id;
 		}
 	}
 }

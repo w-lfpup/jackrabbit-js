@@ -60,11 +60,10 @@ export class Router {
 
 	#boundRoute = this.#route.bind(this);
 	async #route(req: IncomingMessage, res: ServerResponse) {
-		// if (serveBadRequest(req, res)) return;
 		if (servePing(req, res)) return;
 		if (serveTestPage(req, res, this.#config)) return;
 		if (logAction(req, res, this.#eventbus)) return;
-		if (webdriverCommand(req, res, this.#datastore)) return;
+		if (execWebdriverCommand(req, res, this.#datastore)) return;
 
 		await serveFile(req, res);
 	}
@@ -143,7 +142,7 @@ function logAction(
 	return true;
 }
 
-function webdriverCommand(
+function execWebdriverCommand(
 	req: IncomingMessage,
 	res: ServerResponse,
 	datastore: Datastore,
@@ -165,13 +164,14 @@ function webdriverCommand(
 		return true;
 	}
 
-	let { sessionId, webdriverParams } = session;
+	let { sessionId, webdriverParams, signal } = session;
 
-	// send commands here
-	webdriverCommands(req, res, sessionId, webdriverParams).catch(function () {
-		res.writeHead(400);
-		res.end();
-	});
+	webdriverCommands(req, res, signal, sessionId, webdriverParams).catch(
+		function () {
+			res.writeHead(400);
+			res.end();
+		},
+	);
 
 	return true;
 }
@@ -179,6 +179,7 @@ function webdriverCommand(
 export async function webdriverCommands(
 	req: IncomingMessage,
 	res: ServerResponse,
+	signal: AbortSignal | undefined,
 	sessionId: string | undefined,
 	params: WebdriverParams,
 ) {
@@ -188,7 +189,7 @@ export async function webdriverCommands(
 	let reqUrl = req.url;
 	if (reqUrl) {
 		let action = routeMap.get(reqUrl);
-		if (action) return action(req, res, undefined, params, sessionId);
+		if (action) return action(req, res, signal, params, sessionId);
 	}
 
 	res.writeHead(400);

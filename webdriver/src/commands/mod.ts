@@ -14,6 +14,9 @@ export * from "./navigate_to.js";
 export * from "./sessions.js";
 export * from "./take_element_screenshot.js";
 
+// should errors be sent to session errors
+// but returned as a 400?
+
 // let routeMap = new Map([
 // 	["/cmd/element_click", elementClick],
 // 	["/cmd/element_send_keys", elementSendKeys],
