@@ -16,8 +16,6 @@ export async function findElementsFromShadowRoot(
 	params: WebdriverParams,
 	sessionId: string,
 ) {
-	if (!sessionId) return;
-
 	let elementIds = await findElementsFromShadowRootRequest(
 		req,
 		params,

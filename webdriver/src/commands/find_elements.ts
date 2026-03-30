@@ -14,10 +14,8 @@ export async function findElements(
 	res: ServerResponse,
 	signal: AbortSignal | undefined, // driver defined state
 	params: WebdriverParams,
-	sessionId: string | undefined,
+	sessionId: string,
 ) {
-	if (!sessionId) return;
-
 	let elementIds = await findElementsRequest(req, params, undefined, sessionId);
 	if (!elementIds) {
 		res.writeHead(404, { "content-type": "text/plain" });

@@ -16,8 +16,6 @@ export async function findElementFromShadowRoot(
 	params: WebdriverParams,
 	sessionId: string,
 ) {
-	if (!sessionId) return;
-
 	let elementId = await findElementFromShadowRootRequest(
 		req,
 		params,
@@ -44,7 +42,10 @@ async function findElementFromShadowRootRequest(
 	let { url } = params;
 
 	let reqParams = await getRequestParams(req);
-	if (!reqParams) throw new Error("Failed to deserialize find-element-from-shadow-root body.");
+	if (!reqParams)
+		throw new Error(
+			"Failed to deserialize find-element-from-shadow-root body.",
+		);
 
 	let { shadow_root_id, using, value } = reqParams;
 
@@ -67,7 +68,9 @@ async function findElementFromShadowRootRequest(
 
 	let json = await response.json();
 	if ("object" !== typeof json?.value)
-		throw new Error("Find-element-from-shadow-root return value is not an object.");
+		throw new Error(
+			"Find-element-from-shadow-root return value is not an object.",
+		);
 
 	if (json.value instanceof Object) {
 		for (let [key, value] of Object.entries(json.value)) {

@@ -15,8 +15,6 @@ export async function findElement(
 	params: WebdriverParams,
 	sessionId: string,
 ) {
-	if (!sessionId) return;
-
 	let elementId = await findElementRequest(req, params, signal, sessionId);
 	if (!elementId) {
 		res.writeHead(404, { "content-type": "text/plain" });

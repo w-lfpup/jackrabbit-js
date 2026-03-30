@@ -13,7 +13,11 @@ export async function elementClick(
 	let { url } = params;
 
 	let elementId = await getElementIdFromRequest(req);
-	if (!elementId) throw new Error("Failed to deserialize element-click body.");
+	if (!elementId) {
+		res.writeHead(400, { "content-type": "text/plain" });
+		res.end();
+		return;
+	}
 
 	let response = await fetch(
 		new URL(`/session/${sessionId}/element/${elementId}/click`, url),
@@ -25,13 +29,13 @@ export async function elementClick(
 		},
 	);
 
-	if (200 !== response.status) {
-		res.writeHead(404, { "content-type": "text/plain" });
+	if (200 === response.status) {
+		res.writeHead(200, { "content-type": "text/plain" });
 		res.end();
 		return;
 	}
 
-	res.writeHead(200, { "content-type": "text/plain" });
+	res.writeHead(404, { "content-type": "text/plain" });
 	res.end();
 }
 

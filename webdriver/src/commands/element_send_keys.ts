@@ -13,8 +13,11 @@ export async function elementSendKeys(
 	let { url } = params;
 
 	let reqParams = await getRequestParams(req);
-	if (!reqParams)
-		throw new Error("Failed to deserialize element-send-keys body.");
+	if (!reqParams) {
+		res.writeHead(400, { "content-type": "text/plain" });
+		res.end();
+		return;
+	}
 
 	let { element_id, text } = reqParams;
 
@@ -28,12 +31,13 @@ export async function elementSendKeys(
 		},
 	);
 
-	if (200 !== response.status) {
-		res.writeHead(404, { "content-type": "text/plain" });
+	if (200 === response.status) {
+		res.writeHead(200, { "content-type": "text/plain" });
 		res.end();
+		return;
 	}
 
-	res.writeHead(200, { "content-type": "text/plain" });
+	res.writeHead(404, { "content-type": "text/plain" });
 	res.end();
 }
 

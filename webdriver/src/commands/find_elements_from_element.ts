@@ -16,8 +16,6 @@ export async function findElementsFromElement(
 	params: WebdriverParams,
 	sessionId: string,
 ) {
-	if (!sessionId) return;
-
 	let elementIds = await findElementsFromElementRequest(
 		req,
 		params,
