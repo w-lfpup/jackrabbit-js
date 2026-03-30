@@ -171,6 +171,50 @@ An example `jackrabbit_webdriver` config is as follows:
 }
 ```
 
+### Webdriver commands
+
+The following webdriver commands are available:
+
+#### Find element
+
+Find an element id with a css selector.
+
+```ts
+import { findElement } from "@w-lfpup/jackrabbit/browser/dist/mod.js";
+
+let elementId: string | undefined = await findElement("p");
+```
+
+#### Find elements
+
+Find all element ids matching a css selector.
+
+```ts
+import { findElements } from "@w-lfpup/jackrabbit/browser/dist/mod.js";
+
+let elementIds: string[] = await findElements("input[checkbox]");
+```
+
+#### Get element shadow root
+
+If available, get the shadow root id of an element with an id
+
+```ts
+import { getElementShadowRoot } from "@w-lfpup/jackrabbit/browser/dist/mod.js";
+
+let shadowRootId: string | undefined = await getElementShadowRoot(elementId);
+```
+
+#### Take element screenshot
+
+Get a screenshot of an element with their element id and save it to disk.
+
+```ts
+import { takeElementScreenshot } from "@w-lfpup/jackrabbit/browser/dist/mod.js";
+
+await takeElementScreenshot(elementId, "./path/relative/to/cwd.png");
+```
+
 ## License
 
 `Jackrabbit-js` is released under the BSD 3-Clause License.

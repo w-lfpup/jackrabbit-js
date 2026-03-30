@@ -26,8 +26,8 @@ let server = http.createServer();
 server.addListener("request", router.route);
 server.addListener("close", function () {
 	let state = datastore.getState();
-
 	console.log(getResultsAsString(state));
+
 	state.errors || state.fails || !isComplete(state)
 		? process.exit(1)
 		: process.exit(0);
