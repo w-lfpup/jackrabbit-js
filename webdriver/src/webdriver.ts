@@ -8,8 +8,8 @@ import {
 	newSession,
 	addCookie,
 	navigateTo,
-} from "./commands/mod.js";
-import { untilWebdriverReady } from "./operations.js";
+	untilWebdriverReady,
+} from "./operations/mod.js";
 import type { Datastore } from "./datastore.js";
 
 export class WebDrivers {

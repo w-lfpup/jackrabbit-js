@@ -41,7 +41,7 @@ async function findElementRequest(
 		{
 			method: "POST",
 			headers,
-			body: JSON.stringify({using: "css selector", value: css_selector}),
+			body: JSON.stringify({ using: "css selector", value: css_selector }),
 			signal,
 		},
 	);

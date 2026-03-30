@@ -13,19 +13,20 @@ export async function elementClick(
 ): Promise<void> {
 	let { url } = params;
 
-	let elementId = await getElementIdFromRequest(req);
-	if (!elementId) {
+	let reqParams = await getElementIdFromRequest(req);
+	if (!reqParams) {
 		res.writeHead(400, { "content-type": "text/plain" });
 		res.end();
 		return;
 	}
 
+	let { element_id } = reqParams;
 	let response = await fetch(
-		new URL(`/session/${sessionId}/element/${elementId}/click`, url),
+		new URL(`/session/${sessionId}/element/${element_id}/click`, url),
 		{
 			method: "POST",
 			headers,
-			body: JSON.stringify({}),
+			body: "{}",
 			signal,
 		},
 	);

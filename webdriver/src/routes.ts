@@ -18,7 +18,7 @@ import {
 	findElementFromShadowRoot,
 	findElementsFromShadowRoot,
 } from "./commands/mod.js";
-import { serveFile } from "./operations.js";
+import { serveFile } from "./operations/mod.js";
 import { Datastore } from "./datastore.js";
 
 // 404 - not found / undefined
