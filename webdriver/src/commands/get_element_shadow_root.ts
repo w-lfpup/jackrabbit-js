@@ -1,5 +1,6 @@
 import type { IncomingMessage, ServerResponse } from "http";
 import type { WebdriverParams } from "../config.js";
+import type { GetElementShadowRootParams } from "../../../browser/dist/mod.js";
 
 import { getJsonFromRequestBody, headers } from "./flyweight.js";
 
@@ -35,12 +36,13 @@ async function getElementShadowRootRequest(
 ): Promise<string | undefined> {
 	let { url } = params;
 
-	let elementId = await getRequestParams(req);
-	if (!elementId)
+	let reqParams = await getRequestParams(req);
+	if (!reqParams)
 		throw new Error("Failed to deserialize GetElementShadowRoot body.");
 
+	let { element_id } = reqParams;
 	let response = await fetch(
-		new URL(new URL(`/session/${sessionId}/element/${elementId}/shadow`, url)),
+		new URL(new URL(`/session/${sessionId}/element/${element_id}/shadow`, url)),
 		{
 			method: "GET",
 			headers,
@@ -69,10 +71,10 @@ async function getElementShadowRootRequest(
 
 async function getRequestParams(
 	req: IncomingMessage,
-): Promise<string | undefined> {
+): Promise<GetElementShadowRootParams | undefined> {
 	let json = await getJsonFromRequestBody(req);
 	let { element_id } = json;
 	if ("string" === typeof element_id) {
-		return element_id;
+		return { element_id };
 	}
 }

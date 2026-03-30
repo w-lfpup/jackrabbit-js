@@ -1,4 +1,4 @@
-export interface Log {
+export interface LogParams {
 	message: string;
 }
 
@@ -6,7 +6,7 @@ export interface FindElementParams {
 	css_selector: string;
 }
 
-export interface FindElements {
+export interface FindElementsParams {
 	css_selector: string;
 }
 
@@ -15,26 +15,26 @@ export interface FindElementFromElementParams {
 	css_selector: string;
 }
 
-export interface FindElementsFromElement {
+export interface FindElementsFromElementParams {
 	element_id: string;
 	css_selector: string;
 }
 
-export interface GetElementShadowRoot {
+export interface GetElementShadowRootParams {
 	element_id: string;
 }
 
-export interface FindElementFromShadowRoot {
+export interface FindElementFromShadowRootParams {
 	shadow_root_id: string;
 	css_selector: string;
 }
 
-export interface FindElementsFromShadowRoot {
+export interface FindElementsFromShadowRootParams {
 	shadow_root_id: string;
 	css_selector: string;
 }
 
-export interface ElementClick {
+export interface ElementClickParams {
 	element_id: string;
 }
 
@@ -43,7 +43,7 @@ export interface ElementSendKeysParams {
 	text: string;
 }
 
-export interface TakeElementScreenshot {
+export interface TakeElementScreenshotParams {
 	element_id: string;
 	target_filepath: string;
 }
@@ -65,7 +65,7 @@ export async function findElement(
 }
 
 export async function elementClick(element_id: string): Promise<boolean> {
-	let action: ElementClick = {
+	let action: ElementClickParams = {
 		element_id,
 	};
 
@@ -100,7 +100,7 @@ export async function takeElementScreenshot(
 	element_id: string,
 	target_filepath: string,
 ): Promise<boolean> {
-	let action: TakeElementScreenshot = {
+	let action: TakeElementScreenshotParams = {
 		element_id,
 		target_filepath,
 	};
@@ -115,7 +115,7 @@ export async function takeElementScreenshot(
 }
 
 export async function log(message: string): Promise<boolean> {
-	let action: Log = {
+	let action: LogParams = {
 		message,
 	};
 
@@ -131,7 +131,7 @@ export async function log(message: string): Promise<boolean> {
 export async function findElements(
 	css_selector: string,
 ): Promise<string[] | undefined> {
-	let action: FindElements = {
+	let action: FindElementsParams = {
 		css_selector,
 	};
 
@@ -176,7 +176,7 @@ export async function findElementsFromElement(
 	element_id: string,
 	css_selector: string,
 ) {
-	let action: FindElementsFromElement = {
+	let action: FindElementsFromElementParams = {
 		element_id,
 		css_selector,
 	};
@@ -203,7 +203,7 @@ export async function findElementsFromElement(
 export async function getElementShadowRoot(
 	element_id: string,
 ): Promise<string | undefined> {
-	let action: GetElementShadowRoot = {
+	let action: GetElementShadowRootParams = {
 		element_id,
 	};
 
@@ -220,7 +220,7 @@ export async function findElementFromShadowRoot(
 	shadow_root_id: string,
 	css_selector: string,
 ) {
-	let action: FindElementFromShadowRoot = {
+	let action: FindElementFromShadowRootParams = {
 		css_selector,
 		shadow_root_id,
 	};
@@ -238,7 +238,7 @@ export async function findElementsFromShadowRoot(
 	shadow_root_id: string,
 	css_selector: string,
 ) {
-	let action: FindElementsFromShadowRoot = {
+	let action: FindElementsFromShadowRootParams = {
 		shadow_root_id,
 		css_selector,
 	};

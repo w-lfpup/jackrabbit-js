@@ -1,12 +1,8 @@
 import type { IncomingMessage, ServerResponse } from "http";
 import type { WebdriverParams } from "../config.js";
+import type { FindElementParams } from "../../../browser/dist/mod.js";
 
 import { headers, getJsonFromRequestBody } from "./flyweight.js";
-
-interface FindElementParams {
-	using: "css selector";
-	value: string;
-}
 
 export async function findElement(
 	req: IncomingMessage,
@@ -38,12 +34,14 @@ async function findElementRequest(
 	let reqParams = await getRequestParams(req);
 	if (!reqParams) throw new Error("Failed to deserialize find-element body.");
 
+	let { css_selector } = reqParams;
+
 	let response = await fetch(
 		new URL(new URL(`/session/${sessionId}/element`, url)),
 		{
 			method: "POST",
 			headers,
-			body: JSON.stringify(reqParams),
+			body: JSON.stringify({using: "css selector", value: css_selector}),
 			signal,
 		},
 	);
@@ -68,6 +66,6 @@ async function getRequestParams(
 	let json = await getJsonFromRequestBody(req);
 	let { css_selector } = json;
 	if ("string" === typeof css_selector) {
-		return { using: "css selector", value: css_selector };
+		return { css_selector };
 	}
 }

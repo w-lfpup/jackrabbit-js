@@ -1,5 +1,6 @@
 import type { IncomingMessage, ServerResponse } from "http";
 import type { WebdriverParams } from "../config.js";
+import type { ElementClickParams } from "../../../browser/dist/mod.js";
 
 import { headers, getJsonFromRequestBody } from "./flyweight.js";
 
@@ -41,10 +42,10 @@ export async function elementClick(
 
 async function getElementIdFromRequest(
 	req: IncomingMessage,
-): Promise<string | undefined> {
+): Promise<ElementClickParams | undefined> {
 	let json = await getJsonFromRequestBody(req);
 	let element_id = json?.element_id;
 	if ("string" === typeof element_id) {
-		return element_id;
+		return { element_id };
 	}
 }

@@ -1,13 +1,8 @@
 import type { IncomingMessage, ServerResponse } from "http";
 import type { WebdriverParams } from "../config.js";
+import type { FindElementsFromShadowRootParams } from "../../../browser/dist/mod.js";
 
 import { headers, getJsonFromRequestBody } from "./flyweight.js";
-
-interface FindElementParams {
-	using: "css selector";
-	value: string;
-	shadow_root_id: string;
-}
 
 export async function findElementsFromShadowRoot(
 	req: IncomingMessage,
@@ -45,7 +40,7 @@ async function findElementsFromShadowRootRequest(
 	let reqParams = await getRequestParams(req);
 	if (!reqParams) throw new Error("Failed to deserialize FindElement body.");
 
-	let { shadow_root_id, using, value } = reqParams;
+	let { shadow_root_id, css_selector } = reqParams;
 
 	let response = await fetch(
 		new URL(
@@ -54,7 +49,7 @@ async function findElementsFromShadowRootRequest(
 		{
 			method: "POST",
 			headers,
-			body: JSON.stringify({ using, value }),
+			body: JSON.stringify({ using: "css selector", value: css_selector }),
 			signal,
 		},
 	);
@@ -88,10 +83,10 @@ async function findElementsFromShadowRootRequest(
 
 async function getRequestParams(
 	req: IncomingMessage,
-): Promise<FindElementParams | undefined> {
+): Promise<FindElementsFromShadowRootParams | undefined> {
 	let json = await getJsonFromRequestBody(req);
 	let { css_selector, shadow_root_id } = json;
 	if ("string" === typeof css_selector && "string" === typeof shadow_root_id) {
-		return { using: "css selector", value: css_selector, shadow_root_id };
+		return { css_selector, shadow_root_id };
 	}
 }

@@ -1,5 +1,6 @@
 import type { IncomingMessage, ServerResponse } from "http";
 import type { WebdriverParams } from "../config.js";
+import type { TakeElementScreenshotParams } from "../../../browser/dist/mod.js";
 
 import * as fs from "fs";
 import * as path from "path";
@@ -52,11 +53,6 @@ export async function takeElementScreenshot(
 
 	res.writeHead(200, { "content-type": "text/plain" });
 	res.end();
-}
-
-interface TakeElementScreenshotParams {
-	element_id: string;
-	target_filepath: string;
 }
 
 async function getRequestParams(

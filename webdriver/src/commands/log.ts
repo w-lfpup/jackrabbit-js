@@ -1,5 +1,6 @@
 import type { IncomingMessage, ServerResponse } from "http";
 import type { WebdriverParams } from "../config.js";
+import type { LogParams } from "../../../browser/dist/mod.js";
 
 import { getJsonFromRequestBody } from "./flyweight.js";
 
@@ -10,13 +11,14 @@ export async function log(
 	params: WebdriverParams,
 	sessionId: string,
 ) {
-	let message = await getRequestParams(req);
-	if (!message) {
+	let reqParams = await getRequestParams(req);
+	if (!reqParams) {
 		res.writeHead(400, { "content-type": "text/plain" });
 		res.end();
 		return;
 	}
 
+	let { message } = reqParams;
 	console.log(`[${params.title}] ${message}`);
 	res.writeHead(200, { "content-type": "text/plain" });
 	res.end();
@@ -24,10 +26,10 @@ export async function log(
 
 async function getRequestParams(
 	req: IncomingMessage,
-): Promise<string | undefined> {
+): Promise<LogParams | undefined> {
 	let json = await getJsonFromRequestBody(req);
 	let { message } = json;
 	if ("string" === typeof message) {
-		return message;
+		return { message };
 	}
 }
