@@ -4,12 +4,6 @@ import type { FindElementFromElementParams } from "../../../browser/dist/mod.js"
 
 import { headers, getJsonFromRequestBody } from "./flyweight.js";
 
-interface FindElementParams {
-	using: "css selector";
-	value: string;
-	element_id: string;
-}
-
 export async function findElementsFromElement(
 	req: IncomingMessage,
 	res: ServerResponse,
