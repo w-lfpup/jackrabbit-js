@@ -1,6 +1,6 @@
 import type { IncomingMessage } from "http";
 
-export const jsonHeaders = new Headers([["Content-Type", "application/json"]]);
+export const headers = new Headers([["Content-Type", "application/json"]]);
 
 export function getJsonFromRequestBody(req: IncomingMessage): Promise<any> {
 	return new Promise(function (resolve, reject) {

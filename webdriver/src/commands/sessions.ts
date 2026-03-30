@@ -1,7 +1,7 @@
 import type { WebdriverParams } from "../config.js";
 import type { EventBusInterface } from "../eventbus.js";
 
-import { jsonHeaders } from "./flyweight.js";
+import { headers } from "./flyweight.js";
 
 export async function newSession(
 	params: WebdriverParams,
@@ -11,7 +11,7 @@ export async function newSession(
 
 	let response = await fetch(new URL("/session", url), {
 		method: "POST",
-		headers: jsonHeaders,
+		headers: headers,
 		body: JSON.stringify({ capabilities: capabilities ?? {} }),
 		signal,
 	});
@@ -37,7 +37,7 @@ export async function deleteSession(
 	try {
 		let response = await fetch(new URL(`/session/${sessionId}`, url), {
 			method: "DELETE",
-			headers: jsonHeaders,
+			headers,
 			body: null,
 			signal: signal,
 		});

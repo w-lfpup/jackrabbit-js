@@ -18,13 +18,17 @@ export class WebDrivers {
 	#webdrivers: WebdriverSession[] = [];
 	#currentIndex = 0;
 
-	constructor(config: ConfigInterface, eventbus: EventBusInterface, datastore: Datastore) {
+	constructor(
+		config: ConfigInterface,
+		eventbus: EventBusInterface,
+		datastore: Datastore,
+	) {
 		this.#eventbus = eventbus;
 		this.#config = config;
 
 		for (const params of config.webdrivers) {
 			this.#webdrivers.push(
-				new WebdriverSession(params, config.hostAndPort, eventbus, datastore),
+				new WebdriverSession(eventbus, datastore, params, config.hostAndPort),
 			);
 		}
 	}
@@ -78,21 +82,21 @@ export class WebDrivers {
 }
 
 class WebdriverSession {
-	#params: WebdriverParams;
-	#hostAndPort: URL;
 	#eventbus: EventBusInterface;
 	#datastore: Datastore;
+	#params: WebdriverParams;
+	#hostAndPort: URL;
 
 	constructor(
-		params: WebdriverParams,
-		hostAndPort: URL,
 		eventbus: EventBusInterface,
 		datastore: Datastore,
+		params: WebdriverParams,
+		hostAndPort: URL,
 	) {
-		this.#params = params;
-		this.#hostAndPort = hostAndPort;
 		this.#eventbus = eventbus;
 		this.#datastore = datastore;
+		this.#params = params;
+		this.#hostAndPort = hostAndPort;
 
 		this.#eventbus.addListener("run_complete", (action) => {
 			if (action.jackrabbitId === this.#params.jackrabbitId) this.#down();
@@ -105,7 +109,7 @@ class WebdriverSession {
 		let sessionState = this.#datastore.getState().runs.get(jackrabbitId);
 		if (sessionState?.process) return;
 
-		let abortController = new AbortController()
+		let abortController = new AbortController();
 		this.#eventbus.dispatchAction({
 			jackrabbitId,
 			type: "session_start",
@@ -132,7 +136,7 @@ class WebdriverSession {
 					type: "session_synced",
 					sessionId,
 					process,
-					signal
+					signal,
 				},
 			});
 			// session needs to be, go stored in state
@@ -144,13 +148,7 @@ class WebdriverSession {
 				"/ping",
 			);
 			await addCookie(this.#params, signal, sessionId);
-			await navigateTo(
-				this.#params,
-				signal,
-				sessionId,
-				this.#hostAndPort,
-				"/",
-			);
+			await navigateTo(this.#params, signal, sessionId, this.#hostAndPort, "/");
 		} catch (e) {
 			let errOutput;
 			if (e instanceof Error) {

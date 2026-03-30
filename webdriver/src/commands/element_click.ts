@@ -1,7 +1,7 @@
 import type { IncomingMessage, ServerResponse } from "http";
 import type { WebdriverParams } from "../config.js";
 
-import { jsonHeaders, getJsonFromRequestBody } from "./flyweight.js";
+import { headers, getJsonFromRequestBody } from "./flyweight.js";
 
 export async function elementClick(
 	req: IncomingMessage,
@@ -12,21 +12,21 @@ export async function elementClick(
 ): Promise<void> {
 	let { url } = params;
 
-	let elementId = await getElementClickBody(req);
+	let elementId = await getElementIdFromReques(req);
 	if (!elementId) throw new Error("Failed to deserialize element-click body.");
 
-	let resposne = await fetch(
+	let response = await fetch(
 		new URL(`/session/${sessionId}/element/${elementId}/click`, url),
 		{
 			method: "POST",
-			headers: jsonHeaders,
+			headers,
 			body: JSON.stringify({}),
 			signal,
 		},
 	);
 
-	if (200 !== resposne.status) {
-		let cause = await resposne.json();
+	if (200 !== response.status) {
+		let cause = await response.json();
 		throw new Error("Element-click request failed", { cause });
 	}
 
@@ -34,7 +34,7 @@ export async function elementClick(
 	res.end();
 }
 
-async function getElementClickBody(
+async function getElementIdFromReques(
 	req: IncomingMessage,
 ): Promise<string | undefined> {
 	let json = await getJsonFromRequestBody(req);

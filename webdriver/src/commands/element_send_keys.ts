@@ -1,7 +1,7 @@
 import type { IncomingMessage, ServerResponse } from "http";
 import type { WebdriverParams } from "../config.js";
 
-import { jsonHeaders, getJsonFromRequestBody } from "./flyweight.js";
+import { headers, getJsonFromRequestBody } from "./flyweight.js";
 
 export async function elementSendKeys(
 	req: IncomingMessage,
@@ -18,18 +18,18 @@ export async function elementSendKeys(
 
 	let { element_id, text } = reqParams;
 
-	let resposne = await fetch(
+	let response = await fetch(
 		new URL(`/session/${sessionId}/element/${element_id}/value`, url),
 		{
 			method: "POST",
-			headers: jsonHeaders,
+			headers,
 			body: JSON.stringify({ text }),
 			signal,
 		},
 	);
 
-	if (200 !== resposne.status) {
-		let cause = await resposne.json();
+	if (200 !== response.status) {
+		let cause = await response.json();
 		throw new Error("element-send-keys request failed", { cause });
 	}
 

@@ -1,6 +1,6 @@
 import type { WebdriverParams } from "../config.js";
 
-import { jsonHeaders } from "./flyweight.js";
+import { headers } from "./flyweight.js";
 
 export async function navigateTo(
 	params: WebdriverParams,
@@ -14,7 +14,7 @@ export async function navigateTo(
 	let pingUrl = new URL(targetPath, hostAndPort);
 	let response = await fetch(new URL(`/session/${sessionId}/url`, url), {
 		method: "POST",
-		headers: jsonHeaders,
+		headers,
 		body: JSON.stringify({ url: pingUrl }),
 		signal,
 	});

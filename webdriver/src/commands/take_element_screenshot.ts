@@ -3,7 +3,7 @@ import type { WebdriverParams } from "../config.js";
 
 import * as fs from "fs";
 import * as path from "path";
-import { getJsonFromRequestBody, jsonHeaders } from "./flyweight.js";
+import { getJsonFromRequestBody, headers } from "./flyweight.js";
 
 export async function takeElementScreenshot(
 	req: IncomingMessage,
@@ -24,7 +24,7 @@ export async function takeElementScreenshot(
 		new URL(`/session/${sessionId}/element/${element_id}/screenshot`, url),
 		{
 			method: "GET",
-			headers: jsonHeaders,
+			headers,
 			signal,
 		},
 	);

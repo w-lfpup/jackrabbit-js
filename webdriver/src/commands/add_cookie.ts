@@ -1,6 +1,6 @@
 import type { WebdriverParams } from "../config.js";
 
-import { jsonHeaders } from "./flyweight.js";
+import { headers } from "./flyweight.js";
 
 export async function addCookie(
 	params: WebdriverParams,
@@ -11,7 +11,7 @@ export async function addCookie(
 
 	let response = await fetch(new URL(`/session/${sessionId}/cookie`, url), {
 		method: "POST",
-		headers: jsonHeaders,
+		headers,
 		body: JSON.stringify({
 			cookie: {
 				name: "jackrabbit",
@@ -25,6 +25,6 @@ export async function addCookie(
 
 	if (200 !== response.status) {
 		let cause = await response.json();
-		throw new Error("set-cookie request failed", { cause });
+		throw new Error("Add-cookie request failed", { cause });
 	}
 }

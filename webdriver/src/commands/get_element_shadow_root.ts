@@ -1,7 +1,7 @@
 import type { IncomingMessage, ServerResponse } from "http";
 import type { WebdriverParams } from "../config.js";
 
-import { getJsonFromRequestBody, jsonHeaders } from "./flyweight.js";
+import { getJsonFromRequestBody, headers } from "./flyweight.js";
 
 export async function getElementShadowRoot(
 	req: IncomingMessage,
@@ -45,7 +45,7 @@ async function getElementShadowRootRequest(
 		new URL(new URL(`/session/${sessionId}/element/${elementId}/shadow`, url)),
 		{
 			method: "GET",
-			headers: jsonHeaders,
+			headers,
 			signal,
 		},
 	);
@@ -59,13 +59,13 @@ async function getElementShadowRootRequest(
 	if ("object" !== typeof json?.value)
 		throw new Error("GetElementShadowRoot return value is not an object");
 
-	for (let [key, value] of Object.entries(json.value)) {
+	for (let [shadowHash, shadowRootId] of Object.entries(json.value)) {
 		if (
-			"string" === typeof key &&
-			"string" === typeof value &&
-			key.startsWith("shadow-")
+			"string" === typeof shadowHash &&
+			"string" === typeof shadowRootId &&
+			shadowHash.startsWith("shadow-")
 		)
-			return value;
+			return shadowRootId;
 	}
 }
 

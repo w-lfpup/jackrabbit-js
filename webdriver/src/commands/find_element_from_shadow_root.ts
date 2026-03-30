@@ -1,7 +1,7 @@
 import type { IncomingMessage, ServerResponse } from "http";
 import type { WebdriverParams } from "../config.js";
 
-import { jsonHeaders, getJsonFromRequestBody } from "./flyweight.js";
+import { headers, getJsonFromRequestBody } from "./flyweight.js";
 
 interface FindElementParams {
 	using: "css selector";
@@ -54,7 +54,7 @@ async function findElementFromShadowRootRequest(
 		),
 		{
 			method: "POST",
-			headers: jsonHeaders,
+			headers,
 			body: JSON.stringify({ using, value }),
 			signal,
 		},
