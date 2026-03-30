@@ -37,7 +37,7 @@ export async function takeElementScreenshot(
 	let json = await response.json();
 	let base64 = json.value;
 	if ("string" !== typeof base64)
-		throw new Error("element screenshot is not a base64 string");
+		throw new Error("lement screenshot is not a base64 string");
 
 	// get path relative to cwd
 	// if /absolute path

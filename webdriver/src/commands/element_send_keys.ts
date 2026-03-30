@@ -14,7 +14,7 @@ export async function elementSendKeys(
 
 	let reqParams = await getRequestParams(req);
 	if (!reqParams)
-		throw new Error("Failed to deserialize ElementSendKeys body.");
+		throw new Error("Failed to deserialize element-send-keys body.");
 
 	let { element_id, text } = reqParams;
 
@@ -30,7 +30,7 @@ export async function elementSendKeys(
 
 	if (200 !== response.status) {
 		let cause = await response.json();
-		throw new Error("element-send-keys request failed", { cause });
+		throw new Error("Element-send-keys request failed", { cause });
 	}
 
 	res.writeHead(200, { "content-type": "text/plain" });
@@ -45,8 +45,7 @@ interface ElementSendKeysParams {
 async function getRequestParams(
 	req: IncomingMessage,
 ): Promise<ElementSendKeysParams | undefined> {
-	let json = await getJsonFromRequestBody(req);
-	let { element_id, text } = json;
+	let { element_id, text } = await getJsonFromRequestBody(req);
 	if ("string" === typeof element_id && "string" === typeof text) {
 		return { element_id, text };
 	}

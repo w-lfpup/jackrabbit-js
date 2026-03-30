@@ -45,7 +45,7 @@ async function findElementFromElementRequest(
 	let { url } = params;
 
 	let reqParams = await getRequestParams(req);
-	if (!reqParams) throw new Error("Failed to deserialize FindElement body.");
+	if (!reqParams) throw new Error("Failed to deserialize find-element-from-element body.");
 
 	let { element_id, using, value } = reqParams;
 
@@ -63,12 +63,12 @@ async function findElementFromElementRequest(
 
 	if (200 !== response.status) {
 		let cause = await response.json();
-		throw new Error("find-element request failed", { cause });
+		throw new Error("find-element-from-element request failed", { cause });
 	}
 
 	let json = await response.json();
 	if ("object" !== typeof json?.value)
-		throw new Error("getElements return value is not an object");
+		throw new Error("find-element-from-element return value is not an object");
 
 	if (json.value instanceof Object) {
 		for (let [key, value] of Object.entries(json.value)) {
