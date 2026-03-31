@@ -11,7 +11,19 @@ export async function findElement(
 	params: WebdriverParams,
 	sessionId: string,
 ) {
-	let elementId = await findElementRequest(req, params, signal, sessionId);
+	let reqParams = await getRequestParams(req);
+	if (!reqParams) {
+		res.writeHead(400, { "content-type": "text/plain" });
+		res.end();
+		return;
+	}
+
+	let elementId = await findElementRequest(
+		params,
+		reqParams,
+		signal,
+		sessionId,
+	);
 	if (!elementId) {
 		res.writeHead(404, { "content-type": "text/plain" });
 		res.end();
@@ -24,15 +36,12 @@ export async function findElement(
 }
 
 async function findElementRequest(
-	req: IncomingMessage,
 	params: WebdriverParams,
+	reqParams: FindElementParams,
 	signal: AbortSignal | undefined,
 	sessionId: string,
 ): Promise<string | undefined> {
 	let { url } = params;
-
-	let reqParams = await getRequestParams(req);
-	if (!reqParams) throw new Error("Failed to deserialize find-element body.");
 
 	let { css_selector } = reqParams;
 

@@ -11,9 +11,19 @@ export async function findElementFromElement(
 	params: WebdriverParams,
 	sessionId: string,
 ) {
+	// put request body here
+	// needs to return a 400, 200, 404
+	let reqParams = await getRequestParams(req);
+	if (!reqParams) {
+		res.writeHead(400, { "content-type": "text/plain" });
+		res.end();
+		return;
+	}
+	// just return elementId undefined or error
+	// if error write a response about it
 	let elementId = await findElementFromElementRequest(
-		req,
 		params,
+		reqParams,
 		signal,
 		sessionId,
 	);
@@ -29,16 +39,12 @@ export async function findElementFromElement(
 
 // need event bus to send errors to error log
 async function findElementFromElementRequest(
-	req: IncomingMessage,
 	params: WebdriverParams,
+	reqParams: FindElementFromElementParams,
 	signal: AbortSignal | undefined,
 	sessionId: string,
 ): Promise<string | undefined> {
 	let { url } = params;
-
-	let reqParams = await getRequestParams(req);
-	if (!reqParams)
-		throw new Error("Failed to deserialize find-element-from-element body.");
 
 	let { element_id, css_selector } = reqParams;
 

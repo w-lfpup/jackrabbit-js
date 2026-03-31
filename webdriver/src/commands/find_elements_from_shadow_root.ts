@@ -11,6 +11,13 @@ export async function findElementsFromShadowRoot(
 	params: WebdriverParams,
 	sessionId: string,
 ) {
+	let reqParams = await getRequestParams(req);
+	if (!reqParams) {
+		res.writeHead(400, { "content-type": "text/plain" });
+		res.end();
+		return;
+	}
+
 	let elementIds = await findElementsFromShadowRootRequest(
 		req,
 		params,
@@ -36,9 +43,6 @@ async function findElementsFromShadowRootRequest(
 	sessionId: string, // derived state associated with driver
 ): Promise<string[]> {
 	let { url } = params;
-
-	let reqParams = await getRequestParams(req);
-	if (!reqParams) throw new Error("Failed to deserialize FindElement body.");
 
 	let { shadow_root_id, css_selector } = reqParams;
 

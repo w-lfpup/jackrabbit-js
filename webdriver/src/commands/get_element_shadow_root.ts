@@ -11,6 +11,13 @@ export async function getElementShadowRoot(
 	params: WebdriverParams,
 	sessionId: string,
 ) {
+	let reqParams = await getRequestParams(req);
+	if (!reqParams) {
+		res.writeHead(400, { "content-type": "text/plain" });
+		res.end();
+		return;
+	}
+
 	let elementId = await getElementShadowRootRequest(
 		req,
 		signal,
@@ -35,10 +42,6 @@ async function getElementShadowRootRequest(
 	sessionId: string, // derived state associated with driver
 ): Promise<string | undefined> {
 	let { url } = params;
-
-	let reqParams = await getRequestParams(req);
-	if (!reqParams)
-		throw new Error("Failed to deserialize GetElementShadowRoot body.");
 
 	let { element_id } = reqParams;
 	let response = await fetch(
