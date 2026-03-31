@@ -19,8 +19,8 @@ export async function findElementsFromElement(
 	}
 
 	let elementIds = await findElementsFromElementRequest(
-		req,
 		params,
+		reqParams,
 		signal,
 		sessionId,
 	);
@@ -37,8 +37,8 @@ export async function findElementsFromElement(
 
 // need event bus to send errors to error log
 async function findElementsFromElementRequest(
-	req: IncomingMessage,
 	params: WebdriverParams, // driver defined state
+	reqParams: FindElementFromElementParams,
 	signal: AbortSignal | undefined, // driver defined state
 	sessionId: string, // derived state associated with driver
 ): Promise<string[]> {

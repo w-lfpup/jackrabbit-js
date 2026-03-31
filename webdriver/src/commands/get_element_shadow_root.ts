@@ -19,9 +19,9 @@ export async function getElementShadowRoot(
 	}
 
 	let elementId = await getElementShadowRootRequest(
-		req,
 		signal,
 		params,
+		reqParams,
 		sessionId,
 	);
 	if (!elementId) {
@@ -36,9 +36,9 @@ export async function getElementShadowRoot(
 }
 
 async function getElementShadowRootRequest(
-	req: IncomingMessage,
 	signal: AbortSignal | undefined, // driver defined state
 	params: WebdriverParams, // driver defined state
+	reqParams: GetElementShadowRootParams,
 	sessionId: string, // derived state associated with driver
 ): Promise<string | undefined> {
 	let { url } = params;

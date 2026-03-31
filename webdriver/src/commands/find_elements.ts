@@ -19,7 +19,12 @@ export async function findElements(
 		return;
 	}
 
-	let elementIds = await findElementsRequest(req, params, signal, sessionId);
+	let elementIds = await findElementsRequest(
+		params,
+		reqParams,
+		signal,
+		sessionId,
+	);
 	if (!elementIds) {
 		res.writeHead(404, { "content-type": "text/plain" });
 		res.end();
@@ -32,8 +37,8 @@ export async function findElements(
 }
 
 async function findElementsRequest(
-	req: IncomingMessage,
 	params: WebdriverParams, // driver defined state
+	reqParams: FindElementsParams,
 	signal: AbortSignal | undefined, // driver defined state
 	sessionId: string, // derived state associated with driver
 ): Promise<string[]> {

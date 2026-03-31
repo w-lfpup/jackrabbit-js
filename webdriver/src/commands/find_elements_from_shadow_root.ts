@@ -19,8 +19,8 @@ export async function findElementsFromShadowRoot(
 	}
 
 	let elementIds = await findElementsFromShadowRootRequest(
-		req,
 		params,
+		reqParams,
 		signal,
 		sessionId,
 	);
@@ -37,8 +37,8 @@ export async function findElementsFromShadowRoot(
 
 // need event bus to send errors to error log
 async function findElementsFromShadowRootRequest(
-	req: IncomingMessage,
 	params: WebdriverParams, // driver defined state
+	reqParams: FindElementsFromShadowRootParams,
 	signal: AbortSignal | undefined, // driver defined state
 	sessionId: string, // derived state associated with driver
 ): Promise<string[]> {
