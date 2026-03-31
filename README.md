@@ -173,7 +173,7 @@ An example `jackrabbit_webdriver` config is as follows:
 
 ### Webdriver commands
 
-The following webdriver commands are available:
+The following webdriver commands are available
 
 #### Find element
 
