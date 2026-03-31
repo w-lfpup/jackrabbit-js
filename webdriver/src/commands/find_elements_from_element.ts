@@ -71,11 +71,7 @@ async function findElementsFromElementRequest(
 	for (let elObj of json.value) {
 		if (typeof elObj === "object") {
 			for (let [elHash, elId] of Object.entries(elObj)) {
-				if (
-					"string" === typeof elHash &&
-					"string" === typeof elId &&
-					elHash.startsWith("element-")
-				) {
+				if ("string" === typeof elId && elHash.startsWith("element-")) {
 					elementIds.push(elId);
 				}
 			}

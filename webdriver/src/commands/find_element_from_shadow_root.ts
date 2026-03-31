@@ -70,12 +70,7 @@ async function findElementFromShadowRootRequest(
 
 	if (json.value instanceof Object) {
 		for (let [elHash, id] of Object.entries(json.value)) {
-			if (
-				"string" === typeof elHash &&
-				"string" === typeof id &&
-				elHash.startsWith("element-")
-			)
-				return id;
+			if ("string" === typeof id && elHash.startsWith("element-")) return id;
 		}
 	}
 }

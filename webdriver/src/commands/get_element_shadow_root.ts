@@ -63,11 +63,7 @@ async function getElementShadowRootRequest(
 		throw new Error("GetElementShadowRoot return value is not an object");
 
 	for (let [shadowHash, shadowRootId] of Object.entries(json.value)) {
-		if (
-			"string" === typeof shadowHash &&
-			"string" === typeof shadowRootId &&
-			shadowHash.startsWith("shadow-")
-		)
+		if ("string" === typeof shadowRootId && shadowHash.startsWith("shadow-"))
 			return shadowRootId;
 	}
 }
