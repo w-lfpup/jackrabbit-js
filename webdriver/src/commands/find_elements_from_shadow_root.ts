@@ -2,7 +2,7 @@ import type { IncomingMessage } from "http";
 import type { WebdriverParams } from "../config.js";
 import type { FindElementsFromShadowRootParams } from "../../../browser/dist/mod.js";
 
-import { headers, getJsonFromRequestBody, ActionParams } from "./flyweight.js";
+import { headers, getJsonFromRequestBody, ActionParams } from "../flyweight.js";
 
 export async function findElementsFromShadowRoot(actionParams: ActionParams) {
 	let { req, res, eventbus, signal, webdriverParams, sessionId } = actionParams;

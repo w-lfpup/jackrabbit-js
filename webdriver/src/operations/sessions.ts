@@ -1,7 +1,7 @@
 import type { WebdriverParams } from "../config.js";
 import type { EventBusInterface } from "../eventbus.js";
 
-import { headers } from "../commands/flyweight.js";
+import { headers } from "../flyweight.js";
 
 export async function newSession(
 	params: WebdriverParams,

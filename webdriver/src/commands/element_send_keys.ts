@@ -1,7 +1,7 @@
 import type { IncomingMessage } from "http";
 import type { ElementSendKeysParams } from "../../../browser/dist/mod.js";
 
-import { headers, getJsonFromRequestBody, ActionParams } from "./flyweight.js";
+import { headers, getJsonFromRequestBody, ActionParams } from "../flyweight.js";
 
 export async function elementSendKeys(
 	actionParams: ActionParams,

@@ -1,6 +1,15 @@
 import type { IncomingMessage, ServerResponse } from "http";
-import type { EventBusInterface } from "../eventbus.js";
-import type { WebdriverParams } from "../config.js";
+import type { EventBusInterface } from "./eventbus.js";
+import type { WebdriverParams } from "./config.js";
+
+export interface ActionParams {
+	req: IncomingMessage;
+	res: ServerResponse;
+	eventbus: EventBusInterface;
+	signal: AbortSignal | undefined;
+	webdriverParams: WebdriverParams;
+	sessionId: string;
+}
 
 export const headers = new Headers([["Content-Type", "application/json"]]);
 
@@ -28,13 +37,4 @@ export function errorToString(e: any): string {
 		errOutput = e.name + "\n" + e.message + (e.cause ? "\n" + e.cause : "");
 	}
 	return e?.toString();
-}
-
-export interface ActionParams {
-	req: IncomingMessage;
-	res: ServerResponse;
-	eventbus: EventBusInterface;
-	signal: AbortSignal | undefined;
-	webdriverParams: WebdriverParams;
-	sessionId: string;
 }

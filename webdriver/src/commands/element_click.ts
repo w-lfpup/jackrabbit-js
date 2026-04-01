@@ -1,7 +1,7 @@
 import type { IncomingMessage, ServerResponse } from "http";
 import type { ElementClickParams } from "../../../browser/dist/mod.js";
 
-import { headers, getJsonFromRequestBody, ActionParams } from "./flyweight.js";
+import { headers, getJsonFromRequestBody, ActionParams } from "../flyweight.js";
 
 export async function elementClick(actionParams: ActionParams): Promise<void> {
 	let { req, res, eventbus, signal, webdriverParams, sessionId } = actionParams;

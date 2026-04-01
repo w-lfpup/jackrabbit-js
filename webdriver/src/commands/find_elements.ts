@@ -2,7 +2,7 @@ import type { IncomingMessage } from "http";
 import type { WebdriverParams } from "../config.js";
 import type { FindElementsParams } from "../../../browser/dist/mod.js";
 
-import { headers, getJsonFromRequestBody, ActionParams } from "./flyweight.js";
+import { headers, getJsonFromRequestBody, ActionParams } from "../flyweight.js";
 
 // FIND ELEMENTS
 export async function findElements(actionParams: ActionParams) {

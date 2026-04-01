@@ -1,6 +1,6 @@
 import type { WebdriverParams } from "../config.js";
 
-import { headers } from "../commands/flyweight.js";
+import { headers } from "../flyweight.js";
 
 export async function navigateTo(
 	params: WebdriverParams,

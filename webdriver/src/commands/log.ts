@@ -1,7 +1,7 @@
 import type { IncomingMessage } from "http";
 import type { LogParams } from "../../../browser/dist/mod.js";
 
-import { getJsonFromRequestBody, ActionParams } from "./flyweight.js";
+import { getJsonFromRequestBody, ActionParams } from "../flyweight.js";
 
 export async function log(actionParams: ActionParams) {
 	let { req, res, webdriverParams } = actionParams;

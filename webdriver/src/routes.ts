@@ -1,7 +1,8 @@
 import type { IncomingMessage, ServerResponse } from "http";
-import type { EventBusInterface } from "./eventbus.js";
-import type { LogActions } from "./eventbus.js";
 import type { ConfigInterface } from "./config.js";
+import type { Datastore } from "./datastore.js";
+import type { EventBusInterface, LogActions } from "./eventbus.js";
+import type { ActionParams } from "./flyweight.js";
 
 import { testHanger } from "./test_hangar.js";
 import {
@@ -18,8 +19,7 @@ import {
 	findElementsFromShadowRoot,
 } from "./commands/mod.js";
 import { serveFile } from "./operations/mod.js";
-import { Datastore } from "./datastore.js";
-import { ActionParams } from "./commands/flyweight.js";
+import { getJsonFromRequestBody } from "./flyweight.js";
 
 // 404 - not found / undefined
 // 400 - bad request
@@ -165,14 +165,14 @@ function execWebdriverCommand(
 		return true;
 	}
 
-	let { sessionId, webdriverParams, signal } = session;
+	let { sessionId } = session;
 	if (!sessionId) {
 		res.writeHead(401);
 		res.end();
 		return true;
 	}
 
-	// send event bus for errors here
+	let { webdriverParams, signal } = session;
 	webdriverCommands({
 		req,
 		res,
@@ -188,7 +188,6 @@ function execWebdriverCommand(
 	return true;
 }
 
-// send error through event bus
 export async function webdriverCommands(actionParams: ActionParams) {
 	let { req, res, sessionId } = actionParams;
 	if (!sessionId) return;
@@ -202,22 +201,4 @@ export async function webdriverCommands(actionParams: ActionParams) {
 
 	res.writeHead(404);
 	res.end();
-}
-
-function getJsonFromRequestBody(req: IncomingMessage): Promise<any> {
-	return new Promise(function (resolve, reject) {
-		let data: Uint8Array[] = [];
-		req.addListener("data", function (chunk) {
-			data.push(chunk);
-		});
-		req.addListener("end", function () {
-			let actionStr = Buffer.concat(data).toString();
-			let action = JSON.parse(actionStr);
-
-			resolve(action);
-		});
-		req.addListener("error", function (err: Error) {
-			reject(err);
-		});
-	});
 }

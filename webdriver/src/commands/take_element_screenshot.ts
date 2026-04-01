@@ -3,7 +3,7 @@ import type { TakeElementScreenshotParams } from "../../../browser/dist/mod.js";
 
 import * as fs from "fs";
 import * as path from "path";
-import { getJsonFromRequestBody, headers, ActionParams } from "./flyweight.js";
+import { getJsonFromRequestBody, headers, ActionParams } from "../flyweight.js";
 
 export async function takeElementScreenshot(
 	actionParams: ActionParams,
