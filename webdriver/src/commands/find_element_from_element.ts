@@ -1,11 +1,17 @@
 import type { IncomingMessage } from "http";
 import type { WebdriverParams } from "../config.js";
 import type { FindElementFromElementParams } from "../../../browser/dist/mod.js";
+import type { EventBusInterface } from "../eventbus.js";
 
-import { headers, getJsonFromRequestBody, ActionParams } from "../flyweight.js";
+import {
+	headers,
+	getJsonFromRequestBody,
+	ActionParams,
+	dispatchSessionError,
+} from "../flyweight.js";
 
 export async function findElementFromElement(actionParams: ActionParams) {
-	let { req, res, eventbus, signal, webdriverParams, sessionId } = actionParams;
+	let { req, res } = actionParams;
 
 	// put request body here
 	// needs to return a 400, 200, 404
@@ -17,14 +23,11 @@ export async function findElementFromElement(actionParams: ActionParams) {
 	}
 	// just return elementId undefined or error
 	// if error write a response about it
+	let { eventbus, signal, webdriverParams, sessionId } = actionParams;
 
 	// if instanceof error send to event bus
-	let elementId = await findElementFromElementRequest(
-		webdriverParams,
-		reqParams,
-		signal,
-		sessionId,
-	);
+	let elementId = await findElementFromElementRequest(actionParams, reqParams);
+
 	if (elementId) {
 		res.writeHead(200, { "content-type": "text/plain" });
 		res.end(elementId);
@@ -37,13 +40,11 @@ export async function findElementFromElement(actionParams: ActionParams) {
 
 // need event bus to send errors to error log
 async function findElementFromElementRequest(
-	params: WebdriverParams,
+	actionParams: ActionParams,
 	reqParams: FindElementFromElementParams,
-	signal: AbortSignal | undefined,
-	sessionId: string,
 ): Promise<string | undefined> {
-	let { webdriverUrl } = params;
-
+	let { webdriverParams, sessionId, signal, eventbus } = actionParams;
+	let { webdriverUrl, jackrabbitId } = webdriverParams;
 	let { element_id, css_selector } = reqParams;
 
 	let response = await fetch(
@@ -64,12 +65,20 @@ async function findElementFromElementRequest(
 	// whwat if it's just "return" here?
 	if (200 !== response.status) {
 		let cause = await response.json();
-		throw new Error("find-element-from-element request failed.", { cause });
+		let reason = `Find-element-from-element webdriver request failed: ${cause}`;
+		dispatchSessionError(eventbus, jackrabbitId, reason);
+		return;
 	}
 
 	let json = await response.json();
-	if ("object" !== typeof json?.value)
-		throw new Error("find-element-from-element return value is not an object.");
+	if ("object" !== typeof json?.value) {
+		dispatchSessionError(
+			eventbus,
+			jackrabbitId,
+			"Find-element-from-element return value is not an object.",
+		);
+		return;
+	}
 
 	if (json.value instanceof Object) {
 		for (let [elHash, id] of Object.entries(json.value)) {

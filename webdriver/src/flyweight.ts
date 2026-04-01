@@ -38,3 +38,18 @@ export function errorToString(e: any): string {
 	}
 	return e?.toString();
 }
+
+export function dispatchSessionError(
+	eventbus: EventBusInterface,
+	jackrabbitId: string,
+	cause: string | undefined,
+) {
+	eventbus.dispatchAction({
+		type: "log",
+		jackrabbitId,
+		loggerAction: {
+			type: "session_error",
+			error: `Find-element-from-element webdriver request failed: ${cause}`,
+		},
+	});
+}
