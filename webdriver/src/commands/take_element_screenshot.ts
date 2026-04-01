@@ -44,10 +44,15 @@ export async function takeElementScreenshot(
 	if ("string" !== typeof base64)
 		throw new Error("take-element-screeshot is not a base64 string");
 
-	// get path relative to cwd
-	// if /absolute path
-	//
-	// join process.cwd() + target_filepath;
+	// confirm screenshot is saved in the scope of cwd
+	let cwd = process.cwd();
+	let filepath = path.join(cwd, target_filepath);
+	if (!filepath.startsWith(cwd)) {
+		res.writeHead(404, { "content-type": "text/plain" });
+		res.end();
+		return;
+	}
+
 	let buffer = Buffer.from(base64, "base64");
 	await saveFileToDisk(target_filepath, title, buffer);
 
@@ -66,25 +71,18 @@ async function getRequestParams(
 }
 
 async function saveFileToDisk(
-	target_filepath: string,
+	filepath: string,
 	title: string,
 	buffer: Buffer,
 ): Promise<void> {
 	// make sure path is in current working directory?
-	let cwd = process.cwd();
-	let filepath = path.join(cwd, target_filepath);
-	if (!filepath.startsWith(cwd))
-		throw new Error("Screenshot filepath is out of scope (not in cwd)");
-
 	let ext = path.extname(filepath);
 	if (ext) filepath = filepath.substring(0, filepath.length - ext.length);
 
 	let title_ext = title.toLowerCase().replaceAll(" ", "_");
 	filepath = `${filepath}.${title_ext}.png`;
 
-	// create directories
 	let dir = path.dirname(filepath);
 	await fs.promises.mkdir(dir, { recursive: true });
-	// write file
 	await fs.promises.writeFile(filepath, buffer);
 }
