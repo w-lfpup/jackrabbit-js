@@ -2,7 +2,6 @@ import type { IncomingMessage, ServerResponse } from "http";
 import type { EventBusInterface } from "./eventbus.js";
 import type { LogActions } from "./eventbus.js";
 import type { ConfigInterface } from "./config.js";
-import type { WebdriverParams } from "./config.js";
 
 import { testHanger } from "./test_hangar.js";
 import {
@@ -20,6 +19,7 @@ import {
 } from "./commands/mod.js";
 import { serveFile } from "./operations/mod.js";
 import { Datastore } from "./datastore.js";
+import { ActionParams } from "./commands/flyweight.js";
 
 // 404 - not found / undefined
 // 400 - bad request
@@ -63,7 +63,7 @@ export class Router {
 		if (servePing(req, res)) return;
 		if (serveTestPage(req, res, this.#config)) return;
 		if (logAction(req, res, this.#eventbus)) return;
-		if (execWebdriverCommand(req, res, this.#datastore)) return;
+		if (execWebdriverCommand(req, res, this.#datastore, this.#eventbus)) return;
 
 		await serveFile(req, res);
 	}
@@ -146,6 +146,7 @@ function execWebdriverCommand(
 	req: IncomingMessage,
 	res: ServerResponse,
 	datastore: Datastore,
+	eventbus: EventBusInterface,
 ): boolean {
 	let { url } = req;
 	if (!url?.startsWith("/cmd/")) return false;
@@ -165,31 +166,38 @@ function execWebdriverCommand(
 	}
 
 	let { sessionId, webdriverParams, signal } = session;
+	if (!sessionId) {
+		res.writeHead(401);
+		res.end();
+		return true;
+	}
 
-	webdriverCommands(req, res, signal, sessionId, webdriverParams).catch(
-		function () {
-			res.writeHead(500);
-			res.end();
-		},
-	);
+	// send event bus for errors here
+	webdriverCommands({
+		req,
+		res,
+		signal,
+		sessionId,
+		webdriverParams,
+		eventbus,
+	}).catch(function () {
+		res.writeHead(500);
+		res.end();
+	});
 
 	return true;
 }
 
-export async function webdriverCommands(
-	req: IncomingMessage,
-	res: ServerResponse,
-	signal: AbortSignal | undefined,
-	sessionId: string | undefined,
-	params: WebdriverParams,
-) {
+// send error through event bus
+export async function webdriverCommands(actionParams: ActionParams) {
+	let { req, res, sessionId } = actionParams;
 	if (!sessionId) return;
 
 	// expecting http 1.1
 	let reqUrl = req.url;
 	if (reqUrl) {
 		let action = routeMap.get(reqUrl);
-		if (action) return action(req, res, signal, params, sessionId);
+		if (action) return action(actionParams);
 	}
 
 	res.writeHead(404);

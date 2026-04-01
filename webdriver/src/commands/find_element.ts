@@ -1,16 +1,12 @@
-import type { IncomingMessage, ServerResponse } from "http";
+import type { IncomingMessage } from "http";
 import type { WebdriverParams } from "../config.js";
 import type { FindElementParams } from "../../../browser/dist/mod.js";
 
-import { headers, getJsonFromRequestBody } from "./flyweight.js";
+import { headers, getJsonFromRequestBody, ActionParams } from "./flyweight.js";
 
-export async function findElement(
-	req: IncomingMessage,
-	res: ServerResponse,
-	signal: AbortSignal | undefined,
-	params: WebdriverParams,
-	sessionId: string,
-) {
+export async function findElement(actionParams: ActionParams) {
+	let { req, res, eventbus, signal, webdriverParams, sessionId } = actionParams;
+
 	let reqParams = await getRequestParams(req);
 	if (!reqParams) {
 		res.writeHead(400, { "content-type": "text/plain" });
@@ -18,12 +14,17 @@ export async function findElement(
 		return;
 	}
 
+	// send error through event bus
 	let elementId = await findElementRequest(
-		params,
+		webdriverParams,
 		reqParams,
 		signal,
 		sessionId,
 	);
+
+	// if elementId instanceof Error return error status code
+	// dispatch error
+
 	if (!elementId) {
 		res.writeHead(404, { "content-type": "text/plain" });
 		res.end();

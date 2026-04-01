@@ -1,21 +1,20 @@
-import type { IncomingMessage, ServerResponse } from "http";
-import type { WebdriverParams } from "../config.js";
+import type { IncomingMessage } from "http";
 import type { ElementSendKeysParams } from "../../../browser/dist/mod.js";
 
-import { headers, getJsonFromRequestBody } from "./flyweight.js";
+import { headers, getJsonFromRequestBody, ActionParams } from "./flyweight.js";
 
 export async function elementSendKeys(
-	req: IncomingMessage,
-	res: ServerResponse,
-	signal: AbortSignal | undefined,
-	params: WebdriverParams,
-	sessionId: string,
+	actionParams: ActionParams,
 ): Promise<void> {
-	let { webdriverUrl } = params;
+	let { req, res, eventbus, signal, webdriverParams, sessionId } = actionParams;
+
+	let { webdriverUrl } = webdriverParams;
+
+	res.setHeader("content-type", "text/plan");
 
 	let reqParams = await getRequestParams(req);
 	if (!reqParams) {
-		res.writeHead(400, { "content-type": "text/plain" });
+		res.writeHead(400);
 		res.end();
 		return;
 	}
@@ -33,12 +32,14 @@ export async function elementSendKeys(
 	);
 
 	if (200 === response.status) {
-		res.writeHead(200, { "content-type": "text/plain" });
+		res.writeHead(200);
 		res.end();
 		return;
 	}
 
-	res.writeHead(404, { "content-type": "text/plain" });
+	// send error through event bus
+
+	res.writeHead(404);
 	res.end();
 }
 

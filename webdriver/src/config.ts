@@ -23,10 +23,11 @@ export async function createConfig(
 ): Promise<ConfigInterface | Error> {
 	let configFilepath = args[0];
 	// is absolute?
-	path.isAbsolute(configFilepath);
-	let relPath = path.resolve(process.cwd(), configFilepath);
 
 	try {
+		path.isAbsolute(configFilepath);
+		let relPath = path.resolve(process.cwd(), configFilepath);
+
 		// windows might need a "file://<relPath>" situation
 		let { default: json } = await import(`file://${relPath}`, {
 			with: { type: "json" },

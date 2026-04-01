@@ -1,4 +1,6 @@
-import type { IncomingMessage } from "http";
+import type { IncomingMessage, ServerResponse } from "http";
+import type { EventBusInterface } from "../eventbus.js";
+import type { WebdriverParams } from "../config.js";
 
 export const headers = new Headers([["Content-Type", "application/json"]]);
 
@@ -18,4 +20,21 @@ export function getJsonFromRequestBody(req: IncomingMessage): Promise<any> {
 			reject(err);
 		});
 	});
+}
+
+export function errorToString(e: any): string {
+	let errOutput;
+	if (e instanceof Error) {
+		errOutput = e.name + "\n" + e.message + (e.cause ? "\n" + e.cause : "");
+	}
+	return e?.toString();
+}
+
+export interface ActionParams {
+	req: IncomingMessage;
+	res: ServerResponse;
+	eventbus: EventBusInterface;
+	signal: AbortSignal | undefined;
+	webdriverParams: WebdriverParams;
+	sessionId: string;
 }

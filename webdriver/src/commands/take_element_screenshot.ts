@@ -1,19 +1,16 @@
-import type { IncomingMessage, ServerResponse } from "http";
-import type { WebdriverParams } from "../config.js";
+import type { IncomingMessage } from "http";
 import type { TakeElementScreenshotParams } from "../../../browser/dist/mod.js";
 
 import * as fs from "fs";
 import * as path from "path";
-import { getJsonFromRequestBody, headers } from "./flyweight.js";
+import { getJsonFromRequestBody, headers, ActionParams } from "./flyweight.js";
 
 export async function takeElementScreenshot(
-	req: IncomingMessage,
-	res: ServerResponse,
-	signal: AbortSignal | undefined,
-	params: WebdriverParams,
-	sessionId: string,
+	actionParams: ActionParams,
 ): Promise<void> {
-	let { webdriverUrl, title } = params;
+	let { req, res, eventbus, signal, webdriverParams, sessionId } = actionParams;
+
+	let { webdriverUrl, title } = webdriverParams;
 
 	let reqParams = await getRequestParams(req);
 	if (!reqParams) {

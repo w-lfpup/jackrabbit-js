@@ -1,17 +1,12 @@
 import type { IncomingMessage, ServerResponse } from "http";
-import type { WebdriverParams } from "../config.js";
 import type { ElementClickParams } from "../../../browser/dist/mod.js";
 
-import { headers, getJsonFromRequestBody } from "./flyweight.js";
+import { headers, getJsonFromRequestBody, ActionParams } from "./flyweight.js";
 
-export async function elementClick(
-	req: IncomingMessage,
-	res: ServerResponse,
-	signal: AbortSignal | undefined,
-	params: WebdriverParams,
-	sessionId: string,
-): Promise<void> {
-	let { webdriverUrl } = params;
+export async function elementClick(actionParams: ActionParams): Promise<void> {
+	let { req, res, eventbus, signal, webdriverParams, sessionId } = actionParams;
+
+	let { webdriverUrl } = webdriverParams;
 
 	let reqParams = await getElementIdFromRequest(req);
 	if (!reqParams) {

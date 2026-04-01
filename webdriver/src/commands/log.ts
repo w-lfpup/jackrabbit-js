@@ -1,16 +1,10 @@
-import type { IncomingMessage, ServerResponse } from "http";
-import type { WebdriverParams } from "../config.js";
+import type { IncomingMessage } from "http";
 import type { LogParams } from "../../../browser/dist/mod.js";
 
-import { getJsonFromRequestBody } from "./flyweight.js";
+import { getJsonFromRequestBody, ActionParams } from "./flyweight.js";
 
-export async function log(
-	req: IncomingMessage,
-	res: ServerResponse,
-	signal: AbortSignal | undefined,
-	params: WebdriverParams,
-	sessionId: string,
-) {
+export async function log(actionParams: ActionParams) {
+	let { req, res, webdriverParams } = actionParams;
 	let reqParams = await getRequestParams(req);
 	if (!reqParams) {
 		res.writeHead(400, { "content-type": "text/plain" });
@@ -19,7 +13,7 @@ export async function log(
 	}
 
 	let { message } = reqParams;
-	console.log(`[${params.title}] ${message}`);
+	console.log(`[${webdriverParams.title}] ${message}`);
 	res.writeHead(200, { "content-type": "text/plain" });
 	res.end();
 }

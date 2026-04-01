@@ -1,16 +1,12 @@
-import type { IncomingMessage, ServerResponse } from "http";
+import type { IncomingMessage } from "http";
 import type { WebdriverParams } from "../config.js";
 import type { FindElementFromElementParams } from "../../../browser/dist/mod.js";
 
-import { headers, getJsonFromRequestBody } from "./flyweight.js";
+import { headers, getJsonFromRequestBody, ActionParams } from "./flyweight.js";
 
-export async function findElementFromElement(
-	req: IncomingMessage,
-	res: ServerResponse,
-	signal: AbortSignal | undefined,
-	params: WebdriverParams,
-	sessionId: string,
-) {
+export async function findElementFromElement(actionParams: ActionParams) {
+	let { req, res, eventbus, signal, webdriverParams, sessionId } = actionParams;
+
 	// put request body here
 	// needs to return a 400, 200, 404
 	let reqParams = await getRequestParams(req);
@@ -21,8 +17,10 @@ export async function findElementFromElement(
 	}
 	// just return elementId undefined or error
 	// if error write a response about it
+
+	// if instanceof error send to event bus
 	let elementId = await findElementFromElementRequest(
-		params,
+		webdriverParams,
 		reqParams,
 		signal,
 		sessionId,

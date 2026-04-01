@@ -1,16 +1,12 @@
-import type { IncomingMessage, ServerResponse } from "http";
+import type { IncomingMessage } from "http";
 import type { WebdriverParams } from "../config.js";
 import type { FindElementsFromShadowRootParams } from "../../../browser/dist/mod.js";
 
-import { headers, getJsonFromRequestBody } from "./flyweight.js";
+import { headers, getJsonFromRequestBody, ActionParams } from "./flyweight.js";
 
-export async function findElementsFromShadowRoot(
-	req: IncomingMessage,
-	res: ServerResponse,
-	signal: AbortSignal | undefined,
-	params: WebdriverParams,
-	sessionId: string,
-) {
+export async function findElementsFromShadowRoot(actionParams: ActionParams) {
+	let { req, res, eventbus, signal, webdriverParams, sessionId } = actionParams;
+
 	let reqParams = await getRequestParams(req);
 	if (!reqParams) {
 		res.writeHead(400, { "content-type": "text/plain" });
@@ -18,8 +14,9 @@ export async function findElementsFromShadowRoot(
 		return;
 	}
 
+	// send error through event bus
 	let elementIds = await findElementsFromShadowRootRequest(
-		params,
+		webdriverParams,
 		reqParams,
 		signal,
 		sessionId,

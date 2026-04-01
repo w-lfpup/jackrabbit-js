@@ -1,16 +1,12 @@
-import type { IncomingMessage, ServerResponse } from "http";
+import type { IncomingMessage } from "http";
 import type { WebdriverParams } from "../config.js";
 import type { GetElementShadowRootParams } from "../../../browser/dist/mod.js";
 
-import { getJsonFromRequestBody, headers } from "./flyweight.js";
+import { getJsonFromRequestBody, headers, ActionParams } from "./flyweight.js";
 
-export async function getElementShadowRoot(
-	req: IncomingMessage,
-	res: ServerResponse,
-	signal: AbortSignal | undefined, // driver defined state
-	params: WebdriverParams,
-	sessionId: string,
-) {
+export async function getElementShadowRoot(actionParams: ActionParams) {
+	let { req, res, eventbus, signal, webdriverParams, sessionId } = actionParams;
+
 	let reqParams = await getRequestParams(req);
 	if (!reqParams) {
 		res.writeHead(400, { "content-type": "text/plain" });
@@ -20,7 +16,7 @@ export async function getElementShadowRoot(
 
 	let elementId = await getElementShadowRootRequest(
 		signal,
-		params,
+		webdriverParams,
 		reqParams,
 		sessionId,
 	);
@@ -58,6 +54,7 @@ async function getElementShadowRootRequest(
 		},
 	);
 
+	// send error through event bus
 	if (200 !== response.status) {
 		let cause = await response.json();
 		throw new Error("find-element request failed", { cause });
