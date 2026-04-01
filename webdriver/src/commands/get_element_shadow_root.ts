@@ -58,14 +58,14 @@ async function getElementShadowRootRequest(
 
 	if (200 !== response.status) {
 		let reason = await response.json();
-		let cause = `Find-element webdriver request failed: ${reason}`;
+		let cause = `Get-element-shadow-root webdriver request failed: ${reason}`;
 		dispatchSessionError(eventbus, jackrabbitId, cause);
 		return;
 	}
 
 	let json = await response.json();
 	if (json && "object" !== typeof json.value) {
-		let cause = "Find-element return value is not an object.";
+		let cause = "Get-element-shadow-root return value is not an object.";
 		dispatchSessionError(eventbus, jackrabbitId, cause);
 		return;
 	}

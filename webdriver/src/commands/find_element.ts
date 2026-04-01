@@ -1,11 +1,15 @@
 import type { IncomingMessage } from "http";
-import type { WebdriverParams } from "../config.js";
 import type { FindElementParams } from "../../../browser/dist/mod.js";
 
-import { headers, getJsonFromRequestBody, ActionParams } from "../flyweight.js";
+import {
+	headers,
+	getJsonFromRequestBody,
+	ActionParams,
+	dispatchSessionError,
+} from "../flyweight.js";
 
 export async function findElement(actionParams: ActionParams) {
-	let { req, res, eventbus, signal, webdriverParams, sessionId } = actionParams;
+	let { req, res } = actionParams;
 
 	let reqParams = await getRequestParams(req);
 	if (!reqParams) {
@@ -15,12 +19,7 @@ export async function findElement(actionParams: ActionParams) {
 	}
 
 	// send error through event bus
-	let elementId = await findElementRequest(
-		webdriverParams,
-		reqParams,
-		signal,
-		sessionId,
-	);
+	let elementId = await findElementRequest(actionParams, reqParams);
 
 	// if elementId instanceof Error return error status code
 	// dispatch error
@@ -37,13 +36,11 @@ export async function findElement(actionParams: ActionParams) {
 }
 
 async function findElementRequest(
-	params: WebdriverParams,
+	actionParams: ActionParams,
 	reqParams: FindElementParams,
-	signal: AbortSignal | undefined,
-	sessionId: string,
 ): Promise<string | undefined> {
-	let { webdriverUrl } = params;
-
+	let { webdriverParams, sessionId, signal, eventbus } = actionParams;
+	let { webdriverUrl, jackrabbitId } = webdriverParams;
 	let { css_selector } = reqParams;
 
 	let response = await fetch(
@@ -56,14 +53,30 @@ async function findElementRequest(
 		},
 	);
 
+	if (404 === response.status) return;
+
 	if (200 !== response.status) {
-		let cause = await response.json();
-		throw new Error("Find-element request failed", { cause });
+		let reason = await response.json();
+		let cause = `Find-element webdriver request failed: ${reason}`;
+		dispatchSessionError(eventbus, jackrabbitId, cause);
+		return;
 	}
 
 	let json = await response.json();
-	if ("object" !== typeof json?.value)
-		throw new Error("Find-element return value is not an object");
+	if (json && "object" !== typeof json.value) {
+		let cause = "Find-element return value is not an object.";
+		dispatchSessionError(eventbus, jackrabbitId, cause);
+		return;
+	}
+
+	// if (200 !== response.status) {
+	// 	let cause = await response.json();
+	// 	throw new Error("Find-element request failed", { cause });
+	// }
+
+	// let json = await response.json();
+	// if ("object" !== typeof json?.value)
+	// 	throw new Error("Find-element return value is not an object");
 
 	for (let [elHash, elId] of Object.entries(json.value)) {
 		if ("string" === typeof elId && elHash.startsWith("element-")) return elId;

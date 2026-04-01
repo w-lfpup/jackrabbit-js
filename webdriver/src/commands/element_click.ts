@@ -1,4 +1,4 @@
-import type { IncomingMessage, ServerResponse } from "http";
+import type { IncomingMessage } from "http";
 import type { ElementClickParams } from "../../../browser/dist/mod.js";
 
 import { headers, getJsonFromRequestBody, ActionParams } from "../flyweight.js";

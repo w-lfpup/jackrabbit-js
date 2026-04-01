@@ -1,5 +1,4 @@
 import type { IncomingMessage } from "http";
-import type { WebdriverParams } from "../config.js";
 import type { FindElementFromShadowRootParams } from "../../../browser/dist/mod.js";
 
 import {
@@ -8,7 +7,6 @@ import {
 	ActionParams,
 	dispatchSessionError,
 } from "../flyweight.js";
-import { EventBusInterface } from "../eventbus.js";
 
 export async function findElementFromShadowRoot(actionParams: ActionParams) {
 	let { req, res, eventbus, signal, webdriverParams, sessionId } = actionParams;
