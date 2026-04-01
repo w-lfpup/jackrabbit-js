@@ -62,28 +62,22 @@ async function findElementFromElementRequest(
 		},
 	);
 
-	// whwat if it's just "return" here?
 	if (200 !== response.status) {
-		let cause = await response.json();
-		let reason = `Find-element-from-element webdriver request failed: ${cause}`;
-		dispatchSessionError(eventbus, jackrabbitId, reason);
+		let reason = await response.json();
+		let cause = `Find-element-from-element webdriver request failed: ${reason}`;
+		dispatchSessionError(eventbus, jackrabbitId, cause);
 		return;
 	}
 
 	let json = await response.json();
-	if ("object" !== typeof json?.value) {
-		dispatchSessionError(
-			eventbus,
-			jackrabbitId,
-			"Find-element-from-element return value is not an object.",
-		);
+	if (json && "object" !== typeof json.value) {
+		let cause = "Find-element-from-element return value is not an object.";
+		dispatchSessionError(eventbus, jackrabbitId, cause);
 		return;
 	}
 
-	if (json.value instanceof Object) {
-		for (let [elHash, id] of Object.entries(json.value)) {
-			if ("string" === typeof id && elHash.startsWith("element-")) return id;
-		}
+	for (let [elHash, id] of Object.entries(json.value)) {
+		if ("string" === typeof id && elHash.startsWith("element-")) return id;
 	}
 }
 
