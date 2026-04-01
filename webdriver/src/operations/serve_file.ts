@@ -16,6 +16,7 @@ const MIME_TYPES: Record<string, string> = {
 	jpg: "image/jpeg",
 	ico: "image/x-icon",
 	svg: "image/svg+xml",
+	wasm: "application/wasm",
 };
 
 export async function serveFile(req: IncomingMessage, res: ServerResponse) {

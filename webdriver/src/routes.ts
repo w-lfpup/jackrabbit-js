@@ -23,7 +23,7 @@ import { Datastore } from "./datastore.js";
 
 // 404 - not found / undefined
 // 400 - bad request
-// 401 - unauthorized
+// 500 - error between this server and webdriver
 
 let routeMap = new Map([
 	["/cmd/element_click", elementClick],
@@ -135,7 +135,7 @@ function logAction(
 			res.end();
 		})
 		.catch(function () {
-			res.writeHead(400);
+			res.writeHead(500);
 			res.end();
 		});
 
@@ -168,7 +168,7 @@ function execWebdriverCommand(
 
 	webdriverCommands(req, res, signal, sessionId, webdriverParams).catch(
 		function () {
-			res.writeHead(400);
+			res.writeHead(500);
 			res.end();
 		},
 	);
