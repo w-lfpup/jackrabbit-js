@@ -2,10 +2,16 @@ import type { IncomingMessage } from "http";
 import type { WebdriverParams } from "../config.js";
 import type { GetElementShadowRootParams } from "../../../browser/dist/mod.js";
 
-import { getJsonFromRequestBody, headers, ActionParams } from "../flyweight.js";
+import {
+	getJsonFromRequestBody,
+	headers,
+	ActionParams,
+	dispatchSessionError,
+} from "../flyweight.js";
+import { EventBusInterface } from "../eventbus.js";
 
 export async function getElementShadowRoot(actionParams: ActionParams) {
-	let { req, res, eventbus, signal, webdriverParams, sessionId } = actionParams;
+	let { req, res } = actionParams;
 
 	let reqParams = await getRequestParams(req);
 	if (!reqParams) {
@@ -14,12 +20,7 @@ export async function getElementShadowRoot(actionParams: ActionParams) {
 		return;
 	}
 
-	let elementId = await getElementShadowRootRequest(
-		signal,
-		webdriverParams,
-		reqParams,
-		sessionId,
-	);
+	let elementId = await getElementShadowRootRequest(actionParams, reqParams);
 	if (!elementId) {
 		res.writeHead(404, { "content-type": "text/plain" });
 		res.end();
@@ -32,14 +33,13 @@ export async function getElementShadowRoot(actionParams: ActionParams) {
 }
 
 async function getElementShadowRootRequest(
-	signal: AbortSignal | undefined, // driver defined state
-	params: WebdriverParams, // driver defined state
+	actionParams: ActionParams,
 	reqParams: GetElementShadowRootParams,
-	sessionId: string, // derived state associated with driver
 ): Promise<string | undefined> {
-	let { webdriverUrl } = params;
-
+	let { webdriverParams, sessionId, signal, eventbus } = actionParams;
+	let { webdriverUrl, jackrabbitId } = webdriverParams;
 	let { element_id } = reqParams;
+
 	let response = await fetch(
 		new URL(
 			new URL(
@@ -54,15 +54,21 @@ async function getElementShadowRootRequest(
 		},
 	);
 
-	// send error through event bus
+	if (404 === response.status) return;
+
 	if (200 !== response.status) {
-		let cause = await response.json();
-		throw new Error("find-element request failed", { cause });
+		let reason = await response.json();
+		let cause = `Find-element webdriver request failed: ${reason}`;
+		dispatchSessionError(eventbus, jackrabbitId, cause);
+		return;
 	}
 
 	let json = await response.json();
-	if ("object" !== typeof json?.value)
-		throw new Error("GetElementShadowRoot return value is not an object");
+	if (json && "object" !== typeof json.value) {
+		let cause = "Find-element return value is not an object.";
+		dispatchSessionError(eventbus, jackrabbitId, cause);
+		return;
+	}
 
 	for (let [shadowHash, shadowRootId] of Object.entries(json.value)) {
 		if ("string" === typeof shadowRootId && shadowHash.startsWith("shadow-"))
