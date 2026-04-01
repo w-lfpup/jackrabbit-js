@@ -1,5 +1,5 @@
 {
-	"host_and_port": "http://127.0.0.1:4000",
+	"jackrabbit_url": "http://127.0.0.1:4000",
 	"runAsynchronusly": false,
 	"webdrivers": [
 		{

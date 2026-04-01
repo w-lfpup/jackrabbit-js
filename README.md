@@ -151,7 +151,7 @@ An example `jackrabbit_webdriver` config is as follows:
 
 ```JSON
 {
-	"host_and_port": "http://localhost:4000",
+	"jackrabbit_url": "http://localhost:4000",
 	"run_asynchronously": false,
 	"webdrivers": [
 		{
