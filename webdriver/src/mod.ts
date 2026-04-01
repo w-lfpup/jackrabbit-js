@@ -37,7 +37,7 @@ eventbus.addListener("end", function () {
 });
 
 // run server
-let { port, hostname } = config.hostAndPort;
+let { port, hostname } = config.jackrabbitUrl;
 server.listen({
 	port,
 	hostname,

@@ -89,7 +89,7 @@ function serveTestPage(
 	if (url !== "/" || "GET" !== method) return false;
 
 	let hangar = testHanger({
-		jackrabbit_url: config.hostAndPort,
+		jackrabbit_url: config.jackrabbitUrl,
 		test_collections: process.argv.slice(3),
 	});
 

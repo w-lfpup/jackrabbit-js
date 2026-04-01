@@ -28,7 +28,7 @@ server.addListener("close", function () {
 eventbus.addListener("end", function () {
     server.close();
 });
-let { port, hostname } = config.hostAndPort;
+let { port, hostname } = config.jackrabbitUrl;
 server.listen({
     port,
     hostname,

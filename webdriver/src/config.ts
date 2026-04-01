@@ -13,7 +13,7 @@ export interface WebdriverParams extends WebdriverConfig {
 }
 
 export interface ConfigInterface {
-	hostAndPort: URL;
+	jackrabbitUrl: URL;
 	runAsynchronously?: boolean;
 	webdrivers: WebdriverParams[];
 }
@@ -32,11 +32,12 @@ export async function createConfig(
 			with: { type: "json" },
 		});
 
-		let hostAndPort: URL | null = URL.parse(json.host_and_port);
-		if (!hostAndPort)
+		let { run_asynchronously: runAsynchronously, jackrabbit_url } = json;
+
+		let jackrabbitUrl: URL | null = URL.parse(jackrabbit_url);
+		if (!jackrabbitUrl)
 			throw new Error(`Config: invalid host_and_port json property`);
 
-		let { run_asynchronously: runAsynchronously } = json;
 		if (
 			typeof runAsynchronously !== "boolean" &&
 			undefined !== runAsynchronously
@@ -57,7 +58,7 @@ export async function createConfig(
 				webdrivers.push({ ...params, jackrabbitId });
 			}
 		return {
-			hostAndPort,
+			jackrabbitUrl,
 			runAsynchronously,
 			webdrivers,
 		};

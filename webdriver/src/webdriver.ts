@@ -28,7 +28,7 @@ export class WebDrivers {
 
 		for (const params of config.webdrivers) {
 			this.#webdrivers.push(
-				new WebdriverSession(eventbus, datastore, params, config.hostAndPort),
+				new WebdriverSession(eventbus, datastore, params, config.jackrabbitUrl),
 			);
 		}
 	}
