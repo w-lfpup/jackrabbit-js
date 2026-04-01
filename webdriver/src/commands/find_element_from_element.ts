@@ -1,7 +1,5 @@
 import type { IncomingMessage } from "http";
-import type { WebdriverParams } from "../config.js";
 import type { FindElementFromElementParams } from "../../../browser/dist/mod.js";
-import type { EventBusInterface } from "../eventbus.js";
 
 import {
 	headers,
@@ -12,22 +10,14 @@ import {
 
 export async function findElementFromElement(actionParams: ActionParams) {
 	let { req, res } = actionParams;
-
-	// put request body here
-	// needs to return a 400, 200, 404
 	let reqParams = await getRequestParams(req);
 	if (!reqParams) {
 		res.writeHead(400, { "content-type": "text/plain" });
 		res.end();
 		return;
 	}
-	// just return elementId undefined or error
-	// if error write a response about it
-	let { eventbus, signal, webdriverParams, sessionId } = actionParams;
 
-	// if instanceof error send to event bus
 	let elementId = await findElementFromElementRequest(actionParams, reqParams);
-
 	if (elementId) {
 		res.writeHead(200, { "content-type": "text/plain" });
 		res.end(elementId);
@@ -38,7 +28,6 @@ export async function findElementFromElement(actionParams: ActionParams) {
 	res.end();
 }
 
-// need event bus to send errors to error log
 async function findElementFromElementRequest(
 	actionParams: ActionParams,
 	reqParams: FindElementFromElementParams,
@@ -61,6 +50,8 @@ async function findElementFromElementRequest(
 			signal,
 		},
 	);
+
+	if (404 === response.status) return;
 
 	if (200 !== response.status) {
 		let reason = await response.json();
