@@ -6,9 +6,7 @@ import { headers, getJsonFromRequestBody, ActionParams } from "../flyweight.js";
 export async function elementSendKeys(
 	actionParams: ActionParams,
 ): Promise<void> {
-	let { req, res, eventbus, signal, webdriverParams, sessionId } = actionParams;
-
-	let { webdriverUrl } = webdriverParams;
+	let { req, res } = actionParams;
 
 	res.setHeader("content-type", "text/plan");
 
@@ -19,6 +17,8 @@ export async function elementSendKeys(
 		return;
 	}
 
+	let { signal, webdriverParams, sessionId } = actionParams;
+	let { webdriverUrl } = webdriverParams;
 	let { element_id, text } = reqParams;
 
 	let response = await fetch(
@@ -31,15 +31,7 @@ export async function elementSendKeys(
 		},
 	);
 
-	if (200 === response.status) {
-		res.writeHead(200);
-		res.end();
-		return;
-	}
-
-	// send error through event bus
-
-	res.writeHead(404);
+	res.writeHead(response.status, { "content-type": "text/plain" });
 	res.end();
 }
 

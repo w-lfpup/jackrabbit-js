@@ -5,19 +5,7 @@ import type { EventBusInterface, LogActions } from "./eventbus.js";
 import type { ActionParams } from "./flyweight.js";
 
 import { testHanger } from "./test_hangar.js";
-import {
-	getElementShadowRoot,
-	findElements,
-	findElement,
-	log,
-	takeElementScreenshot,
-	elementClick,
-	elementSendKeys,
-	findElementFromElement,
-	findElementsFromElement,
-	findElementFromShadowRoot,
-	findElementsFromShadowRoot,
-} from "./commands/mod.js";
+import * as cmd from "./commands/mod.js";
 import { serveFile } from "./operations/mod.js";
 import { getJsonFromRequestBody } from "./flyweight.js";
 
@@ -26,17 +14,17 @@ import { getJsonFromRequestBody } from "./flyweight.js";
 // 500 - error between this server and webdriver
 
 let routeMap = new Map([
-	["/cmd/element_click", elementClick],
-	["/cmd/element_send_keys", elementSendKeys],
-	["/cmd/find_element_from_element", findElementFromElement],
-	["/cmd/find_element_from_shadow_root", findElementFromShadowRoot],
-	["/cmd/find_element", findElement],
-	["/cmd/find_elements_from_element", findElementsFromElement],
-	["/cmd/find_elements_from_shadow_root", findElementsFromShadowRoot],
-	["/cmd/find_elements", findElements],
-	["/cmd/get_element_shadow_root", getElementShadowRoot],
-	["/cmd/log", log],
-	["/cmd/take_element_screenshot", takeElementScreenshot],
+	["/cmd/element_click", cmd.elementClick],
+	["/cmd/element_send_keys", cmd.elementSendKeys],
+	["/cmd/find_element_from_element", cmd.findElementFromElement],
+	["/cmd/find_element_from_shadow_root", cmd.findElementFromShadowRoot],
+	["/cmd/find_element", cmd.findElement],
+	["/cmd/find_elements_from_element", cmd.findElementsFromElement],
+	["/cmd/find_elements_from_shadow_root", cmd.findElementsFromShadowRoot],
+	["/cmd/find_elements", cmd.findElements],
+	["/cmd/get_element_shadow_root", cmd.getElementShadowRoot],
+	["/cmd/log", cmd.log],
+	["/cmd/take_element_screenshot", cmd.takeElementScreenshot],
 ]);
 
 export class Router {

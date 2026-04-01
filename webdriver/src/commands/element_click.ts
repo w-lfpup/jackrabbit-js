@@ -4,17 +4,19 @@ import type { ElementClickParams } from "../../../browser/dist/mod.js";
 import { headers, getJsonFromRequestBody, ActionParams } from "../flyweight.js";
 
 export async function elementClick(actionParams: ActionParams): Promise<void> {
-	let { req, res, eventbus, signal, webdriverParams, sessionId } = actionParams;
+	let { req, res } = actionParams;
 
-	let { webdriverUrl } = webdriverParams;
+	res.setHeader("content-type", "text/plan");
 
 	let reqParams = await getElementIdFromRequest(req);
 	if (!reqParams) {
-		res.writeHead(400, { "content-type": "text/plain" });
+		res.writeHead(400);
 		res.end();
 		return;
 	}
 
+	let { signal, webdriverParams, sessionId } = actionParams;
+	let { webdriverUrl } = webdriverParams;
 	let { element_id } = reqParams;
 	let response = await fetch(
 		new URL(`/session/${sessionId}/element/${element_id}/click`, webdriverUrl),
@@ -26,13 +28,7 @@ export async function elementClick(actionParams: ActionParams): Promise<void> {
 		},
 	);
 
-	if (200 === response.status) {
-		res.writeHead(200, { "content-type": "text/plain" });
-		res.end();
-		return;
-	}
-
-	res.writeHead(404, { "content-type": "text/plain" });
+	res.writeHead(response.status);
 	res.end();
 }
 
