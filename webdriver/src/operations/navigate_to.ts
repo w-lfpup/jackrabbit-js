@@ -9,15 +9,18 @@ export async function navigateTo(
 	hostAndPort: URL,
 	targetPath: string,
 ): Promise<void> {
-	let { url } = params;
+	let { webdriverUrl } = params;
 
 	let pingUrl = new URL(targetPath, hostAndPort);
-	let response = await fetch(new URL(`/session/${sessionId}/url`, url), {
-		method: "POST",
-		headers,
-		body: JSON.stringify({ url: pingUrl }),
-		signal,
-	});
+	let response = await fetch(
+		new URL(`/session/${sessionId}/url`, webdriverUrl),
+		{
+			method: "POST",
+			headers,
+			body: JSON.stringify({ url: pingUrl }),
+			signal,
+		},
+	);
 
 	if (200 !== response.status) {
 		let cause = await response.json();

@@ -11,7 +11,7 @@ export async function elementClick(
 	params: WebdriverParams,
 	sessionId: string,
 ): Promise<void> {
-	let { url } = params;
+	let { webdriverUrl } = params;
 
 	let reqParams = await getElementIdFromRequest(req);
 	if (!reqParams) {
@@ -22,7 +22,7 @@ export async function elementClick(
 
 	let { element_id } = reqParams;
 	let response = await fetch(
-		new URL(`/session/${sessionId}/element/${element_id}/click`, url),
+		new URL(`/session/${sessionId}/element/${element_id}/click`, webdriverUrl),
 		{
 			method: "POST",
 			headers,

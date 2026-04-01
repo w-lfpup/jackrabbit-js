@@ -41,11 +41,16 @@ async function getElementShadowRootRequest(
 	reqParams: GetElementShadowRootParams,
 	sessionId: string, // derived state associated with driver
 ): Promise<string | undefined> {
-	let { url } = params;
+	let { webdriverUrl } = params;
 
 	let { element_id } = reqParams;
 	let response = await fetch(
-		new URL(new URL(`/session/${sessionId}/element/${element_id}/shadow`, url)),
+		new URL(
+			new URL(
+				`/session/${sessionId}/element/${element_id}/shadow`,
+				webdriverUrl,
+			),
+		),
 		{
 			method: "GET",
 			headers,

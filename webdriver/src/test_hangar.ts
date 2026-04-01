@@ -12,7 +12,6 @@ export function testHanger(params: TestHangerParams) {
 				"imports": {
 					"@w-lfpup/jackrabbit/core/": "/jackrabbit/core/",
 					"@w-lfpup/jackrabbit/browser/": "/jackrabbit/browser/"
-
 				}
 			}
 		</script>

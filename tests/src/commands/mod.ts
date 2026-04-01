@@ -23,3 +23,5 @@ export const testModules = [
 	logTests,
 	takeElementScreenshotTests,
 ];
+
+// Need to test fail cases as well

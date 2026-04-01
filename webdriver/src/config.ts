@@ -2,7 +2,7 @@ import * as path from "path";
 
 interface WebdriverConfig {
 	command: string;
-	url: URL;
+	webdriverUrl: URL;
 	title: string;
 	timeoutMs: number;
 	capabilities?: unknown;
@@ -68,13 +68,13 @@ export async function createConfig(
 }
 
 export function createWebdriverParams(json: any): WebdriverConfig | Error {
-	let { command, url, title, timeout_ms, capabilities } = json;
+	let { command, webdriver_url, title, timeout_ms, capabilities } = json;
 
 	if (typeof command !== "string")
 		return new Error("WebdriverParams: command is not a string");
 
-	let parsedUrl: URL | null = URL.parse(url);
-	if (null === parsedUrl)
+	let webdriverUrl: URL | null = URL.parse(webdriver_url);
+	if (null === webdriverUrl)
 		return new Error("WebdriverParams: url is not a valid URL");
 	if (typeof title !== "string")
 		return new Error("WebdriverParams: title is not a string");
@@ -83,7 +83,7 @@ export function createWebdriverParams(json: any): WebdriverConfig | Error {
 
 	return {
 		command,
-		url: parsedUrl,
+		webdriverUrl,
 		title,
 		timeoutMs: timeout_ms,
 		capabilities,

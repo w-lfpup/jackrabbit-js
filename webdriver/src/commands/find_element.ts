@@ -41,12 +41,12 @@ async function findElementRequest(
 	signal: AbortSignal | undefined,
 	sessionId: string,
 ): Promise<string | undefined> {
-	let { url } = params;
+	let { webdriverUrl } = params;
 
 	let { css_selector } = reqParams;
 
 	let response = await fetch(
-		new URL(new URL(`/session/${sessionId}/element`, url)),
+		new URL(new URL(`/session/${sessionId}/element`, webdriverUrl)),
 		{
 			method: "POST",
 			headers,

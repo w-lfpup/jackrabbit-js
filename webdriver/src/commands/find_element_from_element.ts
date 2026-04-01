@@ -44,13 +44,16 @@ async function findElementFromElementRequest(
 	signal: AbortSignal | undefined,
 	sessionId: string,
 ): Promise<string | undefined> {
-	let { url } = params;
+	let { webdriverUrl } = params;
 
 	let { element_id, css_selector } = reqParams;
 
 	let response = await fetch(
 		new URL(
-			new URL(`/session/${sessionId}/element/${element_id}/element`, url),
+			new URL(
+				`/session/${sessionId}/element/${element_id}/element`,
+				webdriverUrl,
+			),
 		),
 		{
 			method: "POST",
@@ -60,6 +63,7 @@ async function findElementFromElementRequest(
 		},
 	);
 
+	// whwat if it's just "return" here?
 	if (200 !== response.status) {
 		let cause = await response.json();
 		throw new Error("find-element-from-element request failed.", { cause });

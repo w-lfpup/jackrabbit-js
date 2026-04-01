@@ -192,7 +192,7 @@ export async function webdriverCommands(
 		if (action) return action(req, res, signal, params, sessionId);
 	}
 
-	res.writeHead(400);
+	res.writeHead(404);
 	res.end();
 }
 

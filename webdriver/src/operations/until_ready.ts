@@ -6,11 +6,11 @@ export async function untilWebdriverReady(
 	params: WebdriverParams,
 	signal: AbortSignal | undefined,
 ): Promise<void> {
-	let { url } = params;
+	let { webdriverUrl } = params;
 
 	while (signal && !signal.aborted) {
 		try {
-			let res = await fetch(new URL("/status", url), {
+			let res = await fetch(new URL("/status", webdriverUrl), {
 				method: "GET",
 				headers,
 				body: null,

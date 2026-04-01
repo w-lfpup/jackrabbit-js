@@ -42,11 +42,11 @@ async function findElementsRequest(
 	signal: AbortSignal | undefined, // driver defined state
 	sessionId: string, // derived state associated with driver
 ): Promise<string[]> {
-	let { url } = params;
+	let { webdriverUrl } = params;
 
 	let { css_selector } = reqParams;
 	let response = await fetch(
-		new URL(new URL(`/session/${sessionId}/elements`, url)),
+		new URL(new URL(`/session/${sessionId}/elements`, webdriverUrl)),
 		{
 			method: "POST",
 			headers,

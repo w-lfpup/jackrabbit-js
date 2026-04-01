@@ -13,7 +13,7 @@ export async function takeElementScreenshot(
 	params: WebdriverParams,
 	sessionId: string,
 ): Promise<void> {
-	let { url, title } = params;
+	let { webdriverUrl, title } = params;
 
 	let reqParams = await getRequestParams(req);
 	if (!reqParams) {
@@ -25,7 +25,10 @@ export async function takeElementScreenshot(
 	let { element_id, target_filepath } = reqParams;
 
 	let response = await fetch(
-		new URL(`/session/${sessionId}/element/${element_id}/screenshot`, url),
+		new URL(
+			`/session/${sessionId}/element/${element_id}/screenshot`,
+			webdriverUrl,
+		),
 		{
 			method: "GET",
 			headers,

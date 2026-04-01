@@ -7,21 +7,24 @@ export async function addCookie(
 	signal: AbortSignal,
 	sessionId: string,
 ): Promise<void> {
-	let { url, jackrabbitId } = params;
+	let { webdriverUrl, jackrabbitId } = params;
 
-	let response = await fetch(new URL(`/session/${sessionId}/cookie`, url), {
-		method: "POST",
-		headers,
-		body: JSON.stringify({
-			cookie: {
-				name: "jackrabbit",
-				value: jackrabbitId,
-				path: "/",
-				httpOnly: true,
-			},
-		}),
-		signal,
-	});
+	let response = await fetch(
+		new URL(`/session/${sessionId}/cookie`, webdriverUrl),
+		{
+			method: "POST",
+			headers,
+			body: JSON.stringify({
+				cookie: {
+					name: "jackrabbit",
+					value: jackrabbitId,
+					path: "/",
+					httpOnly: true,
+				},
+			}),
+			signal,
+		},
+	);
 
 	if (200 !== response.status) {
 		let cause = await response.json();

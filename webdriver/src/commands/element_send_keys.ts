@@ -11,7 +11,7 @@ export async function elementSendKeys(
 	params: WebdriverParams,
 	sessionId: string,
 ): Promise<void> {
-	let { url } = params;
+	let { webdriverUrl } = params;
 
 	let reqParams = await getRequestParams(req);
 	if (!reqParams) {
@@ -23,7 +23,7 @@ export async function elementSendKeys(
 	let { element_id, text } = reqParams;
 
 	let response = await fetch(
-		new URL(`/session/${sessionId}/element/${element_id}/value`, url),
+		new URL(`/session/${sessionId}/element/${element_id}/value`, webdriverUrl),
 		{
 			method: "POST",
 			headers,

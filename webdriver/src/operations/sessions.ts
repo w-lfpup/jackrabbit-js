@@ -7,9 +7,9 @@ export async function newSession(
 	params: WebdriverParams,
 	signal: AbortSignal,
 ): Promise<string> {
-	let { url, capabilities } = params;
+	let { webdriverUrl, capabilities } = params;
 
-	let response = await fetch(new URL("/session", url), {
+	let response = await fetch(new URL("/session", webdriverUrl), {
 		method: "POST",
 		headers: headers,
 		body: JSON.stringify({ capabilities: capabilities ?? {} }),
@@ -33,9 +33,9 @@ export async function deleteSession(
 	eventbus: EventBusInterface,
 	sessionId: string,
 ): Promise<void> {
-	let { url, jackrabbitId } = params;
+	let { webdriverUrl, jackrabbitId } = params;
 	try {
-		let response = await fetch(new URL(`/session/${sessionId}`, url), {
+		let response = await fetch(new URL(`/session/${sessionId}`, webdriverUrl), {
 			method: "DELETE",
 			headers,
 			body: null,

@@ -41,13 +41,16 @@ async function findElementFromShadowRootRequest(
 	signal: AbortSignal | undefined, // driver defined state
 	sessionId: string, // derived state associated with driver
 ): Promise<string | undefined> {
-	let { url } = params;
+	let { webdriverUrl } = params;
 
 	let { css_selector, shadow_root_id } = reqParams;
 
 	let response = await fetch(
 		new URL(
-			new URL(`/session/${sessionId}/shadow/${shadow_root_id}/element`, url),
+			new URL(
+				`/session/${sessionId}/shadow/${shadow_root_id}/element`,
+				webdriverUrl,
+			),
 		),
 		{
 			method: "POST",
