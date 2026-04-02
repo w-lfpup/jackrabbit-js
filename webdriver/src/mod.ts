@@ -19,15 +19,15 @@ if (config instanceof Error) {
 let eventbus = new EventBus();
 let datastore = new Datastore(config, eventbus);
 let router = new Router(config, eventbus, datastore);
-let webdrivers = new WebDrivers(config, eventbus);
+let webdrivers = new WebDrivers(config, eventbus, datastore);
 
 // setup server
 let server = http.createServer();
 server.addListener("request", router.route);
 server.addListener("close", function () {
 	let state = datastore.getState();
-
 	console.log(getResultsAsString(state));
+
 	state.errors || state.fails || !isComplete(state)
 		? process.exit(1)
 		: process.exit(0);
@@ -37,7 +37,7 @@ eventbus.addListener("end", function () {
 });
 
 // run server
-let { port, hostname } = config.hostAndPort;
+let { port, hostname } = config.jackrabbitUrl;
 server.listen({
 	port,
 	hostname,

@@ -1,8 +1,11 @@
+import type { ChildProcess } from "child_process";
 import type { LoggerAction } from "../../core/dist/jackrabbit_types.js";
 
 interface SessionSyncedAction {
 	type: "session_synced";
 	sessionId: string;
+	process: ChildProcess;
+	signal: AbortSignal;
 }
 
 interface SessionErrorAction {

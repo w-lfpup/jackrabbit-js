@@ -10,14 +10,15 @@ export function testHanger(params: TestHangerParams) {
 		<script type="importmap">
 			{
 				"imports": {
-					"@w-lfpup/jackrabbit/": "/jackrabbit/"
+					"@w-lfpup/jackrabbit/core/": "/jackrabbit/core/",
+					"@w-lfpup/jackrabbit/browser/": "/jackrabbit/browser/"
 				}
 			}
 		</script>
 		<script type="jackrabbit_config">
 			${JSON.stringify(params)}
 		</script>
-		<script type="module" src="/jackrabbit/browser/dist/mod.js"></script>
+		<script type="module" src="/jackrabbit/browser/dist/runner.js"></script>
 	</head>
 	<body></body>
 </html>

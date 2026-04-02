@@ -1,28 +1,27 @@
-import type { IncomingMessage, ServerResponse } from "http";
+import type { IncomingMessage } from "http";
+import type { FindElementsParams } from "../../../browser/dist/mod.js";
 
-// BELOW ARE ACTIONS FROM TESTS THEMSELVES
-import type { WebdriverParams } from "../config.js";
-
-import { jsonHeaders, getJsonFromRequestBody } from "./flyweight.js";
-
-interface FindElementParams {
-	using: "css selector";
-	value: string;
-}
+import {
+	headers,
+	getJsonFromRequestBody,
+	ActionParams,
+	dispatchSessionError,
+} from "../flyweight.js";
 
 // FIND ELEMENTS
-export async function findElements(
-	req: IncomingMessage,
-	res: ServerResponse,
-	signal: AbortSignal | undefined, // driver defined state
-	params: WebdriverParams,
-	sessionId: string | undefined,
-) {
-	if (!sessionId) return;
+export async function findElements(actionParams: ActionParams) {
+	let { req, res } = actionParams;
 
-	let elementIds = await findElementsRequest(req, params, undefined, sessionId);
+	let reqParams = await getRequestParams(req);
+	if (!reqParams) {
+		res.writeHead(400, { "content-type": "text/plain" });
+		res.end();
+		return;
+	}
+
+	let elementIds = await findElementsRequest(actionParams, reqParams);
 	if (!elementIds) {
-		res.writeHead(401);
+		res.writeHead(404, { "content-type": "text/plain" });
 		res.end();
 		return;
 	}
@@ -33,44 +32,44 @@ export async function findElements(
 }
 
 async function findElementsRequest(
-	req: IncomingMessage,
-	params: WebdriverParams, // driver defined state
-	signal: AbortSignal | undefined, // driver defined state
-	sessionId: string, // derived state associated with driver
+	actionParams: ActionParams,
+	reqParams: FindElementsParams,
 ): Promise<string[]> {
-	let { url } = params;
+	let { webdriverParams, sessionId, signal, eventbus } = actionParams;
+	let { webdriverUrl, jackrabbitId } = webdriverParams;
+	let { css_selector } = reqParams;
 
-	let bodyJson = await getFindElementsBody(req);
-	if (!bodyJson) throw new Error("Failed to deserialize FindElements body.");
-
-	let findElementRes = await fetch(
-		new URL(new URL(`/session/${sessionId}/elements`, url)),
+	let response = await fetch(
+		new URL(new URL(`/session/${sessionId}/elements`, webdriverUrl)),
 		{
 			method: "POST",
-			headers: jsonHeaders,
-			body: JSON.stringify(bodyJson),
+			headers,
+			body: JSON.stringify({ using: "css selector", value: css_selector }),
 			signal,
 		},
 	);
 
-	if (200 !== findElementRes.status) {
-		let cause = await findElementRes.json();
-		throw new Error("find-element request failed", { cause });
+	if (404 === response.status) return [];
+
+	if (200 !== response.status) {
+		let reason = await response.json();
+		let cause = `Find-elements webdriver request failed: ${reason}`;
+		dispatchSessionError(eventbus, jackrabbitId, cause);
+		return [];
 	}
 
-	let json = await findElementRes.json();
-	if (!Array.isArray(json?.value))
-		throw new Error("getElements return value is not an array");
+	let json = await response.json();
+	if (!Array.isArray(json?.value)) {
+		let cause = "Find-elements return value is not an array.";
+		dispatchSessionError(eventbus, jackrabbitId, cause);
+		return [];
+	}
 
 	let elementIds = [];
 	for (let elObj of json.value) {
 		if (typeof elObj === "object") {
 			for (let [elHash, elId] of Object.entries(elObj)) {
-				if (
-					"string" === typeof elHash &&
-					"string" === typeof elId &&
-					elHash.startsWith("element-")
-				) {
+				if ("string" === typeof elId && elHash.startsWith("element-")) {
 					elementIds.push(elId);
 				}
 			}
@@ -80,12 +79,12 @@ async function findElementsRequest(
 	return elementIds;
 }
 
-async function getFindElementsBody(
+async function getRequestParams(
 	req: IncomingMessage,
-): Promise<FindElementParams | undefined> {
+): Promise<FindElementsParams | undefined> {
 	let json = await getJsonFromRequestBody(req);
-	let { type, css_selector } = json;
-	if ("find_elements" === type && "string" === typeof css_selector) {
-		return { using: "css selector", value: css_selector };
+	let { css_selector } = json;
+	if ("string" === typeof css_selector) {
+		return { css_selector };
 	}
 }

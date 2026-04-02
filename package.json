@@ -8,7 +8,6 @@
 		"nodejs",
 		"browser",
 		"webdriver",
-		"commands",
 		"tests"
 	],
 	"bin": {

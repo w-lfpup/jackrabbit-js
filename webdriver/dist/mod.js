@@ -15,7 +15,7 @@ if (config instanceof Error) {
 let eventbus = new EventBus();
 let datastore = new Datastore(config, eventbus);
 let router = new Router(config, eventbus, datastore);
-let webdrivers = new WebDrivers(config, eventbus);
+let webdrivers = new WebDrivers(config, eventbus, datastore);
 let server = http.createServer();
 server.addListener("request", router.route);
 server.addListener("close", function () {
@@ -28,7 +28,7 @@ server.addListener("close", function () {
 eventbus.addListener("end", function () {
     server.close();
 });
-let { port, hostname } = config.hostAndPort;
+let { port, hostname } = config.jackrabbitUrl;
 server.listen({
     port,
     hostname,

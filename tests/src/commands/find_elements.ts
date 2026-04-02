@@ -1,8 +1,8 @@
-import { findElements } from "@w-lfpup/jackrabbit/commands/dist/mod.js";
+import { findElements } from "@w-lfpup/jackrabbit/browser/dist/mod.js";
 
 let section = document.createElement("section");
 
-function setupFindElements() {
+function setup() {
 	section.setHTMLUnsafe(`
 		<button>click me</button>
 		<button>click me again</button>
@@ -20,16 +20,12 @@ async function testFindElements(): Promise<string | undefined> {
 	if (3 !== elementIds.length) return `only ${elementIds.length} were found`;
 }
 
-function teardownFindElements() {
+function teardown() {
 	section.remove();
 }
 
 // export tests
-export const tests = [
-	setupFindElements,
-	testFindElements,
-	teardownFindElements,
-];
+export const tests = [setup, testFindElements, teardown];
 
 // export optional test details
 export const options = {

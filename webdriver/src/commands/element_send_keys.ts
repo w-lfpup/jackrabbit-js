@@ -1,59 +1,45 @@
-import type { IncomingMessage, ServerResponse } from "http";
+import type { IncomingMessage } from "http";
+import type { ElementSendKeysParams } from "../../../browser/dist/mod.js";
 
-// BELOW ARE ACTIONS FROM TESTS THEMSELVES
-import type { WebdriverParams } from "../config.js";
-
-import { jsonHeaders, getJsonFromRequestBody } from "./flyweight.js";
+import { headers, getJsonFromRequestBody, ActionParams } from "../flyweight.js";
 
 export async function elementSendKeys(
-	req: IncomingMessage,
-	res: ServerResponse,
-	signal: AbortSignal | undefined,
-	params: WebdriverParams,
-	sessionId: string,
+	actionParams: ActionParams,
 ): Promise<void> {
-	let { url } = params;
+	let { req, res } = actionParams;
 
-	let reqParams = await getElementSendKeysBody(req);
-	if (!reqParams)
-		throw new Error("Failed to deserialize ElementSendKeys body.");
+	res.setHeader("content-type", "text/plan");
 
+	let reqParams = await getRequestParams(req);
+	if (!reqParams) {
+		res.writeHead(400);
+		res.end();
+		return;
+	}
+
+	let { signal, webdriverParams, sessionId } = actionParams;
+	let { webdriverUrl } = webdriverParams;
 	let { element_id, text } = reqParams;
 
-	let resposne = await fetch(
-		new URL(`/session/${sessionId}/element/${element_id}/value`, url),
+	let response = await fetch(
+		new URL(`/session/${sessionId}/element/${element_id}/value`, webdriverUrl),
 		{
 			method: "POST",
-			headers: jsonHeaders,
+			headers,
 			body: JSON.stringify({ text }),
 			signal,
 		},
 	);
 
-	if (200 !== resposne.status) {
-		let cause = await resposne.json();
-		throw new Error("element-send-keys request failed", { cause });
-	}
-
-	res.writeHead(200, { "content-type": "text/plain" });
+	res.writeHead(response.status, { "content-type": "text/plain" });
 	res.end();
 }
 
-interface ElementSendKeysParams {
-	text: string;
-	element_id: string;
-}
-
-async function getElementSendKeysBody(
+async function getRequestParams(
 	req: IncomingMessage,
 ): Promise<ElementSendKeysParams | undefined> {
-	let json = await getJsonFromRequestBody(req);
-	let { type, element_id, text } = json;
-	if (
-		"element_send_keys" === type &&
-		"string" === typeof element_id &&
-		"string" === typeof text
-	) {
+	let { element_id, text } = await getJsonFromRequestBody(req);
+	if ("string" === typeof element_id && "string" === typeof text) {
 		return { element_id, text };
 	}
 }

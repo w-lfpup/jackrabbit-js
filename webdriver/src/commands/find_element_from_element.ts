@@ -1,100 +1,83 @@
-import type { IncomingMessage, ServerResponse } from "http";
+import type { IncomingMessage } from "http";
+import type { FindElementFromElementParams } from "../../../browser/dist/mod.js";
 
-// BELOW ARE ACTIONS FROM TESTS THEMSELVES
-import type { WebdriverParams } from "../config.js";
+import {
+	headers,
+	getJsonFromRequestBody,
+	ActionParams,
+	dispatchSessionError,
+} from "../flyweight.js";
 
-import { jsonHeaders, getJsonFromRequestBody } from "./flyweight.js";
-
-interface FindElementParams {
-	using: "css selector";
-	value: string;
-	element_id: string;
-}
-
-export async function findElementFromElement(
-	req: IncomingMessage,
-	res: ServerResponse,
-	signal: AbortSignal | undefined,
-	params: WebdriverParams,
-	sessionId: string,
-) {
-	if (!sessionId) return;
-
-	let elementId = await findElementFromElementRequest(
-		req,
-		params,
-		undefined,
-		sessionId,
-	);
-	if (!elementId) {
-		res.writeHead(401);
+export async function findElementFromElement(actionParams: ActionParams) {
+	let { req, res } = actionParams;
+	let reqParams = await getRequestParams(req);
+	if (!reqParams) {
+		res.writeHead(400, { "content-type": "text/plain" });
 		res.end();
 		return;
 	}
 
-	res.writeHead(200, { "content-type": "text/plain" });
-	res.write(elementId);
+	let elementId = await findElementFromElementRequest(actionParams, reqParams);
+	if (elementId) {
+		res.writeHead(200, { "content-type": "text/plain" });
+		res.end(elementId);
+		return;
+	}
+
+	res.writeHead(404, { "content-type": "text/plain" });
 	res.end();
 }
 
-// need event bus to send errors to error log
 async function findElementFromElementRequest(
-	req: IncomingMessage,
-	params: WebdriverParams, // driver defined state
-	signal: AbortSignal | undefined, // driver defined state
-	sessionId: string, // derived state associated with driver
+	actionParams: ActionParams,
+	reqParams: FindElementFromElementParams,
 ): Promise<string | undefined> {
-	let { url } = params;
+	let { webdriverParams, sessionId, signal, eventbus } = actionParams;
+	let { webdriverUrl, jackrabbitId } = webdriverParams;
+	let { element_id, css_selector } = reqParams;
 
-	let bodyJson = await getFindElementFromElementBody(req);
-	if (!bodyJson) throw new Error("Failed to deserialize FindElement body.");
-
-	let { element_id, using, value } = bodyJson;
-
-	let findElementRes = await fetch(
+	let response = await fetch(
 		new URL(
-			new URL(`/session/${sessionId}/element/${element_id}/element`, url),
+			new URL(
+				`/session/${sessionId}/element/${element_id}/element`,
+				webdriverUrl,
+			),
 		),
 		{
 			method: "POST",
-			headers: jsonHeaders,
-			body: JSON.stringify({ using, value }),
+			headers,
+			body: JSON.stringify({ using: "css selector", value: css_selector }),
 			signal,
 		},
 	);
 
-	if (200 !== findElementRes.status) {
-		let cause = await findElementRes.json();
-		throw new Error("find-element request failed", { cause });
+	if (404 === response.status) return;
+
+	if (200 !== response.status) {
+		let reason = await response.json();
+		let cause = `Find-element-from-element webdriver request failed: ${reason}`;
+		dispatchSessionError(eventbus, jackrabbitId, cause);
+		return;
 	}
 
-	let json = await findElementRes.json();
-	if ("object" !== typeof json?.value)
-		throw new Error("getElements return value is not an object");
+	let json = await response.json();
+	if (json && "object" !== typeof json.value) {
+		let cause = "Find-element-from-element return value is not an object.";
+		dispatchSessionError(eventbus, jackrabbitId, cause);
+		return;
+	}
 
-	if (json.value instanceof Object) {
-		for (let [key, value] of Object.entries(json.value)) {
-			if (
-				"string" === typeof key &&
-				"string" === typeof value &&
-				key.startsWith("element-")
-			)
-				// return key;
-				return value;
-		}
+	for (let [elHash, id] of Object.entries(json.value)) {
+		if ("string" === typeof id && elHash.startsWith("element-")) return id;
 	}
 }
 
-async function getFindElementFromElementBody(
+async function getRequestParams(
 	req: IncomingMessage,
-): Promise<FindElementParams | undefined> {
+): Promise<FindElementFromElementParams | undefined> {
 	let json = await getJsonFromRequestBody(req);
-	let { type, css_selector, element_id } = json;
-	if (
-		"find_element_from_element" === type &&
-		"string" === typeof css_selector &&
-		"string" === typeof element_id
-	) {
-		return { using: "css selector", value: css_selector, element_id };
+	let { css_selector, element_id } = json;
+	if ("string" === typeof css_selector && "string" === typeof element_id) {
+		return { css_selector, element_id };
 	}
 }

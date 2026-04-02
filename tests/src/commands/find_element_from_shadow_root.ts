@@ -2,7 +2,7 @@ import {
 	findElement,
 	findElementFromShadowRoot,
 	getElementShadowRoot,
-} from "@w-lfpup/jackrabbit/commands/dist/mod.js";
+} from "@w-lfpup/jackrabbit/browser/dist/mod.js";
 
 // cannot find element in shadow root
 class MyComponent extends HTMLElement {
@@ -30,7 +30,7 @@ function setup() {
 	body?.append(section);
 }
 
-async function testFindElementFromElement(): Promise<string | undefined> {
+async function testFindElementFromShadowRoot(): Promise<string | undefined> {
 	let componentId = await findElement("component-b");
 	if (!componentId) return "failed to find componentId element";
 
@@ -46,7 +46,7 @@ function teardown() {
 }
 
 // export tests
-export const tests = [setup, testFindElementFromElement, teardown];
+export const tests = [setup, testFindElementFromShadowRoot, teardown];
 
 // export optional test details
 export const options = {

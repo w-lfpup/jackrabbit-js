@@ -2,7 +2,7 @@ import * as path from "path";
 
 interface WebdriverConfig {
 	command: string;
-	url: URL;
+	webdriverUrl: URL;
 	title: string;
 	timeoutMs: number;
 	capabilities?: unknown;
@@ -13,7 +13,7 @@ export interface WebdriverParams extends WebdriverConfig {
 }
 
 export interface ConfigInterface {
-	hostAndPort: URL;
+	jackrabbitUrl: URL;
 	runAsynchronously?: boolean;
 	webdrivers: WebdriverParams[];
 }
@@ -22,57 +22,50 @@ export async function createConfig(
 	args: string[],
 ): Promise<ConfigInterface | Error> {
 	let configFilepath = args[0];
-	let relPath = path.resolve(process.cwd(), configFilepath);
+	let filepath = path.resolve(process.cwd(), configFilepath);
 
-	try {
-		// windows might need a "file://<relPath>" situation
-		let { default: json } = await import(`file://${relPath}`, {
-			with: { type: "json" },
-		});
+	// windows might need a "file://<relPath>" situation
+	let { default: json } = await import(`file://${filepath}`, {
+		with: { type: "json" },
+	});
 
-		let hostAndPort: URL | null = URL.parse(json.host_and_port);
-		if (!hostAndPort)
-			throw new Error(`Config: invalid host_and_port json property`);
+	let { run_asynchronously: runAsynchronously, jackrabbit_url } = json;
 
-		let { run_asynchronously: runAsynchronously } = json;
-		if (
-			typeof runAsynchronously !== "boolean" &&
-			undefined !== runAsynchronously
-		)
-			throw new Error(
-				"Config: the property runAsynchronously is not a boolean or undefined",
-			);
+	let jackrabbitUrl: URL | null = URL.parse(jackrabbit_url);
+	if (!jackrabbitUrl)
+		return new Error(`Config: invalid host_and_port json property`);
 
-		let webdrivers: WebdriverParams[] = [];
-		if (Array.isArray(json.webdrivers))
-			for (const [index, webdriverParams] of json.webdrivers.entries()) {
-				let params = createWebdriverParams(webdriverParams);
-				if (params instanceof Error) return params;
+	if (typeof runAsynchronously !== "boolean" && undefined !== runAsynchronously)
+		return new Error(
+			"Config: the property runAsynchronously is not a boolean or undefined",
+		);
 
-				let session = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER);
-				let jackrabbitId = `${index}:${session.toString(32)}`;
+	let webdrivers: WebdriverParams[] = [];
+	if (Array.isArray(json.webdrivers))
+		for (const [index, webdriverParams] of json.webdrivers.entries()) {
+			let params = createWebdriverParams(webdriverParams);
+			if (params instanceof Error) return params;
 
-				webdrivers.push({ ...params, jackrabbitId });
-			}
-		return {
-			hostAndPort,
-			runAsynchronously,
-			webdrivers,
-		};
-	} catch (e) {
-		if (e instanceof Error) return e;
-		return new Error("Config: failed to parse config params from string");
-	}
+			let session = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER);
+			let jackrabbitId = `${index}:${session.toString(32)}`;
+
+			webdrivers.push({ ...params, jackrabbitId });
+		}
+	return {
+		jackrabbitUrl,
+		runAsynchronously,
+		webdrivers,
+	};
 }
 
 export function createWebdriverParams(json: any): WebdriverConfig | Error {
-	let { command, url, title, timeout_ms, capabilities } = json;
+	let { command, webdriver_url, title, timeout_ms, capabilities } = json;
 
 	if (typeof command !== "string")
 		return new Error("WebdriverParams: command is not a string");
 
-	let parsedUrl: URL | null = URL.parse(url);
-	if (null === parsedUrl)
+	let webdriverUrl: URL | null = URL.parse(webdriver_url);
+	if (null === webdriverUrl)
 		return new Error("WebdriverParams: url is not a valid URL");
 	if (typeof title !== "string")
 		return new Error("WebdriverParams: title is not a string");
@@ -81,7 +74,7 @@ export function createWebdriverParams(json: any): WebdriverConfig | Error {
 
 	return {
 		command,
-		url: parsedUrl,
+		webdriverUrl,
 		title,
 		timeoutMs: timeout_ms,
 		capabilities,

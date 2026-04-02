@@ -1,23 +1,28 @@
-import type { IncomingMessage, ServerResponse } from "http";
+import type { IncomingMessage } from "http";
 import type { WebdriverParams } from "../config.js";
+import type { GetElementShadowRootParams } from "../../../browser/dist/mod.js";
 
-import { getJsonFromRequestBody, jsonHeaders } from "./flyweight.js";
+import {
+	getJsonFromRequestBody,
+	headers,
+	ActionParams,
+	dispatchSessionError,
+} from "../flyweight.js";
+import { EventBusInterface } from "../eventbus.js";
 
-export async function getElementShadowRoot(
-	req: IncomingMessage,
-	res: ServerResponse,
-	signal: AbortSignal | undefined, // driver defined state
-	params: WebdriverParams,
-	sessionId: string | undefined,
-) {
-	let elementId = await getElementShadowRootRequest(
-		req,
-		signal,
-		params,
-		sessionId,
-	);
+export async function getElementShadowRoot(actionParams: ActionParams) {
+	let { req, res } = actionParams;
+
+	let reqParams = await getRequestParams(req);
+	if (!reqParams) {
+		res.writeHead(400, { "content-type": "text/plain" });
+		res.end();
+		return;
+	}
+
+	let elementId = await getElementShadowRootRequest(actionParams, reqParams);
 	if (!elementId) {
-		res.writeHead(401);
+		res.writeHead(404, { "content-type": "text/plain" });
 		res.end();
 		return;
 	}
@@ -28,53 +33,55 @@ export async function getElementShadowRoot(
 }
 
 async function getElementShadowRootRequest(
-	req: IncomingMessage,
-	signal: AbortSignal | undefined, // driver defined state
-	params: WebdriverParams, // driver defined state
-	sessionId: string | undefined, // derived state associated with driver
+	actionParams: ActionParams,
+	reqParams: GetElementShadowRootParams,
 ): Promise<string | undefined> {
-	let { url } = params;
-
-	if (!sessionId) return;
-
-	let elementId = await getElementShadowRootBody(req);
-	if (!elementId)
-		throw new Error("Failed to deserialize GetElementShadowRoot body.");
+	let { webdriverParams, sessionId, signal, eventbus } = actionParams;
+	let { webdriverUrl, jackrabbitId } = webdriverParams;
+	let { element_id } = reqParams;
 
 	let response = await fetch(
-		new URL(new URL(`/session/${sessionId}/element/${elementId}/shadow`, url)),
+		new URL(
+			new URL(
+				`/session/${sessionId}/element/${element_id}/shadow`,
+				webdriverUrl,
+			),
+		),
 		{
 			method: "GET",
-			headers: jsonHeaders,
+			headers,
 			signal,
 		},
 	);
 
+	if (404 === response.status) return;
+
 	if (200 !== response.status) {
-		let cause = await response.json();
-		throw new Error("find-element request failed", { cause });
+		let reason = await response.json();
+		let cause = `Get-element-shadow-root webdriver request failed: ${reason}`;
+		dispatchSessionError(eventbus, jackrabbitId, cause);
+		return;
 	}
 
 	let json = await response.json();
-	if ("object" !== typeof json?.value)
-		throw new Error("GetElementShadowRoot return value is not an object");
+	if (json && "object" !== typeof json.value) {
+		let cause = "Get-element-shadow-root return value is not an object.";
+		dispatchSessionError(eventbus, jackrabbitId, cause);
+		return;
+	}
 
-	for (let [key, value] of Object.entries(json.value)) {
-		if (
-			"string" === typeof key &&
-			"string" === typeof value &&
-			key.startsWith("shadow-")
-		)
-			return value;
+	for (let [shadowHash, shadowRootId] of Object.entries(json.value)) {
+		if ("string" === typeof shadowRootId && shadowHash.startsWith("shadow-"))
+			return shadowRootId;
 	}
 }
 
-async function getElementShadowRootBody(
+async function getRequestParams(
 	req: IncomingMessage,
-): Promise<string | undefined> {
+): Promise<GetElementShadowRootParams | undefined> {
 	let json = await getJsonFromRequestBody(req);
-	let { type, element_id } = json;
-	if ("get_element_shadow_root" === type && "string" === typeof element_id) {
-		return element_id;
+	let { element_id } = json;
+	if ("string" === typeof element_id) {
+		return { element_id };
 	}
 }

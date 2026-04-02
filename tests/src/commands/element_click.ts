@@ -1,18 +1,17 @@
 import {
 	findElement,
 	elementClick,
-} from "@w-lfpup/jackrabbit/commands/dist/mod.js";
+} from "@w-lfpup/jackrabbit/browser/dist/mod.js";
 
 let clickCounter = 0;
 let section = document.createElement("section");
 
-function setupElementClick() {
+function setup() {
 	section.setHTMLUnsafe(`
-		<button data-element_click>click me softly</button>
+		<button>boop</button>
 	`);
 
 	let button = section.querySelector("button");
-	button?.setAttribute("data-element_click", "");
 	button?.addEventListener("click", function () {
 		clickCounter += 1;
 	});
@@ -22,7 +21,7 @@ function setupElementClick() {
 }
 
 async function testElementClick(): Promise<string | undefined> {
-	let elementId = await findElement("button[data-element_click]");
+	let elementId = await findElement("button");
 	if (!elementId) return "failed to find element";
 
 	await elementClick(elementId);
@@ -32,7 +31,7 @@ async function testElementClick(): Promise<string | undefined> {
 
 async function testMultipleElementClicks(): Promise<string | undefined> {
 	clickCounter = 0;
-	let elementId = await findElement("button[data-element_click]");
+	let elementId = await findElement("button");
 	if (!elementId) return "failed to find element";
 
 	await elementClick(elementId);
@@ -44,16 +43,16 @@ async function testMultipleElementClicks(): Promise<string | undefined> {
 }
 
 // tear down
-function teardownElementClick() {
+function teardown() {
 	section.remove();
 }
 
 // export tests
 export const tests = [
-	setupElementClick,
+	setup,
 	testElementClick,
 	testMultipleElementClicks,
-	teardownElementClick,
+	teardown,
 ];
 
 // export optional test details

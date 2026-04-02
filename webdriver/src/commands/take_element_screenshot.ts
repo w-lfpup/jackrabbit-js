@@ -1,49 +1,58 @@
-import type { IncomingMessage, ServerResponse } from "http";
-import type { WebdriverParams } from "../config.js";
+import type { IncomingMessage } from "http";
+import type { TakeElementScreenshotParams } from "../../../browser/dist/mod.js";
 
 import * as fs from "fs";
 import * as path from "path";
-import { getJsonFromRequestBody, jsonHeaders } from "./flyweight.js";
+import { getJsonFromRequestBody, headers, ActionParams } from "../flyweight.js";
 
-// TAKE ELEMENT SCREENSHOT
 export async function takeElementScreenshot(
-	req: IncomingMessage,
-	res: ServerResponse,
-	signal: AbortSignal | undefined,
-	params: WebdriverParams,
-	sessionId: string,
+	actionParams: ActionParams,
 ): Promise<void> {
-	let { url, title } = params;
+	let { req, res, eventbus, signal, webdriverParams, sessionId } = actionParams;
 
-	let reqParams = await getTakeElementScreenshotBody(req);
-	if (!reqParams)
-		throw new Error("Failed to deserialize TakeElementScreenshot body.");
+	let { webdriverUrl, title } = webdriverParams;
+
+	let reqParams = await getRequestParams(req);
+	if (!reqParams) {
+		res.writeHead(400, { "content-type": "text/plain" });
+		res.end();
+		return;
+	}
 
 	let { element_id, target_filepath } = reqParams;
 
-	let resposne = await fetch(
-		new URL(`/session/${sessionId}/element/${element_id}/screenshot`, url),
+	let response = await fetch(
+		new URL(
+			`/session/${sessionId}/element/${element_id}/screenshot`,
+			webdriverUrl,
+		),
 		{
 			method: "GET",
-			headers: jsonHeaders,
+			headers,
 			signal,
 		},
 	);
 
-	if (200 !== resposne.status) {
-		let cause = await resposne.json();
-		throw new Error("take-element-screenshot request failed", { cause });
+	if (200 !== response.status) {
+		res.writeHead(404, { "content-type": "text/plain" });
+		res.end();
+		return;
 	}
 
-	let json = await resposne.json();
+	let json = await response.json();
 	let base64 = json.value;
 	if ("string" !== typeof base64)
-		throw new Error("element screenshot is not a base64 string");
+		throw new Error("take-element-screeshot is not a base64 string");
 
-	// get path relative to cwd
-	// if /absolute path
-	//
-	// join process.cwd() + target_filepath;
+	// confirm screenshot is saved in the scope of cwd
+	let cwd = process.cwd();
+	let filepath = path.join(cwd, target_filepath);
+	if (!filepath.startsWith(cwd)) {
+		res.writeHead(404, { "content-type": "text/plain" });
+		res.end();
+		return;
+	}
+
 	let buffer = Buffer.from(base64, "base64");
 	await saveFileToDisk(target_filepath, title, buffer);
 
@@ -51,45 +60,29 @@ export async function takeElementScreenshot(
 	res.end();
 }
 
-interface TakeElementScreenshotParams {
-	element_id: string;
-	target_filepath: string;
-}
-
-async function getTakeElementScreenshotBody(
+async function getRequestParams(
 	req: IncomingMessage,
 ): Promise<TakeElementScreenshotParams | undefined> {
 	let json = await getJsonFromRequestBody(req);
-	let { type, element_id, target_filepath } = json;
-	if (
-		"take_element_screenshot" === type &&
-		"string" === typeof element_id &&
-		"string" === typeof target_filepath
-	) {
+	let { element_id, target_filepath } = json;
+	if ("string" === typeof element_id && "string" === typeof target_filepath) {
 		return { element_id, target_filepath };
 	}
 }
 
 async function saveFileToDisk(
-	target_filepath: string,
+	filepath: string,
 	title: string,
 	buffer: Buffer,
 ): Promise<void> {
 	// make sure path is in current working directory?
-	let cwd = process.cwd();
-	let filepath = path.join(cwd, target_filepath);
-	if (!filepath.startsWith(cwd))
-		throw new Error("Screenshot filepath is out of scope (not in cwd)");
-
 	let ext = path.extname(filepath);
 	if (ext) filepath = filepath.substring(0, filepath.length - ext.length);
 
 	let title_ext = title.toLowerCase().replaceAll(" ", "_");
 	filepath = `${filepath}.${title_ext}.png`;
 
-	// create directories
 	let dir = path.dirname(filepath);
 	await fs.promises.mkdir(dir, { recursive: true });
-	// write file
 	await fs.promises.writeFile(filepath, buffer);
 }

@@ -1,39 +1,30 @@
 import type { IncomingMessage, ServerResponse } from "http";
-import type { EventBusInterface } from "./eventbus.js";
-import type { LogActions } from "./eventbus.js";
 import type { ConfigInterface } from "./config.js";
-import type { WebdriverParams } from "./config.js";
+import type { Datastore } from "./datastore.js";
+import type { EventBusInterface, LogActions } from "./eventbus.js";
+import type { ActionParams } from "./flyweight.js";
 
 import { testHanger } from "./test_hangar.js";
-import {
-	getElementShadowRoot,
-	findElements,
-	findElement,
-	log,
-	takeElementScreenshot,
-	elementClick,
-	elementSendKeys,
-	findElementFromElement,
-	findElementsFromElement,
-	findElementFromShadowRoot,
-	findElementsFromShadowRoot,
-} from "./commands/mod.js";
-import { serveFile } from "./operations.js";
-import { Datastore } from "./datastore.js";
+import * as cmd from "./commands/mod.js";
+import { serveFile } from "./operations/mod.js";
+import { getJsonFromRequestBody } from "./flyweight.js";
 
-// needs access to state
+// 404 - not found / undefined
+// 400 - bad request
+// 500 - error between this server and webdriver
+
 let routeMap = new Map([
-	["/cmd/element_click", elementClick],
-	["/cmd/element_send_keys", elementSendKeys],
-	["/cmd/find_element_from_element", findElementFromElement],
-	["/cmd/find_element_from_shadow_root", findElementFromShadowRoot],
-	["/cmd/find_element", findElement],
-	["/cmd/find_elements_from_element", findElementsFromElement],
-	["/cmd/find_elements_from_shadow_root", findElementsFromShadowRoot],
-	["/cmd/find_elements", findElements],
-	["/cmd/get_element_shadow_root", getElementShadowRoot],
-	["/cmd/log", log],
-	["/cmd/take_element_screenshot", takeElementScreenshot],
+	["/cmd/element_click", cmd.elementClick],
+	["/cmd/element_send_keys", cmd.elementSendKeys],
+	["/cmd/find_element_from_element", cmd.findElementFromElement],
+	["/cmd/find_element_from_shadow_root", cmd.findElementFromShadowRoot],
+	["/cmd/find_element", cmd.findElement],
+	["/cmd/find_elements_from_element", cmd.findElementsFromElement],
+	["/cmd/find_elements_from_shadow_root", cmd.findElementsFromShadowRoot],
+	["/cmd/find_elements", cmd.findElements],
+	["/cmd/get_element_shadow_root", cmd.getElementShadowRoot],
+	["/cmd/log", cmd.log],
+	["/cmd/take_element_screenshot", cmd.takeElementScreenshot],
 ]);
 
 export class Router {
@@ -57,11 +48,10 @@ export class Router {
 
 	#boundRoute = this.#route.bind(this);
 	async #route(req: IncomingMessage, res: ServerResponse) {
-		// if (serveBadRequest(req, res)) return;
 		if (servePing(req, res)) return;
 		if (serveTestPage(req, res, this.#config)) return;
 		if (logAction(req, res, this.#eventbus)) return;
-		if (webdriverCommand(req, res, this.#config, this.#datastore)) return;
+		if (execWebdriverCommand(req, res, this.#datastore, this.#eventbus)) return;
 
 		await serveFile(req, res);
 	}
@@ -87,7 +77,7 @@ function serveTestPage(
 	if (url !== "/" || "GET" !== method) return false;
 
 	let hangar = testHanger({
-		jackrabbit_url: config.hostAndPort,
+		jackrabbit_url: config.jackrabbitUrl,
 		test_collections: process.argv.slice(3),
 	});
 
@@ -96,6 +86,15 @@ function serveTestPage(
 	res.end(hangar);
 
 	return true;
+}
+
+function getCookie(req: IncomingMessage): string | undefined {
+	let cookies = req.headers.cookie?.split(";") ?? [];
+	for (const cookieLine of cookies) {
+		if (cookieLine.startsWith("jackrabbit=")) {
+			return cookieLine.split("=")[1];
+		}
+	}
 }
 
 function logAction(
@@ -120,38 +119,24 @@ function logAction(
 				loggerAction,
 				jackrabbitId,
 			});
-			res.writeHead(201);
+			res.writeHead(200);
+			res.end();
 		})
 		.catch(function () {
-			res.writeHead(401);
-		})
-		.finally(function () {
+			res.writeHead(500);
 			res.end();
 		});
 
 	return true;
 }
 
-function getCookie(req: IncomingMessage): string | undefined {
-	let id: string | undefined;
-	let cookies = req.headers.cookie?.split(";") ?? [];
-	for (const cookieLine of cookies) {
-		if (cookieLine.startsWith("jackrabbit=")) {
-			let [_name, value] = cookieLine.split("=");
-			id = value;
-		}
-	}
-
-	return id;
-}
-
-function webdriverCommand(
+function execWebdriverCommand(
 	req: IncomingMessage,
 	res: ServerResponse,
-	config: ConfigInterface,
 	datastore: Datastore,
+	eventbus: EventBusInterface,
 ): boolean {
-	let { url, method } = req;
+	let { url } = req;
 	if (!url?.startsWith("/cmd/")) return false;
 
 	let jackrabbitId = getCookie(req);
@@ -168,53 +153,40 @@ function webdriverCommand(
 		return true;
 	}
 
-	let { sessionId, webdriverParams } = session;
-
-	// send commands here
-	webdriverCommands(req, res, sessionId, webdriverParams).catch(function () {
+	let { sessionId } = session;
+	if (!sessionId) {
 		res.writeHead(401);
+		res.end();
+		return true;
+	}
+
+	let { webdriverParams, signal } = session;
+	webdriverCommands({
+		req,
+		res,
+		signal,
+		sessionId,
+		webdriverParams,
+		eventbus,
+	}).catch(function () {
+		res.writeHead(500);
 		res.end();
 	});
 
 	return true;
 }
 
-export async function webdriverCommands(
-	req: IncomingMessage,
-	res: ServerResponse,
-	sessionId: string | undefined,
-	params: WebdriverParams,
-) {
+export async function webdriverCommands(actionParams: ActionParams) {
+	let { req, res, sessionId } = actionParams;
 	if (!sessionId) return;
-
-	let { url } = params;
-	let urlStr = url.toString();
 
 	// expecting http 1.1
 	let reqUrl = req.url;
 	if (reqUrl) {
 		let action = routeMap.get(reqUrl);
-		if (action) return action(req, res, undefined, params, sessionId);
+		if (action) return action(actionParams);
 	}
 
-	res.writeHead(401);
+	res.writeHead(404);
 	res.end();
-}
-
-function getJsonFromRequestBody(req: IncomingMessage): Promise<any> {
-	return new Promise(function (resolve, reject) {
-		let data: Uint8Array[] = [];
-		req.addListener("data", function (chunk) {
-			data.push(chunk);
-		});
-		req.addListener("end", function () {
-			let actionStr = Buffer.concat(data).toString();
-			let action = JSON.parse(actionStr);
-
-			resolve(action);
-		});
-		req.addListener("error", function (err: Error) {
-			reject(err);
-		});
-	});
 }

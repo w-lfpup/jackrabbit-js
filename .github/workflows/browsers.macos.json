@@ -1,18 +1,18 @@
 {
-	"host_and_port": "http://127.0.0.1:4000",
+	"jackrabbit_url": "http://127.0.0.1:4000",
 	"runAsynchronusly": false,
 	"webdrivers": [
 		{
 			"command": "safaridriver -p 4001",
 			"title": "Safari",
 			"timeout_ms": 30000,
-			"url": "http://localhost:4001"
+			"webdriver_url": "http://localhost:4001"
 		},
 		{
 			"command": "$GECKOWEBDRIVER/geckodriver -p 4001",
 			"title": "Firefox",
 			"timeout_ms": 30000,
-			"url": "http://127.0.0.1:4001",
+			"webdriver_url": "http://127.0.0.1:4001",
 			"capabilities": {
 				"alwaysMatch": {
 					"moz:firefoxOptions": {
@@ -25,7 +25,7 @@
 			"command": "$CHROMEWEBDRIVER/chromedriver --port=4001",
 			"title": "Chrome",
 			"timeout_ms": 30000,
-			"url": "http://localhost:4001",
+			"webdriver_url": "http://localhost:4001",
 			"capabilities": {
 				"alwaysMatch": {
 					"goog:chromeOptions": {
@@ -38,7 +38,7 @@
 			"command": "$EDGEWEBDRIVER/msedgedriver --port=4001",
 			"title": "Edge",
 			"timeout_ms": 30000,
-			"url": "http://localhost:4001",
+			"webdriver_url": "http://localhost:4001",
 			"capabilities": {
 				"alwaysMatch": {
 					"ms:edgeOptions": {

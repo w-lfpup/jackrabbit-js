@@ -1,33 +1,29 @@
-import type { IncomingMessage, ServerResponse } from "http";
+import type { IncomingMessage } from "http";
+import type { FindElementsFromShadowRootParams } from "../../../browser/dist/mod.js";
 
-// BELOW ARE ACTIONS FROM TESTS THEMSELVES
-import type { WebdriverParams } from "../config.js";
+import {
+	headers,
+	getJsonFromRequestBody,
+	ActionParams,
+	dispatchSessionError,
+} from "../flyweight.js";
 
-import { jsonHeaders, getJsonFromRequestBody } from "./flyweight.js";
+export async function findElementsFromShadowRoot(actionParams: ActionParams) {
+	let { req, res } = actionParams;
 
-interface FindElementParams {
-	using: "css selector";
-	value: string;
-	shadow_root_id: string;
-}
-
-export async function findElementsFromShadowRoot(
-	req: IncomingMessage,
-	res: ServerResponse,
-	signal: AbortSignal | undefined,
-	params: WebdriverParams,
-	sessionId: string,
-) {
-	if (!sessionId) return;
+	let reqParams = await getRequestParams(req);
+	if (!reqParams) {
+		res.writeHead(400, { "content-type": "text/plain" });
+		res.end();
+		return;
+	}
 
 	let elementIds = await findElementsFromShadowRootRequest(
-		req,
-		params,
-		undefined,
-		sessionId,
+		actionParams,
+		reqParams,
 	);
 	if (!elementIds) {
-		res.writeHead(401);
+		res.writeHead(404, { "content-type": "text/plain" });
 		res.end();
 		return;
 	}
@@ -37,50 +33,49 @@ export async function findElementsFromShadowRoot(
 	res.end(JSON.stringify(elementIds));
 }
 
-// need event bus to send errors to error log
 async function findElementsFromShadowRootRequest(
-	req: IncomingMessage,
-	params: WebdriverParams, // driver defined state
-	signal: AbortSignal | undefined, // driver defined state
-	sessionId: string, // derived state associated with driver
+	actionParams: ActionParams,
+	reqParams: FindElementsFromShadowRootParams,
 ): Promise<string[]> {
-	let { url } = params;
+	let { webdriverParams, sessionId, signal, eventbus } = actionParams;
+	let { webdriverUrl, jackrabbitId } = webdriverParams;
+	let { shadow_root_id, css_selector } = reqParams;
 
-	let bodyJson = await getFindElementFromShadowRootBody(req);
-	if (!bodyJson) throw new Error("Failed to deserialize FindElement body.");
-
-	let { shadow_root_id, using, value } = bodyJson;
-
-	let findElementRes = await fetch(
+	let response = await fetch(
 		new URL(
-			new URL(`/session/${sessionId}/shadow/${shadow_root_id}/elements`, url),
+			new URL(
+				`/session/${sessionId}/shadow/${shadow_root_id}/elements`,
+				webdriverUrl,
+			),
 		),
 		{
 			method: "POST",
-			headers: jsonHeaders,
-			body: JSON.stringify({ using, value }),
+			headers,
+			body: JSON.stringify({ using: "css selector", value: css_selector }),
 			signal,
 		},
 	);
 
-	if (200 !== findElementRes.status) {
-		let cause = await findElementRes.json();
-		throw new Error("find-element request failed", { cause });
+	if (404 === response.status) return [];
+
+	if (200 !== response.status) {
+		let reason = await response.json();
+		let cause = `Find-elements webdriver request failed: ${reason}`;
+		dispatchSessionError(eventbus, jackrabbitId, cause);
+		return [];
 	}
 
-	let json = await findElementRes.json();
-	if (!Array.isArray(json?.value))
-		throw new Error("getElements return value is not an array");
-
+	let json = await response.json();
+	if (!Array.isArray(json?.value)) {
+		let cause = "Find-elements return value is not an array.";
+		dispatchSessionError(eventbus, jackrabbitId, cause);
+		return [];
+	}
 	let elementIds = [];
 	for (let elObj of json.value) {
 		if (typeof elObj === "object") {
 			for (let [elHash, elId] of Object.entries(elObj)) {
-				if (
-					"string" === typeof elHash &&
-					"string" === typeof elId &&
-					elHash.startsWith("element-")
-				) {
+				if ("string" === typeof elId && elHash.startsWith("element-")) {
 					elementIds.push(elId);
 				}
 			}
@@ -90,16 +85,12 @@ async function findElementsFromShadowRootRequest(
 	return elementIds;
 }
 
-async function getFindElementFromShadowRootBody(
+async function getRequestParams(
 	req: IncomingMessage,
-): Promise<FindElementParams | undefined> {
+): Promise<FindElementsFromShadowRootParams | undefined> {
 	let json = await getJsonFromRequestBody(req);
-	let { type, css_selector, shadow_root_id } = json;
-	if (
-		"find_element_from_shadow_root" === type &&
-		"string" === typeof css_selector &&
-		"string" === typeof shadow_root_id
-	) {
-		return { using: "css selector", value: css_selector, shadow_root_id };
+	let { css_selector, shadow_root_id } = json;
+	if ("string" === typeof css_selector && "string" === typeof shadow_root_id) {
+		return { css_selector, shadow_root_id };
 	}
 }

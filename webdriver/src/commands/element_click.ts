@@ -1,48 +1,43 @@
-import type { IncomingMessage, ServerResponse } from "http";
+import type { IncomingMessage } from "http";
+import type { ElementClickParams } from "../../../browser/dist/mod.js";
 
-// BELOW ARE ACTIONS FROM TESTS THEMSELVES
-import type { WebdriverParams } from "../config.js";
+import { headers, getJsonFromRequestBody, ActionParams } from "../flyweight.js";
 
-import { jsonHeaders, getJsonFromRequestBody } from "./flyweight.js";
+export async function elementClick(actionParams: ActionParams): Promise<void> {
+	let { req, res } = actionParams;
 
-// ELEMENT CLICK
-export async function elementClick(
-	req: IncomingMessage,
-	res: ServerResponse,
-	signal: AbortSignal | undefined,
-	params: WebdriverParams,
-	sessionId: string,
-): Promise<void> {
-	let { url } = params;
+	res.setHeader("content-type", "text/plan");
 
-	let elementId = await getElementClickBody(req);
-	if (!elementId) throw new Error("Failed to deserialize ElementClick body.");
+	let reqParams = await getElementIdFromRequest(req);
+	if (!reqParams) {
+		res.writeHead(400);
+		res.end();
+		return;
+	}
 
-	let resposne = await fetch(
-		new URL(`/session/${sessionId}/element/${elementId}/click`, url),
+	let { signal, webdriverParams, sessionId } = actionParams;
+	let { webdriverUrl } = webdriverParams;
+	let { element_id } = reqParams;
+	let response = await fetch(
+		new URL(`/session/${sessionId}/element/${element_id}/click`, webdriverUrl),
 		{
 			method: "POST",
-			headers: jsonHeaders,
-			body: JSON.stringify({}),
+			headers,
+			body: "{}",
 			signal,
 		},
 	);
 
-	if (200 !== resposne.status) {
-		let cause = await resposne.json();
-		throw new Error("element-click request failed", { cause });
-	}
-
-	res.writeHead(200, { "content-type": "text/plain" });
+	res.writeHead(response.status);
 	res.end();
 }
 
-async function getElementClickBody(
+async function getElementIdFromRequest(
 	req: IncomingMessage,
-): Promise<string | undefined> {
+): Promise<ElementClickParams | undefined> {
 	let json = await getJsonFromRequestBody(req);
-	let { type, element_id } = json;
-	if ("element_click" === type && "string" === typeof element_id) {
-		return element_id;
+	let element_id = json?.element_id;
+	if ("string" === typeof element_id) {
+		return { element_id };
 	}
 }

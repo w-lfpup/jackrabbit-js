@@ -2,9 +2,8 @@ import {
 	findElement,
 	findElementsFromShadowRoot,
 	getElementShadowRoot,
-} from "@w-lfpup/jackrabbit/commands/dist/mod.js";
+} from "@w-lfpup/jackrabbit/browser/dist/mod.js";
 
-// cannot find element in shadow root
 class MyComponent extends HTMLElement {
 	#shadow = this.attachShadow({ mode: "open" });
 	constructor() {
