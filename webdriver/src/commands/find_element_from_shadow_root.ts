@@ -9,7 +9,7 @@ import {
 } from "../flyweight.js";
 
 export async function findElementFromShadowRoot(actionParams: ActionParams) {
-	let { req, res, eventbus, signal, webdriverParams, sessionId } = actionParams;
+	let { req, res } = actionParams;
 
 	let reqParams = await getRequestParams(req);
 	if (!reqParams) {
@@ -18,7 +18,6 @@ export async function findElementFromShadowRoot(actionParams: ActionParams) {
 		return;
 	}
 
-	// send error through event bus
 	let elementId = await findElementFromShadowRootRequest(
 		actionParams,
 		reqParams,
@@ -33,7 +32,6 @@ export async function findElementFromShadowRoot(actionParams: ActionParams) {
 	res.end(elementId);
 }
 
-// need event bus to send errors to error log
 async function findElementFromShadowRootRequest(
 	actionParams: ActionParams,
 	reqParams: FindElementFromShadowRootParams,

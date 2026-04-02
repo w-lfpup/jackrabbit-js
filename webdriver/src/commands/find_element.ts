@@ -18,12 +18,7 @@ export async function findElement(actionParams: ActionParams) {
 		return;
 	}
 
-	// send error through event bus
 	let elementId = await findElementRequest(actionParams, reqParams);
-
-	// if elementId instanceof Error return error status code
-	// dispatch error
-
 	if (!elementId) {
 		res.writeHead(404, { "content-type": "text/plain" });
 		res.end();
@@ -68,15 +63,6 @@ async function findElementRequest(
 		dispatchSessionError(eventbus, jackrabbitId, cause);
 		return;
 	}
-
-	// if (200 !== response.status) {
-	// 	let cause = await response.json();
-	// 	throw new Error("Find-element request failed", { cause });
-	// }
-
-	// let json = await response.json();
-	// if ("object" !== typeof json?.value)
-	// 	throw new Error("Find-element return value is not an object");
 
 	for (let [elHash, elId] of Object.entries(json.value)) {
 		if ("string" === typeof elId && elHash.startsWith("element-")) return elId;
