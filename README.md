@@ -135,17 +135,7 @@ npx jackrabbit ./mod.tests.ts ./another_mod.tests.ts
 
 ### Webdrivers
 
-Run the following command to log the results of a test collection from a browser.
-
-```sh
-npx jackrabbit_webdriver ./config.json ./mod.tests.ts
-```
-
-To run multiple test collections, add more filepaths as commandline arguments:
-
-```sh
-npx jackrabbit_webdriver ./config.json ./mod.tests.ts ./another_mod.tests.ts
-```
+Jackrabbit can run tests in browsers via webdrivers. However, weebdrivers require a configuration file.
 
 An example `jackrabbit_webdriver` config is as follows:
 
@@ -169,6 +159,18 @@ An example `jackrabbit_webdriver` config is as follows:
 		}
 	]
 }
+```
+
+Run the following command to log the results of a test collection from a browser.
+
+```sh
+npx jackrabbit_webdriver ./config.json ./mod.tests.ts
+```
+
+To run multiple test collections, add more filepaths as commandline arguments:
+
+```sh
+npx jackrabbit_webdriver ./config.json ./mod.tests.ts ./another_mod.tests.ts
 ```
 
 ### Webdriver commands
@@ -195,6 +197,32 @@ import { findElements } from "@w-lfpup/jackrabbit/browser/dist/mod.js";
 let elementIds: string[] = await findElements("input[checkbox]");
 ```
 
+#### Find element from element
+
+Find all descendant element ids matching a css selector.
+
+```ts
+import { findElementFromElements } from "@w-lfpup/jackrabbit/browser/dist/mod.js";
+
+let elementId: string | undefined = await findElementFromElements(
+	"<element_id>",
+	"input[checkbox]",
+);
+```
+
+#### Find elements from element
+
+Find all descendant element ids matching a css selector.
+
+```ts
+import { findElementsFromElements } from "@w-lfpup/jackrabbit/browser/dist/mod.js";
+
+let elementIds: string[] = await findElementsFromElements(
+	"<element_id>",
+	"input[checkbox]",
+);
+```
+
 #### Get element shadow root
 
 If available, get the shadow root id of an element with an id
@@ -203,6 +231,32 @@ If available, get the shadow root id of an element with an id
 import { getElementShadowRoot } from "@w-lfpup/jackrabbit/browser/dist/mod.js";
 
 let shadowRootId: string | undefined = await getElementShadowRoot(elementId);
+```
+
+#### Find element from shadow root
+
+Find all descendant element ids matching a css selector.
+
+```ts
+import { findElementFromShadowRoot } from "@w-lfpup/jackrabbit/browser/dist/mod.js";
+
+let elementId: string | undefined = await findElementFromShadowRoot(
+	"<element_id>",
+	"input[checkbox]",
+);
+```
+
+#### Find elements from shadow root
+
+Find all descendant element ids matching a css selector.
+
+```ts
+import { findElementsFromShadowRoot } from "@w-lfpup/jackrabbit/browser/dist/mod.js";
+
+let elementIds: string[] = await findElementsFromShadowRoot(
+	"<element_id>",
+	"input[checkbox]",
+);
 ```
 
 #### Take element screenshot
