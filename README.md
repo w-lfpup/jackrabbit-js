@@ -182,7 +182,7 @@ The following webdriver commands are available
 Find an element id with a css selector.
 
 ```ts
-import { findElement } from "@w-lfpup/jackrabbit/browser/dist/mod.js";
+import { findElement } from "@w-lfpup/jackrabbit";
 
 let elementId: string | undefined = await findElement("p");
 ```
@@ -192,7 +192,7 @@ let elementId: string | undefined = await findElement("p");
 Find all element ids matching a css selector.
 
 ```ts
-import { findElements } from "@w-lfpup/jackrabbit/browser/dist/mod.js";
+import { findElements } from "@w-lfpup/jackrabbit";
 
 let elementIds: string[] = await findElements("input[checkbox]");
 ```
@@ -202,7 +202,7 @@ let elementIds: string[] = await findElements("input[checkbox]");
 Find all descendant element ids matching a css selector.
 
 ```ts
-import { findElementFromElements } from "@w-lfpup/jackrabbit/browser/dist/mod.js";
+import { findElementFromElements } from "@w-lfpup/jackrabbit";
 
 let elementId: string | undefined = await findElementFromElements(
 	"<element_id>",
@@ -215,7 +215,7 @@ let elementId: string | undefined = await findElementFromElements(
 Find all descendant element ids matching a css selector.
 
 ```ts
-import { findElementsFromElements } from "@w-lfpup/jackrabbit/browser/dist/mod.js";
+import { findElementsFromElements } from "@w-lfpup/jackrabbit";
 
 let elementIds: string[] = await findElementsFromElements(
 	"<element_id>",
@@ -228,7 +228,7 @@ let elementIds: string[] = await findElementsFromElements(
 If available, get the shadow root id of an element with an id
 
 ```ts
-import { getElementShadowRoot } from "@w-lfpup/jackrabbit/browser/dist/mod.js";
+import { getElementShadowRoot } from "@w-lfpup/jackrabbit";
 
 let shadowRootId: string | undefined = await getElementShadowRoot(elementId);
 ```
@@ -238,7 +238,7 @@ let shadowRootId: string | undefined = await getElementShadowRoot(elementId);
 Find all descendant element ids matching a css selector.
 
 ```ts
-import { findElementFromShadowRoot } from "@w-lfpup/jackrabbit/browser/dist/mod.js";
+import { findElementFromShadowRoot } from "@w-lfpup/jackrabbit";
 
 let elementId: string | undefined = await findElementFromShadowRoot(
 	"<element_id>",
@@ -251,7 +251,7 @@ let elementId: string | undefined = await findElementFromShadowRoot(
 Find all descendant element ids matching a css selector.
 
 ```ts
-import { findElementsFromShadowRoot } from "@w-lfpup/jackrabbit/browser/dist/mod.js";
+import { findElementsFromShadowRoot } from "@w-lfpup/jackrabbit";
 
 let elementIds: string[] = await findElementsFromShadowRoot(
 	"<element_id>",
@@ -264,7 +264,7 @@ let elementIds: string[] = await findElementsFromShadowRoot(
 Get a screenshot of an element with their element id and save it to disk.
 
 ```ts
-import { takeElementScreenshot } from "@w-lfpup/jackrabbit/browser/dist/mod.js";
+import { takeElementScreenshot } from "@w-lfpup/jackrabbit";
 
 await takeElementScreenshot(elementId, "./path/relative/to/cwd.png");
 ```

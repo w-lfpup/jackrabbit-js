@@ -10,6 +10,7 @@
 		"webdriver",
 		"tests"
 	],
+	"main": "browser/dist/mod.js",
 	"bin": {
 		"jackrabbit": "nodejs/dist/mod.js",
 		"jackrabbit_webdriver": "webdriver/dist/mod.js"

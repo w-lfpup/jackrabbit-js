@@ -2,7 +2,7 @@ import {
 	findElement,
 	findElementFromShadowRoot,
 	getElementShadowRoot,
-} from "@w-lfpup/jackrabbit/browser/dist/mod.js";
+} from "@w-lfpup/jackrabbit";
 
 // cannot find element in shadow root
 class MyComponent extends HTMLElement {

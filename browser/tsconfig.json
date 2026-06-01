@@ -3,6 +3,7 @@
 	"compilerOptions": {
 		"rootDir": "./src",
 		"outDir": "./dist",
+		"composite": true,
 		"paths": {
 			"@w-lfpup/jackrabbit/core/*": ["../core/*"]
 		}
