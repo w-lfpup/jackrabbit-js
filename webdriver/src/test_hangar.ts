@@ -11,7 +11,7 @@ export function testHanger(params: TestHangerParams) {
 			{
 				"imports": {
 					"@w-lfpup/jackrabbit/core/": "/jackrabbit/core/",
-					"@w-lfpup/jackrabbit": "/jackrabbit/browser/dist/mod.js"
+					"@w-lfpup/jackrabbit/browser/": "/jackrabbit/browser/"
 				}
 			}
 		</script>
