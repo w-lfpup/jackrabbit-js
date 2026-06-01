@@ -2,7 +2,7 @@ import {
 	findElement,
 	findElementsFromShadowRoot,
 	getElementShadowRoot,
-} from "@w-lfpup/jackrabbit/browser/dist/mod.js";
+} from "@w-lfpup/jackrabbit";
 
 class MyComponent extends HTMLElement {
 	#shadow = this.attachShadow({ mode: "open" });

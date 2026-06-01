@@ -1,4 +1,4 @@
-import { log } from "@w-lfpup/jackrabbit/browser/dist/mod.js";
+import { log } from "@w-lfpup/jackrabbit";
 
 async function testLogMessage(): Promise<string | undefined> {
 	let confirmed = await log("aarruuuuff!!");
