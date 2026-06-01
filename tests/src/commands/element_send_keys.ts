@@ -1,7 +1,4 @@
-import {
-	findElement,
-	elementSendKeys,
-} from "@w-lfpup/jackrabbit/browser/dist/mod.js";
+import { findElement, elementSendKeys } from "@w-lfpup/jackrabbit";
 
 let section = document.createElement("section");
 

@@ -1,7 +1,4 @@
-import {
-	findElement,
-	findElementsFromElement,
-} from "@w-lfpup/jackrabbit/browser/dist/mod.js";
+import { findElement, findElementsFromElement } from "@w-lfpup/jackrabbit";
 
 let section = document.createElement("section");
 

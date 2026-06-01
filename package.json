@@ -3,6 +3,7 @@
 	"description": "A test runner without dependencies",
 	"version": "0.3.2",
 	"license": "BSD-3-Clause",
+	"type": "module",
 	"workspaces": [
 		"core",
 		"nodejs",
@@ -10,6 +11,7 @@
 		"webdriver",
 		"tests"
 	],
+	"main": "browser/dist/mod.js",
 	"bin": {
 		"jackrabbit": "nodejs/dist/mod.js",
 		"jackrabbit_webdriver": "webdriver/dist/mod.js"
