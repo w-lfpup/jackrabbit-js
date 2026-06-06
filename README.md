@@ -22,9 +22,9 @@ npm install --save-dev https://github.com/w-lfpup/jackrabbit-js
 
 Jackrabbit tests are decoupled from jackrabbit test runners.
 
-Test runners rely on a few expected properties to be exported from `test modules` and `test collections`. These properties control test behavior like timeouts or asynchronous test runs.
+Test runners rely on properties exported from `test modules` and `test collections`. These properties control test behavior like timeouts or asynchronous runs.
 
-This means you could technically swap `jackrabbit` with your own test runner without updating your tests.
+This means you could technically swap `jackrabbit` with your own test runner without updating your tests!
 
 For a quick visual reference, please refer to the [examples](./examples/).
 
