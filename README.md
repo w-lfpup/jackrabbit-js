@@ -1,6 +1,6 @@
 # Jackrabbit-js
 
-Write tests without dependencies (including jackrabbit itself).
+A test-runner for nodejs and the browser
 
 [![Tests](https://github.com/w-lfpup/jackrabbit-js/actions/workflows/tests.yml/badge.svg)](https://github.com/w-lfpup/jackrabbit-js/actions/workflows/tests.yml)
 
@@ -18,11 +18,15 @@ Or Install jackrabbit directly from github.
 npm install --save-dev https://github.com/w-lfpup/jackrabbit-js
 ```
 
-# Tests
+# Framework agnostic tests
+
+Jackrabbit tests are decoupled from jackrabbit test runners.
+
+Test runners rely on properties exported from `test modules` and `test collections`. These properties control test behavior like timeouts or asynchronous runs.
+
+This means you could technically swap `jackrabbit` with your own test runner without updating your tests!
 
 For a quick visual reference, please refer to the [examples](./examples/).
-
-Developers with javascript experience can immediately start testing with basically zero overhead.
 
 ## Tests
 
@@ -117,7 +121,7 @@ export const testModules = [
 ];
 ```
 
-## Run Test Collections
+## Test runners
 
 ### NodeJS
 
@@ -135,9 +139,7 @@ npx jackrabbit ./mod.tests.ts ./another_mod.tests.ts
 
 ### Webdrivers
 
-Jackrabbit can run tests in browsers via webdrivers. However, weebdrivers require a configuration file.
-
-An example `jackrabbit_webdriver` config is as follows:
+Jackrabbit runs tests in browsers via webdrivers which require a configuration file:
 
 ```JSON
 {
@@ -173,9 +175,23 @@ To run multiple test collections, add more filepaths as commandline arguments:
 npx jackrabbit_webdriver ./config.json ./mod.tests.ts ./another_mod.tests.ts
 ```
 
+[Here](./examples/webdriver_config.json) is an example of a webdriver configuration file. Jackrabbit tests itself on every major browser in github actions using [these](./.github/workflows/) configuration files.
+
 ### Webdriver commands
 
-The following webdriver commands are available
+The following webdriver commands are available:
+
+- Element click
+- Element send keys
+- Find element
+- Find element from element
+- Find element from shadow root
+- Find elements
+- Find elements from element
+- Find elements from shadow root
+- Get element shadow root
+- Take element screenshot
+- Log (not a spec-compliant webdriver command but helpful)
 
 #### Find element
 
@@ -256,6 +272,29 @@ import { findElementsFromShadowRoot } from "@w-lfpup/jackrabbit";
 let elementIds: string[] = await findElementsFromShadowRoot(
 	"<element_id>",
 	"input[checkbox]",
+);
+```
+
+#### Element click
+
+Click an element.
+
+```ts
+import { elementClick } from "@w-lfpup/jackrabbit";
+
+let elementWasClicked: boolean = await elementClick("<element_id>");
+```
+
+#### Element send keys
+
+Send keys to an element.
+
+```ts
+import { elementSendKeys } from "@w-lfpup/jackrabbit";
+
+let keysWereSent: boolean = await elementSendKeys(
+	"<element_id>",
+	"keys to send!",
 );
 ```
 
