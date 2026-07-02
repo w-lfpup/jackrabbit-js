@@ -8,5 +8,5 @@ tests/
 
 .prettierignore
 .prettierrc
-.tsconfig.tsbuildinfo
 .DS_Store
+tsconfig.tsbuildinfo
