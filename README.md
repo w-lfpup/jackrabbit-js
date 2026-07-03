@@ -210,7 +210,7 @@ Find all element ids matching a css selector.
 ```ts
 import { findElements } from "@w-lfpup/jackrabbit";
 
-let elementIds: string[] = await findElements("input[checkbox]");
+let elementIds: string[] = await findElements("input[type=checkbox]");
 ```
 
 #### Find element from element
@@ -222,7 +222,7 @@ import { findElementFromElements } from "@w-lfpup/jackrabbit";
 
 let elementId: string | undefined = await findElementFromElements(
 	"<element_id>",
-	"input[checkbox]",
+	"input[type=checkbox]",
 );
 ```
 
@@ -235,7 +235,7 @@ import { findElementsFromElements } from "@w-lfpup/jackrabbit";
 
 let elementIds: string[] = await findElementsFromElements(
 	"<element_id>",
-	"input[checkbox]",
+	"input[type=checkbox]",
 );
 ```
 
@@ -258,7 +258,7 @@ import { findElementFromShadowRoot } from "@w-lfpup/jackrabbit";
 
 let elementId: string | undefined = await findElementFromShadowRoot(
 	"<element_id>",
-	"input[checkbox]",
+	"input[type=checkbox]",
 );
 ```
 
@@ -271,7 +271,7 @@ import { findElementsFromShadowRoot } from "@w-lfpup/jackrabbit";
 
 let elementIds: string[] = await findElementsFromShadowRoot(
 	"<element_id>",
-	"input[checkbox]",
+	"input[type=checkbox]",
 );
 ```
 

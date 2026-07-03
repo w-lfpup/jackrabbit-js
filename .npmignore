@@ -1,1 +1,12 @@
-# this file exists because NPM is dedicated to making deployment a miserable experience
+.github/
+browser/src/
+webdriver/src/
+nodejs/src/
+core/src/
+examples/
+tests/
+
+.prettierignore
+.prettierrc
+.DS_Store
+tsconfig.tsbuildinfo
