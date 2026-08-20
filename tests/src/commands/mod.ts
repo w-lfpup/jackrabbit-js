@@ -8,6 +8,7 @@ import * as findElementsTests from "./find_elements.js";
 import * as findElementTests from "./find_element.js";
 import * as getElementShadowRootTests from "./get_element_shadow_root.js";
 import * as logTests from "./log.js";
+import * as takeScreenshotTests from "./take_screenshot.js";
 import * as takeElementScreenshotTests from "./take_element_screenshot.js";
 
 export const testModules = [
@@ -21,6 +22,7 @@ export const testModules = [
 	findElementTests,
 	getElementShadowRootTests,
 	logTests,
+	takeScreenshotTests,
 	takeElementScreenshotTests,
 ];
 

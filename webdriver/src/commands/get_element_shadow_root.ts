@@ -62,7 +62,7 @@ async function getElementShadowRootRequest(
 	}
 
 	let json = await response.json();
-	if (json && "object" !== typeof json.value) {
+	if (json && "object" !== typeof json?.value) {
 		let cause = "Get-element-shadow-root return value is not an object.";
 		dispatchSessionError(eventbus, jackrabbitId, cause);
 		return;

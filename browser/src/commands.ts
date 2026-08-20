@@ -43,6 +43,10 @@ export interface ElementSendKeysParams {
 	text: string;
 }
 
+export interface TakeScreenshotParams {
+	target_filepath: string;
+}
+
 export interface TakeElementScreenshotParams {
 	element_id: string;
 	target_filepath: string;
@@ -88,6 +92,22 @@ export async function elementSendKeys(
 	};
 
 	let res = await fetch(`/cmd/element_send_keys`, {
+		body: JSON.stringify(action),
+		headers: new Headers([["Content-Type", "application/json"]]),
+		method: "POST",
+	});
+
+	return 200 === res.status;
+}
+
+export async function takeScreenshot(
+	target_filepath: string,
+): Promise<boolean> {
+	let action: TakeScreenshotParams = {
+		target_filepath,
+	};
+
+	let res = await fetch(`/cmd/take_screenshot`, {
 		body: JSON.stringify(action),
 		headers: new Headers([["Content-Type", "application/json"]]),
 		method: "POST",
