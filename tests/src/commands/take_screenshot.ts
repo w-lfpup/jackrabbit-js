@@ -15,9 +15,6 @@ function setup() {
 }
 
 async function testTakeScreenshot(): Promise<string | undefined> {
-	let elementId = await findElement("span");
-	if (!elementId) return "failed to findElement before take-element-screenshot";
-
 	let result = await takeScreenshot("./tests/screenshots/window.png");
 
 	if (!result) return "failed to take element screenshot";
@@ -27,10 +24,8 @@ function teardown() {
 	section.remove();
 }
 
-// export tests
 export const tests = [setup, testTakeScreenshot, teardown];
 
-// export optional test details
 export const options = {
 	title: import.meta.url,
 };
