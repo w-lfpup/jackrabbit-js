@@ -22,10 +22,8 @@ function teardown() {
 	section.remove();
 }
 
-// export tests
 export const tests = [setup, testElementSendKeys, teardown];
 
-// export optional test details
 export const options = {
 	title: import.meta.url,
 };

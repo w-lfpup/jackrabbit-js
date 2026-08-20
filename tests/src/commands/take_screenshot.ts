@@ -16,8 +16,7 @@ function setup() {
 
 async function testTakeScreenshot(): Promise<string | undefined> {
 	let result = await takeScreenshot("./tests/screenshots/window.png");
-
-	if (!result) return "failed to take element screenshot";
+	if (!result) return "failed to take screenshot";
 }
 
 function teardown() {

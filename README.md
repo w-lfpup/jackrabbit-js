@@ -308,7 +308,6 @@ import { takeElementScreenshot } from "@w-lfpup/jackrabbit";
 await takeScreenshot(elementId, "./path/relative/to/cwd.png");
 ```
 
-
 #### Take element screenshot
 
 Get a screenshot of an element with their element id and save it to disk.

@@ -14,7 +14,6 @@ async function testMoreStuffAndFailAsync() {
 	return ["this test also failed!"];
 }
 
-// export tests
 export const tests = [
 	testStuffAndFail,
 	testMoreStuffAndFail,
@@ -22,7 +21,6 @@ export const tests = [
 	testMoreStuffAndFailAsync,
 ];
 
-// export optional test details
 export const options = {
 	title: import.meta.url,
 };

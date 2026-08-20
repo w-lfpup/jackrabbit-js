@@ -19,8 +19,9 @@
 		"prepare": "npm run build",
 		"build": "npm run --workspaces build",
 		"format": "npx prettier --write ./",
-		"test": "npx jackrabbit ./tests/dist/core/mod.js",
-		"test:browsers": "npx jackrabbit_webdriver ./webdriver_config.json ./tests/dist/core/mod.js ./tests/dist/commands/mod.js"
+		"test": "npm run test:node && npm run test:browsers",
+		"test:node": "npx jackrabbit ./tests/dist/core/mod.js",
+		"test:browsers": "npx jackrabbit_webdriver ./webdriver.config.json ./tests/dist/core/mod.js ./tests/dist/commands/mod.js"
 	},
 	"repository": {
 		"type": "git",

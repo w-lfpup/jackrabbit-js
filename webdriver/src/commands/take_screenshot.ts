@@ -39,7 +39,7 @@ export async function takeScreenshot(
 	let json = await response.json();
 	let base64 = json.value;
 	if ("string" !== typeof base64)
-		throw new Error("take-element-screeshot is not a base64 string");
+		throw new Error("take-screeshot is not a base64 string");
 
 	// confirm screenshot is saved in the scope of cwd
 	let cwd = process.cwd();
