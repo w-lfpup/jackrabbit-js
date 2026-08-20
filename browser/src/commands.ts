@@ -52,7 +52,12 @@ export interface TakeElementScreenshotParams {
 	target_filepath: string;
 }
 
-// set window
+export interface SetWindowRectParams {
+	x: number;
+	y: number;
+	width: number;
+	height: number;
+}
 
 // get window
 
@@ -300,4 +305,16 @@ export function sleep(milliseconds: number): Promise<void> {
 			resolve();
 		}, milliseconds);
 	});
+}
+
+export async function setWindowRect(
+	params: SetWindowRectParams,
+): Promise<boolean> {
+	let res = await fetch(`/cmd/set_window_rect`, {
+		body: JSON.stringify(params),
+		headers: new Headers([["Content-Type", "application/json"]]),
+		method: "POST",
+	});
+
+	return 200 === res.status;
 }
