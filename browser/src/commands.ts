@@ -52,6 +52,10 @@ export interface TakeElementScreenshotParams {
 	target_filepath: string;
 }
 
+// set window
+
+// get window
+
 export async function findElement(
 	css_selector: string,
 ): Promise<string | undefined> {
