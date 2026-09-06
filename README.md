@@ -190,6 +190,7 @@ The following webdriver commands are available:
 - Find elements from element
 - Find elements from shadow root
 - Get element shadow root
+- Take screenshot
 - Take element screenshot
 - Log (not a spec-compliant webdriver command but helpful)
 
@@ -296,6 +297,16 @@ let keysWereSent: boolean = await elementSendKeys(
 	"<element_id>",
 	"keys to send!",
 );
+```
+
+#### Take screenshot
+
+Get a screenshot of a window and save it to disk.
+
+```ts
+import { takeElementScreenshot } from "@w-lfpup/jackrabbit";
+
+await takeScreenshot(elementId, "./path/relative/to/cwd.png");
 ```
 
 #### Take element screenshot

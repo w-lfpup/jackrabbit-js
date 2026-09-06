@@ -10,6 +10,8 @@ export * from "./find_elements_from_shadow_root.js";
 export * from "./find_elements.js";
 export * from "./get_element_shadow_root.js";
 export * from "./log.js";
+export * from "./set_window_rect.js";
+export * from "./take_screenshot.js";
 export * from "./take_element_screenshot.js";
 
 // command errors should be sent to session errors but returned as "not found"

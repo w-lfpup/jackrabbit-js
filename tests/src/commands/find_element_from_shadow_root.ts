@@ -45,10 +45,8 @@ function teardown() {
 	section.remove();
 }
 
-// export tests
 export const tests = [setup, testFindElementFromShadowRoot, teardown];
 
-// export optional test details
 export const options = {
 	title: import.meta.url,
 };

@@ -1,5 +1,4 @@
 import type { IncomingMessage } from "http";
-import type { WebdriverParams } from "../config.js";
 import type { GetElementShadowRootParams } from "../../../browser/dist/mod.js";
 
 import {
@@ -8,7 +7,6 @@ import {
 	ActionParams,
 	dispatchSessionError,
 } from "../flyweight.js";
-import { EventBusInterface } from "../eventbus.js";
 
 export async function getElementShadowRoot(actionParams: ActionParams) {
 	let { req, res } = actionParams;
@@ -64,7 +62,7 @@ async function getElementShadowRootRequest(
 	}
 
 	let json = await response.json();
-	if (json && "object" !== typeof json.value) {
+	if (json && "object" !== typeof json?.value) {
 		let cause = "Get-element-shadow-root return value is not an object.";
 		dispatchSessionError(eventbus, jackrabbitId, cause);
 		return;

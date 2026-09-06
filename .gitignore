@@ -1,10 +1,5 @@
 node_modules/
-core/dist/
-browser/dist/
-nodejs/dist/
-tests/dist/
-webdriver/dist/
-commands/dist/
+dist/
 
 # odd but important to preserve exec privleges 
 !nodejs/dist/mod.js

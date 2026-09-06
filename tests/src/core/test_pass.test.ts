@@ -14,7 +14,6 @@ async function testMoreStuffAndPassAsync(): Promise<string[]> {
 	return [];
 }
 
-// export tests
 export const tests = [
 	testStuffAndPass,
 	testMoreStuffAndPass,
@@ -22,7 +21,6 @@ export const tests = [
 	testMoreStuffAndPassAsync,
 ];
 
-// export optional test details
 export const options = {
 	title: import.meta.url,
 };

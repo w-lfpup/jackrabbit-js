@@ -5,6 +5,7 @@
 		"target": "esnext",
 		"strict": true,
 		"declaration": true,
-		"removeComments": true
+		"removeComments": true,
+		"types": ["node"]
 	}
 }

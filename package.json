@@ -1,7 +1,7 @@
 {
 	"name": "@w-lfpup/jackrabbit",
 	"description": "A test runner without dependencies",
-	"version": "0.3.3",
+	"version": "0.3.4",
 	"license": "BSD-3-Clause",
 	"workspaces": [
 		"core",
@@ -19,8 +19,9 @@
 		"prepare": "npm run build",
 		"build": "npm run --workspaces build",
 		"format": "npx prettier --write ./",
-		"test": "npx jackrabbit ./tests/dist/core/mod.js",
-		"test:browsers": "npx jackrabbit_webdriver ./webdriver_config.json ./tests/dist/core/mod.js ./tests/dist/commands/mod.js"
+		"test": "npm run test:nodejs && npm run test:browsers",
+		"test:nodejs": "npx jackrabbit ./tests/dist/core/mod.js",
+		"test:browsers": "npx jackrabbit_webdriver ./webdriver.config.json ./tests/dist/core/mod.js ./tests/dist/commands/mod.js"
 	},
 	"repository": {
 		"type": "git",

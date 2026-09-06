@@ -14,9 +14,7 @@ interface SessionErrorAction {
 }
 
 export type LogActions =
-	| LoggerAction
-	| SessionSyncedAction
-	| SessionErrorAction;
+	LoggerAction | SessionSyncedAction | SessionErrorAction;
 
 export interface WebdriverSessionAction {
 	jackrabbitId: string;

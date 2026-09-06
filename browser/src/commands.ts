@@ -43,10 +43,31 @@ export interface ElementSendKeysParams {
 	text: string;
 }
 
+export interface TakeScreenshotParams {
+	target_filepath: string;
+}
+
 export interface TakeElementScreenshotParams {
 	element_id: string;
 	target_filepath: string;
 }
+
+export interface RectInterface {
+	x: number;
+	y: number;
+	width: number;
+	height: number;
+}
+
+// get element rect
+// get element text
+// get element attribute
+// get element property
+// get element css property values
+// get window
+// set window fullscreen
+// set window maximize
+// set window minimize
 
 export async function findElement(
 	css_selector: string,
@@ -88,6 +109,22 @@ export async function elementSendKeys(
 	};
 
 	let res = await fetch(`/cmd/element_send_keys`, {
+		body: JSON.stringify(action),
+		headers: new Headers([["Content-Type", "application/json"]]),
+		method: "POST",
+	});
+
+	return 200 === res.status;
+}
+
+export async function takeScreenshot(
+	target_filepath: string,
+): Promise<boolean> {
+	let action: TakeScreenshotParams = {
+		target_filepath,
+	};
+
+	let res = await fetch(`/cmd/take_screenshot`, {
 		body: JSON.stringify(action),
 		headers: new Headers([["Content-Type", "application/json"]]),
 		method: "POST",
@@ -175,7 +212,7 @@ export async function findElementFromElement(
 export async function findElementsFromElement(
 	element_id: string,
 	css_selector: string,
-) {
+): Promise<string[] | undefined> {
 	let action: FindElementsFromElementParams = {
 		element_id,
 		css_selector,
@@ -277,3 +314,64 @@ export function sleep(milliseconds: number): Promise<void> {
 		}, milliseconds);
 	});
 }
+
+export async function setWindowRect(
+	params: RectInterface,
+): Promise<RectInterface | undefined> {
+	let res = await fetch(`/cmd/set_window_rect`, {
+		body: JSON.stringify(params),
+		headers: new Headers([["Content-Type", "application/json"]]),
+		method: "POST",
+	});
+
+	if (200 === res.status) return;
+}
+
+export async function getWindowRect(): Promise<RectInterface | undefined> {
+	let res = await fetch(`/cmd/get_window_rect`, {
+		headers: new Headers([["Content-Type", "application/json"]]),
+		method: "POST",
+	});
+
+	if (200 === res.status) return;
+}
+
+export async function maximizeWindow(): Promise<RectInterface | undefined> {
+	let res = await fetch(`/cmd/maximize_window`, {
+		headers: new Headers([["Content-Type", "application/json"]]),
+		method: "POST",
+	});
+
+	if (200 === res.status) return;
+}
+
+export async function minimizeWindow(): Promise<RectInterface | undefined> {
+	let res = await fetch(`/cmd/minimize_window`, {
+		headers: new Headers([["Content-Type", "application/json"]]),
+		method: "POST",
+	});
+
+	if (200 === res.status) return;
+	// returns dimensions
+}
+
+export async function fullscreenWindow(): Promise<RectInterface | undefined> {
+	let res = await fetch(`/cmd/fullscreen_window`, {
+		headers: new Headers([["Content-Type", "application/json"]]),
+		method: "POST",
+	});
+
+	if (200 === res.status) return;
+}
+
+async function getWindowRectResponse(): Promise<RectInterface | undefined> {
+	return;
+}
+
+// getElementAttribute()
+
+// getElementCssProperty()
+
+// getElementProperty()
+
+// getElementRect

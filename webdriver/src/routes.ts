@@ -24,6 +24,8 @@ let routeMap = new Map([
 	["/cmd/find_elements", cmd.findElements],
 	["/cmd/get_element_shadow_root", cmd.getElementShadowRoot],
 	["/cmd/log", cmd.log],
+	["/cmd/set_window_rect", cmd.setWindowRect],
+	["/cmd/take_screenshot", cmd.takeScreenshot],
 	["/cmd/take_element_screenshot", cmd.takeElementScreenshot],
 ]);
 

@@ -18,7 +18,6 @@ async function testMoreStuffAndErrorAsync(): Promise<string[]> {
 	return ["good"];
 }
 
-// export tests
 export const tests = [
 	testStuffAndError,
 	testMoreStuffAndError,
@@ -26,7 +25,6 @@ export const tests = [
 	testMoreStuffAndErrorAsync,
 ];
 
-// export optional test details
 export const options = {
 	title: import.meta.url,
 };
