@@ -20,7 +20,7 @@ export async function setWindowRect(actionParams: ActionParams): Promise<void> {
 	let response = await fetch(
 		new URL(`/session/${sessionId}/window/rect`, webdriverUrl),
 		{
-			method: "GET",
+			method: "POST",
 			headers,
 			signal,
 			body: JSON.stringify(reqParams),
@@ -28,12 +28,13 @@ export async function setWindowRect(actionParams: ActionParams): Promise<void> {
 	);
 
 	if (200 !== response.status) {
-		res.writeHead(404, { "content-type": "text/plain" });
+		res.writeHead(response.status, { "content-type": "text/plain" });
 		res.end();
 		return;
 	}
 
-	res.writeHead(200, { "content-type": "text/plain" });
+	res.writeHead(response.status, { "content-type": "application/json" });
+	res.write(response.body);
 	res.end();
 }
 
